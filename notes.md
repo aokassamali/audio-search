@@ -21,3 +21,12 @@
 - WER eval vs. official SCOTUS transcript (`data/reference/`) using `jiwer`; needs PDF text extraction + normalization strategy for the proper-noun problem.
 - Progress bar via `tqdm` (denominator: `info.duration` vs. segment `end` timestamps).
 - CUDA loud-failure except block around model load. *(← noting this: it's still not in the committed script)*
+
+
+## 2026-07-17 — Milestone 2a: Chunking
+
+**Shipped:** `src/chunk.py` — transcript JSON → retrieval-sized chunks (soft target 120 words extended to sentence boundary, hard cap 200, single-segment overlap between consecutive chunks). 98 chunks from the SCOTUS argument, verified by eyeball: sentence-boundary endings, visible overlap, overlapping time ranges as expected.
+
+**Design decisions:**
+- Chunk boundaries keyed on terminal punctuation (`.` `?`), not domain keywords ("Your Honor") — pipeline stays corpus-agnostic.
+- No silent behavior on punctuation-free transcripts: chunking degrades to pure hard-cap sizing, which is the contract

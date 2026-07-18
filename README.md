@@ -6,6 +6,7 @@ Search and Q&A over conversational audio. Ingests audio files, transcribes them 
 
 **v0.1 does not include:** tonal analysis, UI, auth, multi-file scale, speaker diarization, hosting.
 
-**Milestones:** 1) Transcription pipeline ✅ · 2) Retrieval + Q&A via FastAPI · 3) Dagster orchestration of ingest.
+**Milestones:** 1) Transcription pipeline ✅ · 2) Retrieval + Q&A via FastAPI — chunking ✅, retrieval next · 3) Dagster orchestration of ingest.
 
 **Eval:** transcription validated against official SCOTUS oral argument transcripts (WER eval in progress).
+

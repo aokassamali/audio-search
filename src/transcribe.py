@@ -6,7 +6,7 @@ from pathlib import Path
 
 def create_output_path(audio: str) -> Path:
     audio_path = Path(audio)
-    output_directory = Path("data/processed")
+    output_directory = Path("data/processed/jsons")
     output_directory.mkdir(parents=True, exist_ok=True)
 
     output_path = output_directory / f"{audio_path.stem}.json"
@@ -44,8 +44,6 @@ def main():
         }
         for segment in segments
     ]
-
-# Use the audio argument to determine where this transcript should be stored.
 
     output_path = create_output_path(args.audio)
 
