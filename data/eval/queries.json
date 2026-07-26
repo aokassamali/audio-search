@@ -1,0 +1,81 @@
+[
+  {
+    "query": "How does the petitioner distinguish disgorgement from compensatory damages?",
+    "relevant_chunk_ids": [
+      3,
+      4
+    ]
+  },
+  {
+    "query": "What makes disgorgement remedial rather than punitive, according to Sripetch?",
+    "relevant_chunk_ids": [
+      51,
+      52,
+      53
+    ]
+  },
+  {
+    "query": "How does proven victim loss cap disgorgement under the petitioner's theory?",
+    "relevant_chunk_ids": [
+      16,
+      17,
+      18
+    ]
+  },
+  {
+    "query": "Why does the SEC argue that Jarkesy does not control this case?",
+    "relevant_chunk_ids": [
+      64,
+      65,
+      66
+    ]
+  },
+  {
+    "query": "What percentage of collected disgorgement funds did the SEC say were designated for distribution to victims?",
+    "relevant_chunk_ids": [
+      63,
+      77,
+      78
+    ]
+  },
+  {
+    "query": "Why does the SEC prefer relying on D7 rather than D5?",
+    "relevant_chunk_ids": [
+      85,
+      86,
+      87,
+      91
+    ]
+  },
+  {
+    "query": "What Seventh Amendment concern does the petitioner raise about the SEC's disgorgement theory?",
+    "relevant_chunk_ids": [
+      34,
+      50
+    ]
+  },
+  {
+    "query": "According to the SEC, how is disgorgement different from a civil penalty?",
+    "relevant_chunk_ids": [
+      66,
+      71,
+      72,
+      79
+    ]
+  },
+  {
+    "query": "What did Congress intend to accomplish in 2021, according to Sripetch?",
+    "relevant_chunk_ids": [
+      48,
+      49
+    ]
+  },
+  {
+    "query": "What does the SEC say is the core purpose of disgorgement?",
+    "relevant_chunk_ids": [
+      60,
+      61,
+      84
+    ]
+  }
+]
