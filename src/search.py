@@ -2,6 +2,34 @@ import argparse
 import json
 from rank_bm25 import BM25Okapi
 from sentence_transformers import SentenceTransformer
+import hashlib
+from pathlib import Path
+import numpy as np
+
+
+EMBEDDING_MODEL_NAME = (
+    "sentence-transformers/all-MiniLM-L6-v2"
+)
+
+
+def create_embedding_cache_key(texts):
+    cache_input = {
+        "model_name": EMBEDDING_MODEL_NAME,
+        "texts": texts,
+    }
+
+    serialized_input = json.dumps(
+        cache_input,
+        ensure_ascii=False,
+        separators=(",", ":"),
+    )
+
+    cache_key = hashlib.sha256(
+        serialized_input.encode("utf-8")
+    ).hexdigest()
+
+    return cache_key
+
 
 def load_chunks(chunks_path):
     with open(chunks_path, "r", encoding="utf-8") as file:
@@ -39,15 +67,89 @@ def rank_bm25(query, bm25):
     return bm25_ranked_indices
 
 
-def build_dense_index(texts):
-    embedding_model = SentenceTransformer(
-        "sentence-transformers/all-MiniLM-L6-v2"
+def build_dense_index(
+    texts,
+    cache_dir=None,
+    embedding_model=None,
+):
+    if embedding_model is None:
+        embedding_model = SentenceTransformer(
+            EMBEDDING_MODEL_NAME
+        )
+    if cache_dir is None:
+        chunk_embeddings = embedding_model.encode(
+            texts,
+            normalize_embeddings=True,
+        )
+
+        return embedding_model, chunk_embeddings
+
+    cache_dir = Path(cache_dir)
+    cache_dir.mkdir(
+        parents=True,
+        exist_ok=True,
     )
 
-    chunk_embeddings = embedding_model.encode(
-        texts,
-        normalize_embeddings=True,
+    embeddings_path = cache_dir / "chunk_embeddings.npy"
+    metadata_path = cache_dir / "chunk_embeddings_metadata.json"
+
+    current_cache_key = create_embedding_cache_key(
+        texts
     )
+
+    cached_metadata = {}
+
+    if metadata_path.exists():
+        with open(
+            metadata_path,
+            "r",
+            encoding="utf-8",
+        ) as file:
+            cached_metadata = json.load(file)
+
+    cache_is_valid = (
+        embeddings_path.exists()
+        and cached_metadata.get("cache_key")
+        == current_cache_key
+    )
+
+    if cache_is_valid:
+        chunk_embeddings = np.load(
+            embeddings_path,
+            allow_pickle=False,
+        )
+
+        print("Loaded chunk embeddings from cache")
+
+    else:
+        chunk_embeddings = embedding_model.encode(
+            texts,
+            normalize_embeddings=True,
+        )
+
+        np.save(
+            embeddings_path,
+            chunk_embeddings,
+        )
+
+        metadata = {
+            "cache_key": current_cache_key,
+            "model_name": EMBEDDING_MODEL_NAME,
+            "chunk_count": len(texts),
+        }
+
+        with open(
+            metadata_path,
+            "w",
+            encoding="utf-8",
+        ) as file:
+            json.dump(
+                metadata,
+                file,
+                indent=2,
+            )
+
+        print("Built and cached chunk embeddings")
 
     return embedding_model, chunk_embeddings
 

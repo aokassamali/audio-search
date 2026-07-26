@@ -48,21 +48,18 @@ def build_chunk(segments: list[dict], chunk_id: int) -> dict:
     }
 
 
-def main():
-    parser = argparse.ArgumentParser()
-    parser.add_argument("transcription")
-    args = parser.parse_args()
-
-    with open(args.transcription, "r", encoding="utf-8") as file:
-        data = json.load(file)
-
+def create_chunks(
+    segments,
+    soft_target=SOFT_TARGET,
+    hard_cap=HARD_CAP,
+):
     current_segments = []
     current_word_count = 0
     all_chunks = []
     chunk_id = 0
     just_closed_chunk = False
 
-    for segment in data:
+    for segment in segments:
         just_closed_chunk = False
         segment_text = segment["text"].strip()
 
@@ -70,29 +67,98 @@ def main():
         current_word_count += len(segment_text.split())
 
         reached_soft_target = (
-            current_word_count >= SOFT_TARGET
+            current_word_count >= soft_target
             and segment_text.endswith((".", "?", "!"))
         )
-        reached_hard_cap = current_word_count >= HARD_CAP
+
+        reached_hard_cap = (
+            current_word_count >= hard_cap
+        )
 
         if reached_soft_target or reached_hard_cap:
-            all_chunks.append(build_chunk(current_segments, chunk_id))
+            all_chunks.append(
+                build_chunk(
+                    current_segments,
+                    chunk_id,
+                )
+            )
+
             chunk_id += 1
 
             overlap_segment = current_segments[-1]
             current_segments = [overlap_segment]
-            current_word_count = len(overlap_segment["text"].split())
+            current_word_count = len(
+                overlap_segment["text"].split()
+            )
+
             just_closed_chunk = True
 
     if current_segments and not just_closed_chunk:
-        all_chunks.append(build_chunk(current_segments, chunk_id))
+        all_chunks.append(
+            build_chunk(
+                current_segments,
+                chunk_id,
+            )
+        )
 
-    output_path = create_output_path(args.transcription)
+    return all_chunks
 
-    with output_path.open("w", encoding="utf-8") as file:
-        json.dump(all_chunks, file, indent=2, ensure_ascii=False)
 
-    print(f"Created {len(all_chunks)} chunks.")
+def chunk_transcript(
+    transcription,
+    output_path=None,
+    soft_target=SOFT_TARGET,
+    hard_cap=HARD_CAP,
+):
+    transcription_path = Path(transcription)
+
+    with transcription_path.open(
+        "r",
+        encoding="utf-8",
+    ) as file:
+        segments = json.load(file)
+
+    all_chunks = create_chunks(
+        segments,
+        soft_target=soft_target,
+        hard_cap=hard_cap,
+    )
+
+    if output_path is None:
+        output_path = create_output_path(
+            transcription_path
+        )
+    else:
+        output_path = Path(output_path)
+        output_path.parent.mkdir(
+            parents=True,
+            exist_ok=True,
+        )
+
+    with output_path.open(
+        "w",
+        encoding="utf-8",
+    ) as file:
+        json.dump(
+            all_chunks,
+            file,
+            indent=2,
+            ensure_ascii=False,
+        )
+
+    return output_path, len(all_chunks)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("transcription")
+    args = parser.parse_args()
+
+    output_path, chunk_count = chunk_transcript(
+        args.transcription
+    )
+
+    print(f"Created {chunk_count} chunks.")
     print(f"Saved to: {output_path}")
 
 
