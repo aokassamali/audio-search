@@ -1,8 +1,6 @@
 # audio-search
 
-Search and Q&A over conversational audio with **speaker-attributed, citation-grounded answers**.
-
-Ask a natural-language question about an audio file and get an answer that cites specific timestamps, attributed to the speaker who actually said it.
+Natural language search and Q&A over audio. Answers cite timestamps and speaker.
 
 ```
                     ┌─> transcript (faster-whisper) ─┐
@@ -28,7 +26,7 @@ Orchestrated as a partitioned Dagster DAG. Served via FastAPI.
 
 ## Status
 
-**v2.2 — shipped.** Diarization and speaker role attribution.
+v2.2
 
 | | Milestone | |
 |---|---|---|
@@ -42,15 +40,11 @@ Orchestrated as a partitioned Dagster DAG. Served via FastAPI.
 | v2.2 | Diarization + speaker role attribution | ✅ |
 | v2.3 | Prosodic register classification | in design |
 
-Demo corpus is US Supreme Court oral argument. Nothing in the pipeline is court-specific.
-
 ---
 
-## Evaluation
+## Results
 
-Measurements below.
-
-### Transcription — 6.4% WER
+### Transcription
 
 Against the official transcript, with case, punctuation, and whitespace normalized on both sides.
 
@@ -58,19 +52,14 @@ Against the official transcript, with case, punctuation, and whitespace normaliz
 WER 6.448%   |   Substitutions 202   Insertions 22   Deletions 603   Correct 12,020
 ```
 
-**Raw WER overstates the substantive error rate.** Word-level alignment:
+- 387 deletion runs, 88% of 1-2 words. ~1/3 of deleted tokens are adjacent repetitions.
+- Court reporter transcribes verbatim, including false starts and stage directions. WER overstates genuine omissions. Some exist, including one about jury trials.
+- Substitutions are almost all proper nouns. Liu (lew/lieu/lue) = 55, ~27% of substitutions.
+- `iii` → `three` is a citation convention mismatch, not an error.
+- No alias correction applied. With it, 6.4% → ~5.8%.
+- Fix for the proper-noun class is `initial_prompt` vocabulary biasing.
 
-- 387 deletion runs, 88% of them 1–2 words; only 8 runs exceeded 5 consecutive words.
-- Roughly a third of deleted words are adjacent repetitions ("the the", "that that").
-- Cause: the court reporter transcribes **verbatim**. Includes false starts, stutters, filler, stage directions. Whisper silently cleans these up.
-
-Most deletions are a convention mismatch, not lost content. Few genuine omissions, including a substantive phrase about jury trials.
-
-**Substitutions are almost entirely one addressable class.** Proper nouns and domain vocabulary: a single case name accounts for ~27% of all substitutions on its own (Liu → lew/lieu/lue, 55 occurrences). Formal legal citation style rendered phonetically (`iii` → `three`).
-
-`initial_prompt` vocabulary biasing seeds the decoder with domain terms and proper nouns would help. No alias-correction step is applied here, because the goal is agnosticism to audiofile. Correcting the homophones would move 6.4% to roughly 5.8%.
-
-### Retrieval — dense led fusion
+### Retrieval
 
 Hand-labeled query set, recall@5 and MRR:
 
@@ -80,55 +69,70 @@ Hand-labeled query set, recall@5 and MRR:
 | Dense | **0.417** | **0.650** |
 | RRF | 0.358 | 0.543 |
 
-**Caveat :~10 queries.** More hand-labled queries can increase n for confidence, but for this particular section of the project I didn't expect that much value.
+n=10. Directional only. Separating dense from RRF needs 30+ queries.
 
- BM25 is weak here because paraphrase-style queries against homophone-riddled ASR output doesn't work well. Lexical matching needs term overlap that the transcript doesn't reliably contain.
+BM25 is weak because lexical matching doesn't work well on this sort of transcript. RRF degrades when one retriever dominates.
 
-Recall is prioritized over precision, because retrieval feeds an LLM. Recall sets the ceiling for the entire pipeline.
+Recall prioritized over precision. The LLM tolerates an irrelevant chunk, not a missing one.
 
-### Answer layer — smoke test
+### Answer layer
 
-System correctly refuses when the topic is absent from the corpus (`out_of_corpus`) and when a question's premise is unsupported (`false_premise`), and answers direct and multi-chunk questions with citations.
+n=4. Refuses when the topic is absent from the corpus (`out_of_corpus`) and when a question's premise is unsupported (`false_premise`). Answers direct and multi-chunk questions with citations. Answerability only.
 
 ---
 
 ## Grounding
 
-Citations are enforced in depth rather than requested in the prompt.
-
 1. **Schema constraint.** The answer schema restricts citation IDs to an enum of the chunks actually retrieved for this query.
-2. **Prompt rules.** Evidence-only, a citation per claim, refuse when unanswerable, and don't attribute a position to a party.
+2. **Prompt rules.** Evidence-only, a citation per claim, refuse when unanswerable, and don't attribute a position to a party on the basis of another speaker describing it.
 3. **Post-validation.** Every returned citation is re-checked against the retrieved set. Empty or invalid citations downgrade the response to a refusal.
+
+Layer 1 binds only if the inference server enforces the supplied grammar.
 
 ### Speaker attribution
 
-Role and identity are modeled as **separate claims with separate evidence**. 
+Role and identity are separate fields with separate confidence and separate evidence.
 
-Prompt only accepts a neighboring name when the context shows it's being used to *address* the target.
+Speaker samples plus neighboring-turn context are passed to the LLM. Neighboring turns supply names, since speakers do not state their own. A neighboring name is accepted only when context shows it addressing the target.
 
-Evidence enforcement is a code-level invariant. Resolution order is manual override → high-confidence identity → high-confidence role → raw speaker ID, and the inferred values are retained alongside the effective label so an override masking a bad inference stays visible.
+Role or identity returned without a valid evidence sample is downgraded to `unknown`. Evidence belonging to a different speaker is rejected.
 
-Rendered output keeps provenance.
+Resolution order is manual override → high-confidence identity → high-confidence role → raw speaker ID.
 
-### Attribution ambiguity is measured
+Inferred values are kept alongside the effective label, so an override masking a bad inference is visible.
 
-Two diagnostics per transcript segment:
+Output format is `Geiser [SPEAKER_01]`.
 
-- **`speaker_overlap_ratio`** = winning speaker's overlap ÷ total diarized speech in the segment. 
+Role prompt contains no domain vocabulary. TOML overrides handle manual correction.
 
-- **`diarization_coverage`** = total diarized speech ÷ segment duration
+### Attribution ambiguity calcs
 
-**82 of ~1,650 segments (5%) have an overlap ratio below 0.8** 
+- **`speaker_overlap_ratio`** = winning speaker's overlap ÷ total diarized speech in the segment. Near 1.0 = one speaker owns it. Near 0.5 = split.
+- **`diarization_coverage`** = total diarized speech ÷ segment duration. Low coverage with high ratio = dominant speaker, non-diarized audio in segment.
+
+**82 of ~1,650 segments (5%) have an overlap ratio below 0.8.** These segments span a speaker change. Speaker changes occur at question-answer transitions, so they cluster there rather than distributing evenly.
 
 ---
 
 ## Known limitations
 
-- **Faithfulness** The system verifies that a cited chunk is real and was retrieved. It does not verify that the claim is *entailed by* the chunk it cites.
-- **Evaluation is small.** ~10 retrieval queries, n=4 answerability.
-- **Retrieval finds mentions, not speakers, at the chunk level.** 
-- **GPU concurrency is capped.** Materializing multiple Dagster partitions at once puts multiple Whisper models in contention for the same VRAM. Concurrency limits are set so partitions queue rather than collide.
-- **Single corpus.** Everything is validated on formal, low-affect speech with an official transcript. Generalization to other registers is untested.
+- **Faithfulness.** Citations are checked for validity, not entailment. Requires a separate NLI or judge step.
+- **Small eval set.** n=10 retrieval, n=4 answerability.
+- **Chunk retrieval matches mentions, not speakers.** Rule 8 is a stopgap.
+- **Embedding cache key hashes chunk `text` only.** Correct while `text` is the embedded field. Fix is to include the field name in the key.
+- **GPU concurrency capped.** Concurrent partitions load multiple Whisper models against shared VRAM.
+- **Single corpus.** Formal low-affect speech.
+
+---
+
+## Design decisions
+
+- No silent CUDA → CPU fallback. Fails with a `--device cpu` suggestion.
+- No vector DB. NumPy brute force to ~10⁵ vectors.
+- int8 over fp16. Pascal fp16 throughput is degraded. `--compute-type` overrides.
+- Audio normalized to 16 kHz mono PCM before diarization. Compressed MP3 seeking gave inconsistent sample-length errors.
+- Chunk boundaries key on terminal punctuation, not domain keywords.
+- Corpus prep amortized in FastAPI `lifespan`. Per request: embed query, rank.
 
 ---
 
@@ -148,12 +152,16 @@ Requires `ffmpeg` on PATH. Diarization requires a HuggingFace token with access 
 
 ## Usage
 
-<!-- TODO: once v2.3 is completed-->
+<!-- TODO -->
 
 ---
 
 ## Roadmap
 
-**v2.3 — prosodic register classification** . Whether prosody adds signal beyond text for classifying speech register: assertion, hypothetical, question, characterization, hyperbole, joke.
+**v2.3 — prosodic register classification.** Whether prosody adds signal beyond text for classifying speech register: assertion, hypothetical, question, characterization, hyperbole, joke.
+
+Three-arm ablation: text-only, prosody-only, text+prosody. eGeMAPS features. Labels from audio. Reported per class.
+
+Label perturbation: strict vs permissive taxonomy variants over the same turns, measuring agreement.
 
 Public-domain government audio only.
