@@ -33,6 +33,7 @@ class LlamaCppClient:
         system_prompt: str,
         user_prompt: str,
         response_schema: dict,
+        max_tokens: int = 512,
     ) -> str:
         response = httpx.post(
             f"{self.base_url}/v1/chat/completions",
@@ -49,7 +50,7 @@ class LlamaCppClient:
                     },
                 ],
                 "temperature": 0,
-                "max_tokens": 512,
+                "max_tokens": max_tokens,
                 "reasoning_effort": "none",
                 "response_format": {
                     "type": "json_object",

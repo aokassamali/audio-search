@@ -30,6 +30,7 @@ class PathSettings:
     transcript_dir: Path
     diarization_dir: Path
     speaker_transcript_dir: Path
+    speaker_roles_dir: Path
     chunks_dir: Path
     speaker_chunks_dir: Path
     embedding_cache_root: Path
@@ -56,6 +57,7 @@ class SourceSettings:
     source_id: str
     audio_filename: str
     chunk_variant: str
+    speaker_labels: dict[str, str]
     paths: PathSettings
 
     @property
@@ -94,6 +96,13 @@ class SourceSettings:
         )
 
     @property
+    def speaker_roles_path(self) -> Path:
+        return (
+            self.paths.speaker_roles_dir
+            / f"{self.source_id}_speaker_roles.json"
+        )
+
+    @property
     def chunks_path(self) -> Path:
         return (
             self.paths.chunks_dir
@@ -109,10 +118,16 @@ class SourceSettings:
 
     @property
     def active_chunks_path(self) -> Path:
-        if self.chunk_variant == "speaker":
-            return self.speaker_chunks_path
+        if self.chunk_variant == "plain":
+            return self.chunks_path
 
-        return self.chunks_path
+        if self.chunk_variant == "prefer_speaker":
+            if self.speaker_chunks_path.exists():
+                return self.speaker_chunks_path
+
+            return self.chunks_path
+
+        return self.speaker_chunks_path
 
     @property
     def embedding_cache_dir(self) -> Path:
@@ -200,6 +215,10 @@ def load_settings(
             path_data["speaker_transcript_dir"],
             config_dir,
         ),
+        speaker_roles_dir=resolve_path(
+            path_data["speaker_roles_dir"],
+            config_dir,
+        ),
         chunks_dir=resolve_path(
             path_data["chunks_dir"],
             config_dir,
@@ -237,11 +256,20 @@ def load_settings(
             Path(audio_filename).stem,
         )
 
+        speaker_labels = {
+            speaker_id: label
+            for speaker_id, label in source_data.get(
+                "speaker_labels",
+                {},
+            ).items()
+        }
+
         sources[source_key] = SourceSettings(
             key=source_key,
             source_id=source_id,
             audio_filename=audio_filename,
             chunk_variant=chunk_variant,
+            speaker_labels=speaker_labels,
             paths=paths,
         )
 

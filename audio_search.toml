@@ -1,6 +1,6 @@
 [app]
 default_source_id = "sripetch"
-chunk_variant = "speaker"
+chunk_variant = "prefer_speaker"
 
 [paths]
 raw_audio_dir = "data/raw/"
@@ -12,6 +12,7 @@ chunks_dir = "data/processed/chunks"
 speaker_chunks_dir = "data/processed/speaker_chunks"
 embedding_cache_root = "data/cache/"
 eval_dir = "data/eval"
+speaker_roles_dir = "data/processed/speaker_roles"
 
 [models]
 embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
@@ -31,3 +32,6 @@ audio_filename = "Blanche_vs._Lau.mp3"
 
 [sources.case_three]
 audio_filename = "Mullin_vs._Doe.mp3"
+
+[sources.sripetch.speaker_labels]
+SPEAKER_01 = "Geiser"

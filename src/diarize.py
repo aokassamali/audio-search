@@ -12,14 +12,15 @@ MODEL_NAME = "pyannote/speaker-diarization-community-1"
 
 def load_diarization_pipeline(
     token: str | None = None,
+    model_name: str = MODEL_NAME,
 ) -> Pipeline:
     token = token or os.getenv("HF_TOKEN")
 
     pipeline = Pipeline.from_pretrained(
-        MODEL_NAME,
+        model_name,
         token=token,
     )
-
+    
     if torch.cuda.is_available():
         pipeline.to(torch.device("cuda"))
 

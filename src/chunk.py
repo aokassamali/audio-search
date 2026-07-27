@@ -9,6 +9,40 @@ SOFT_TARGET = 120
 HARD_CAP = 200
 
 
+def load_speaker_labels(
+    speaker_roles_path: str | Path,
+) -> dict[str, str]:
+    speaker_roles_path = Path(
+        speaker_roles_path
+    )
+
+    with speaker_roles_path.open(
+        "r",
+        encoding="utf-8",
+    ) as file:
+        artifact = json.load(file)
+
+    labels = {}
+
+    for speaker, role in artifact.get(
+        "roles",
+        {},
+    ).items():
+        effective_label = role.get(
+            "effective_label"
+        )
+
+        if (
+            isinstance(effective_label, str)
+            and effective_label.strip()
+        ):
+            labels[speaker] = (
+                effective_label.strip()
+            )
+
+    return labels
+
+
 def create_output_path(
     transcription: str | Path,
     output_directory: str | Path,
@@ -31,6 +65,7 @@ def build_chunk(
     segments,
     chunk_id,
     source_id,
+    speaker_labels=None,
 ):
     text = " ".join(
         segment["text"].strip()
@@ -53,7 +88,8 @@ def build_chunk(
 
     if has_speaker_data:
         speaker_turns = build_speaker_turns(
-            segments
+            segments,
+            speaker_labels=speaker_labels,
         )
 
         chunk["speakers"] = list(
@@ -63,11 +99,41 @@ def build_chunk(
             )
         )
 
+        chunk["speaker_labels"] = {
+            speaker: (
+                speaker_labels or {}
+            ).get(
+                speaker,
+                speaker,
+            )
+            for speaker in chunk["speakers"]
+        }
+
         chunk["speaker_turns"] = speaker_turns
 
+        speaker_lines = []
+
+        for turn in speaker_turns:
+            speaker = turn["speaker"]
+            speaker_label = turn[
+                "speaker_label"
+            ]
+
+            if speaker_label == speaker:
+                display_name = speaker
+            else:
+                display_name = (
+                    f"{speaker_label} "
+                    f"[{speaker}]"
+                )
+
+            speaker_lines.append(
+                f"{display_name}: "
+                f"{turn['text']}"
+            )
+
         chunk["speaker_text"] = "\n".join(
-            f"{turn['speaker']}: {turn['text']}"
-            for turn in speaker_turns
+            speaker_lines
         )
 
     return chunk
@@ -78,6 +144,7 @@ def create_chunks(
     source_id,
     soft_target=SOFT_TARGET,
     hard_cap=HARD_CAP,
+    speaker_labels=None,
 ):
     current_segments = []
     current_word_count = 0
@@ -107,6 +174,7 @@ def create_chunks(
                     current_segments,
                     chunk_id,
                     source_id,
+                    speaker_labels=speaker_labels,
                 )
             )
 
@@ -126,6 +194,7 @@ def create_chunks(
                 current_segments,
                 chunk_id,
                 source_id,
+                speaker_labels=speaker_labels,
             )
         )
 
@@ -138,6 +207,7 @@ def chunk_transcript(
     source_id=None,
     soft_target=SOFT_TARGET,
     hard_cap=HARD_CAP,
+    speaker_labels=None,
 ):
     transcription_path = Path(transcription)
     if source_id is None:
@@ -154,6 +224,7 @@ def chunk_transcript(
         source_id=source_id,
         soft_target=soft_target,
         hard_cap=hard_cap,
+        speaker_labels=speaker_labels,
     )
 
     if output_path is None:
@@ -188,7 +259,10 @@ def chunk_transcript(
 
 def build_speaker_turns(
     segments: list[dict],
+    speaker_labels: dict[str, str] | None = None,
 ) -> list[dict]:
+    speaker_labels = speaker_labels or {}
+
     speaker_turns = []
 
     for segment in segments:
@@ -202,16 +276,23 @@ def build_speaker_turns(
             "UNKNOWN",
         )
 
+        speaker_label = speaker_labels.get(
+            speaker,
+            speaker,
+        )
+
         if (
             speaker_turns
             and speaker_turns[-1]["speaker"] == speaker
         ):
             speaker_turns[-1]["end"] = segment["end"]
             speaker_turns[-1]["text"] += f" {text}"
+
         else:
             speaker_turns.append(
                 {
                     "speaker": speaker,
+                    "speaker_label": speaker_label,
                     "start": segment["start"],
                     "end": segment["end"],
                     "text": text,
@@ -239,12 +320,26 @@ def main():
         default=None,
     )
 
+    parser.add_argument(
+        "--speaker-roles",
+        type=Path,
+        default=None,
+    )
+
     args = parser.parse_args()
+
+    speaker_labels = None
+
+    if args.speaker_roles is not None:
+        speaker_labels = load_speaker_labels(
+            args.speaker_roles
+        )
 
     output_path, chunk_count = chunk_transcript(
         transcription=args.transcription,
         output_path=args.output,
         source_id=args.source_id,
+        speaker_labels=speaker_labels,
     )
 
     print(f"Created {chunk_count} chunks.")

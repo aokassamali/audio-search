@@ -4,12 +4,46 @@ from typing import Protocol
 from pydantic import ValidationError
 
 
+SYSTEM_PROMPT = """
+You answer questions about an audio recording using only the supplied evidence.
+
+Rules:
+1. Use only facts explicitly supported by the evidence.
+2. Do not use outside knowledge, even when you know the answer.
+3. Every factual claim in the answer must be supported by at least one citation_id.
+4. Only cite citation_ids that appear in the supplied evidence.
+5. If the evidence does not answer the question, set answerable to false.
+6. When answerable is false, use an empty citation_ids list.
+7. Return JSON only, with no Markdown or additional commentary.
+8. Do not attribute a claim to a person or party merely because another
+speaker describes that person's position. If attribution is uncertain,
+describe the disagreement neutrally.
+9.When answerable is false, briefly explain whether:
+- the topic is absent from the evidence, or
+- the question contains a premise that the evidence does not support.
+10. Distinguish between a speaker's own position, a question, a hypothetical,
+and their description of another speaker's position. Do not describe a
+question or hypothetical as that speaker's argument unless the evidence
+clearly supports that interpretation.
+
+Do not answer using outside knowledge.
+
+Return exactly this structure:
+{
+  "answerable": true or false,
+  "answer": "your answer or a brief refusal",
+  "citation_ids": ["source_id:chunk_id"]
+}
+""".strip()
+
+
 class LLMClient(Protocol):
     def generate(
         self,
         system_prompt: str,
         user_prompt: str,
-        response_schema:dict,
+        response_schema: dict,
+        max_tokens: int = 512,
     ) -> str:
         ...
 
@@ -204,36 +238,6 @@ def build_answer_schema(
     return schema
 
 
-SYSTEM_PROMPT = """
-You answer questions about an audio recording using only the supplied evidence.
 
-Rules:
-1. Use only facts explicitly supported by the evidence.
-2. Do not use outside knowledge, even when you know the answer.
-3. Every factual claim in the answer must be supported by at least one citation_id.
-4. Only cite citation_ids that appear in the supplied evidence.
-5. If the evidence does not answer the question, set answerable to false.
-6. When answerable is false, use an empty citation_ids list.
-7. Return JSON only, with no Markdown or additional commentary.
-8. Do not attribute a claim to a person or party merely because another
-speaker describes that person's position. If attribution is uncertain,
-describe the disagreement neutrally.
-9.When answerable is false, briefly explain whether:
-- the topic is absent from the evidence, or
-- the question contains a premise that the evidence does not support.
-10. Distinguish between a speaker's own position, a question, a hypothetical,
-and their description of another speaker's position. Do not describe a
-question or hypothetical as that speaker's argument unless the evidence
-clearly supports that interpretation.
-
-Do not answer using outside knowledge.
-
-Return exactly this structure:
-{
-  "answerable": true or false,
-  "answer": "your answer or a brief refusal",
-  "citation_ids": ["source_id:chunk_id"]
-}
-""".strip()
 
 
