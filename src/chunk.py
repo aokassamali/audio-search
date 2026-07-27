@@ -36,10 +36,15 @@ def create_output_path(transcription: str) -> Path:
     return output_path
 
 
-def build_chunk(segments: list[dict], chunk_id: int) -> dict:
+def build_chunk(
+    segments: list[dict],
+    chunk_id: int,
+    source_id: str,
+) -> dict:
     text = " ".join(segment["text"].strip() for segment in segments)
 
     return {
+        "source_id": source_id,
         "chunk_id": chunk_id,
         "text": text,
         "start": segments[0]["start"],
@@ -50,6 +55,7 @@ def build_chunk(segments: list[dict], chunk_id: int) -> dict:
 
 def create_chunks(
     segments,
+    source_id,
     soft_target=SOFT_TARGET,
     hard_cap=HARD_CAP,
 ):
@@ -80,6 +86,7 @@ def create_chunks(
                 build_chunk(
                     current_segments,
                     chunk_id,
+                    source_id,
                 )
             )
 
@@ -98,6 +105,7 @@ def create_chunks(
             build_chunk(
                 current_segments,
                 chunk_id,
+                source_id,
             )
         )
 
@@ -111,6 +119,7 @@ def chunk_transcript(
     hard_cap=HARD_CAP,
 ):
     transcription_path = Path(transcription)
+    source_id = transcription_path.stem
 
     with transcription_path.open(
         "r",
@@ -120,6 +129,7 @@ def chunk_transcript(
 
     all_chunks = create_chunks(
         segments,
+        source_id=source_id,
         soft_target=soft_target,
         hard_cap=hard_cap,
     )

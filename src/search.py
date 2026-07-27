@@ -195,6 +195,50 @@ def reciprocal_rank_fusion(
     return fused_ranked_indices, rrf_scores
 
 
+def hybrid_search(
+    query: str,
+    chunks: list[dict],
+    bm25,
+    embedding_model,
+    chunk_embeddings,
+    top_k: int = 5,
+) -> list[dict]:
+    bm25_ranked_indices = rank_bm25(
+        query,
+        bm25,
+    )
+
+    dense_ranked_indices = rank_dense(
+        query,
+        embedding_model,
+        chunk_embeddings,
+    )
+
+    fused_ranked_indices, rrf_scores = (
+        reciprocal_rank_fusion(
+            bm25_ranked_indices,
+            dense_ranked_indices,
+        )
+    )
+
+    results = []
+
+    for rank, chunk_index in enumerate(
+        fused_ranked_indices[:top_k],
+        start=1,
+    ):
+        result = chunks[chunk_index].copy()
+
+        result["rank"] = rank
+        result["rrf_score"] = rrf_scores[
+            chunk_index
+        ]
+
+        results.append(result)
+
+    return results
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("chunks")

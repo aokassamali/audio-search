@@ -1,0 +1,121 @@
+[
+  {
+    "id": "direct_answer",
+    "query": "What limits does the petitioner say apply to disgorgement?",
+    "expected_answerable": true,
+    "actual_answerable": true,
+    "answerability_match": true,
+    "answer": "The petitioner argues that disgorgement is limited by the requirement that it must be a compensatory remedy measured by losses to the victims, rather than a punitive measure focused solely on depriving wrongdoers of profits. The petitioner also states that the only victims to whom funds can legally be distributed are those who could establish their own right to sue under the private cause of action.",
+    "citations": [
+      {
+        "citation_id": "Sripetch_vs_SEC:63",
+        "source_id": "Sripetch_vs_SEC",
+        "chunk_id": 63,
+        "start": 2650.0,
+        "end": 2709.0
+      },
+      {
+        "citation_id": "Sripetch_vs_SEC:61",
+        "source_id": "Sripetch_vs_SEC",
+        "chunk_id": 61,
+        "start": 2554.0,
+        "end": 2609.0
+      }
+    ],
+    "retrieved_citation_ids": [
+      "Sripetch_vs_SEC:59",
+      "Sripetch_vs_SEC:58",
+      "Sripetch_vs_SEC:63",
+      "Sripetch_vs_SEC:1",
+      "Sripetch_vs_SEC:61"
+    ],
+    "notes": "Directly answered in the opening argument."
+  },
+  {
+    "id": "multi_chunk",
+    "query": "How do the parties disagree about the purpose of disgorgement and where the recovered money may go?",
+    "expected_answerable": true,
+    "actual_answerable": true,
+    "answerability_match": true,
+    "answer": "The parties disagree on whether the primary purpose of disgorgement is to deprive a wrongdoer of gains (with the destination of funds being secondary) or to compensate injured investors. One party argues that disgorgement is simply 'the surrender' of gains and that 'any question about where the money goes after that is secondary,' implying the government does not necessarily have to pass funds to victims. The opposing party argues that disgorgement is 'designed for a compensatory function' where the SEC stands in the shoes of injured investors to seek recovery, and that funds should go to victims if feasible. Regarding the destination of recovered money, one side states the SEC 'has to pass funds along to victims if it is feasible,' while the other side implies that if the purpose is merely to ensure the defendant does not profit, the destination is not the primary concern.",
+    "citations": [
+      {
+        "citation_id": "Sripetch_vs_SEC:60",
+        "source_id": "Sripetch_vs_SEC",
+        "chunk_id": 60,
+        "start": 2502.0,
+        "end": 2557.0
+      },
+      {
+        "citation_id": "Sripetch_vs_SEC:84",
+        "source_id": "Sripetch_vs_SEC",
+        "chunk_id": 84,
+        "start": 3605.0,
+        "end": 3660.0
+      },
+      {
+        "citation_id": "Sripetch_vs_SEC:3",
+        "source_id": "Sripetch_vs_SEC",
+        "chunk_id": 3,
+        "start": 127.0,
+        "end": 172.0
+      },
+      {
+        "citation_id": "Sripetch_vs_SEC:32",
+        "source_id": "Sripetch_vs_SEC",
+        "chunk_id": 32,
+        "start": 1331.0,
+        "end": 1371.0
+      },
+      {
+        "citation_id": "Sripetch_vs_SEC:44",
+        "source_id": "Sripetch_vs_SEC",
+        "chunk_id": 44,
+        "start": 1830.0,
+        "end": 1882.0
+      }
+    ],
+    "retrieved_citation_ids": [
+      "Sripetch_vs_SEC:60",
+      "Sripetch_vs_SEC:84",
+      "Sripetch_vs_SEC:3",
+      "Sripetch_vs_SEC:32",
+      "Sripetch_vs_SEC:44"
+    ],
+    "notes": "Requires synthesis across multiple parts of the argument."
+  },
+  {
+    "id": "out_of_corpus",
+    "query": "Who won the FIFA World Cup?",
+    "expected_answerable": false,
+    "actual_answerable": false,
+    "answerability_match": true,
+    "answer": "The provided audio evidence discusses legal proceedings involving the SEC, disgorgement, and private litigation; it does not contain any information about the FIFA World Cup.",
+    "citations": [],
+    "retrieved_citation_ids": [
+      "Sripetch_vs_SEC:37",
+      "Sripetch_vs_SEC:83",
+      "Sripetch_vs_SEC:11",
+      "Sripetch_vs_SEC:89",
+      "Sripetch_vs_SEC:19"
+    ],
+    "notes": "Completely unrelated to the recording."
+  },
+  {
+    "id": "false_premise",
+    "query": "Why did the petitioner concede that disgorgement may be punitive?",
+    "expected_answerable": false,
+    "actual_answerable": false,
+    "answerability_match": true,
+    "answer": "The provided audio evidence does not contain information explaining why the petitioner conceded that disgorgement may be punitive. The text discusses the petitioner's arguments regarding the definition of disgorgement, the necessity of showing investor harm, and the distinction between compensatory and punitive remedies, but it does not state that the petitioner made a concession on the punitive nature of disgorgement.",
+    "citations": [],
+    "retrieved_citation_ids": [
+      "Sripetch_vs_SEC:41",
+      "Sripetch_vs_SEC:59",
+      "Sripetch_vs_SEC:58",
+      "Sripetch_vs_SEC:0",
+      "Sripetch_vs_SEC:19"
+    ],
+    "notes": "The evidence does not support the claimed concession."
+  }
+]

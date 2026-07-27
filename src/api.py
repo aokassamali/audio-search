@@ -8,13 +8,14 @@ from src.search import (
     extract_texts,
     build_bm25,
     build_dense_index,
-    rank_bm25,
-    rank_dense,
-    reciprocal_rank_fusion,
+    hybrid_search,
 )
 
+from src.llm_clients import LlamaCppClient
+from src.rag import GroundedAnswer, answer_question
+
 CHUNKS_PATH = Path(
-    "data/processed/chunks/Sripetch_vs_SEC_chunks.json"
+    "data/processed/chunks/Sripetch_vs_SEC_chunks_20260726_145257.json"
 )
 
 EMBEDDING_CACHE_DIR = Path(
@@ -29,6 +30,16 @@ class SearchRequest(BaseModel):
         le=20,
     )
 
+
+class AnswerRequest(BaseModel):
+    query: str
+    top_k: int = Field(
+        default=5,
+        ge=1,
+        le=20,
+    )
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     chunks = load_chunks(CHUNKS_PATH)
@@ -41,11 +52,14 @@ async def lifespan(app: FastAPI):
         cache_dir=EMBEDDING_CACHE_DIR,
     )
 
+    llm_client = LlamaCppClient()
+
     app.state.chunks = chunks
     app.state.texts = texts
     app.state.bm25 = bm25
     app.state.embedding_model = embedding_model
     app.state.chunk_embeddings = chunk_embeddings
+    app.state.llm_client = llm_client
 
     print(f"Loaded {len(chunks)} chunks")
 
@@ -72,37 +86,42 @@ def search(
 ):
     state = request.app.state
 
-    bm25_ranked_indices = rank_bm25(
-        search_request.query,
-        state.bm25,
+    results = hybrid_search(
+        query=search_request.query,
+        chunks=state.chunks,
+        bm25=state.bm25,
+        embedding_model=state.embedding_model,
+        chunk_embeddings=state.chunk_embeddings,
+        top_k=search_request.top_k,
     )
-
-    dense_ranked_indices = rank_dense(
-        search_request.query,
-        state.embedding_model,
-        state.chunk_embeddings,
-    )
-
-    fused_ranked_indices, rrf_scores = reciprocal_rank_fusion(
-        bm25_ranked_indices,
-        dense_ranked_indices,
-    )
-
-    results = []
-
-    for rank, chunk_index in enumerate(
-        fused_ranked_indices[:search_request.top_k],
-        start=1,
-    ):
-        result = dict(state.chunks[chunk_index])
-
-        result["rank"] = rank
-        result["rrf_score"] = rrf_scores[chunk_index]
-
-        results.append(result)
 
     return {
         "query": search_request.query,
         "top_k": search_request.top_k,
         "results": results,
     }
+
+@app.post(
+    "/answer",
+    response_model=GroundedAnswer,
+)
+def answer(
+    answer_request: AnswerRequest,
+    request: Request,
+):
+    state = request.app.state
+
+    retrieved_chunks = hybrid_search(
+        query=answer_request.query,
+        chunks=state.chunks,
+        bm25=state.bm25,
+        embedding_model=state.embedding_model,
+        chunk_embeddings=state.chunk_embeddings,
+        top_k=answer_request.top_k,
+    )
+
+    return answer_question(
+        query=answer_request.query,
+        retrieved_chunks=retrieved_chunks,
+        llm_client=state.llm_client,
+    )

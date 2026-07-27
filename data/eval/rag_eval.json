@@ -1,0 +1,26 @@
+[
+  {
+    "id": "direct_answer",
+    "query": "What limits does the petitioner say apply to disgorgement?",
+    "expected_answerable": true,
+    "notes": "Directly answered in the opening argument."
+  },
+  {
+    "id": "multi_chunk",
+    "query": "How do the parties disagree about the purpose of disgorgement and where the recovered money may go?",
+    "expected_answerable": true,
+    "notes": "Requires synthesis across multiple parts of the argument."
+  },
+  {
+    "id": "out_of_corpus",
+    "query": "Who won the FIFA World Cup?",
+    "expected_answerable": false,
+    "notes": "Completely unrelated to the recording."
+  },
+  {
+    "id": "false_premise",
+    "query": "Why did the petitioner concede that disgorgement may be punitive?",
+    "expected_answerable": false,
+    "notes": "The evidence does not support the claimed concession."
+  }
+]
