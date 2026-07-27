@@ -1,23 +1,25 @@
 from faster_whisper import WhisperModel
 import argparse
 import json
-from datetime import datetime
+from src.config import load_settings
 from pathlib import Path
 
-def create_output_path(audio: str) -> Path:
+def create_output_path(
+    audio: str | Path,
+    output_directory: str | Path,
+) -> Path:
     audio_path = Path(audio)
-    output_directory = Path("data/processed/jsons")
-    output_directory.mkdir(parents=True, exist_ok=True)
+    output_directory = Path(output_directory)
 
-    output_path = output_directory / f"{audio_path.stem}.json"
+    output_directory.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
-    if output_path.exists():
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_path = output_directory / (
-            f"{audio_path.stem}_{timestamp}.json"
-        )
-
-    return output_path
+    return (
+        output_directory
+        / f"{audio_path.stem}.json"
+    )
 
 
 def transcribe_audio(
@@ -50,7 +52,14 @@ def transcribe_audio(
     ]
 
     if output_path is None:
-        output_path = create_output_path(audio)
+        settings = load_settings()
+
+        output_path = create_output_path(
+            audio=audio,
+            output_directory=(
+                settings.paths.transcript_dir
+            ),
+        )
     else:
         output_path = Path(output_path)
         output_path.parent.mkdir(
@@ -73,16 +82,46 @@ def transcribe_audio(
 
 
 def main():
+    settings = load_settings()
+
     parser = argparse.ArgumentParser()
-    parser.add_argument("audio")
-    parser.add_argument("--model-size", default="medium")
-    parser.add_argument("--device", default="cuda")
-    parser.add_argument("--compute-type", default="int8")
+
+    parser.add_argument(
+        "audio",
+    )
+
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+    )
+
+    parser.add_argument(
+        "--model-size",
+        default=None,
+    )
+
+    parser.add_argument(
+        "--device",
+        default="cuda",
+    )
+
+    parser.add_argument(
+        "--compute-type",
+        default="int8",
+    )
+
     args = parser.parse_args()
+
+    model_size = (
+        args.model_size
+        or settings.models.whisper_model
+    )
 
     output_path = transcribe_audio(
         audio=args.audio,
-        model_size=args.model_size,
+        output_path=args.output,
+        model_size=model_size,
         device=args.device,
         compute_type=args.compute_type,
     )

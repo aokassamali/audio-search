@@ -1,12 +1,21 @@
 [
   {
     "id": "direct_answer",
+    "source_key": "sripetch",
+    "source_id": "Sripetch_vs_SEC",
     "query": "What limits does the petitioner say apply to disgorgement?",
     "expected_answerable": true,
     "actual_answerable": true,
     "answerability_match": true,
-    "answer": "The petitioner argues that disgorgement is limited by the requirement that it must be a compensatory remedy measured by losses to the victims, rather than a punitive measure focused solely on depriving wrongdoers of profits. The petitioner also states that the only victims to whom funds can legally be distributed are those who could establish their own right to sue under the private cause of action.",
+    "answer": "The petitioner argues that disgorgement should be limited to the narrowest possible conception of victim, specifically restricting distribution to people who could establish their own right to sue under the private cause of action. Additionally, the petitioner maintains that disgorgement is a remedy designed to deprive the defendant of ill-gotten gains measured by profits, rather than a compensatory remedy measured by losses to victims.",
     "citations": [
+      {
+        "citation_id": "Sripetch_vs_SEC:58",
+        "source_id": "Sripetch_vs_SEC",
+        "chunk_id": 58,
+        "start": 2410.0,
+        "end": 2459.0
+      },
       {
         "citation_id": "Sripetch_vs_SEC:63",
         "source_id": "Sripetch_vs_SEC",
@@ -33,11 +42,13 @@
   },
   {
     "id": "multi_chunk",
+    "source_key": "sripetch",
+    "source_id": "Sripetch_vs_SEC",
     "query": "How do the parties disagree about the purpose of disgorgement and where the recovered money may go?",
     "expected_answerable": true,
     "actual_answerable": true,
     "answerability_match": true,
-    "answer": "The parties disagree on whether the primary purpose of disgorgement is to deprive a wrongdoer of gains (with the destination of funds being secondary) or to compensate injured investors. One party argues that disgorgement is simply 'the surrender' of gains and that 'any question about where the money goes after that is secondary,' implying the government does not necessarily have to pass funds to victims. The opposing party argues that disgorgement is 'designed for a compensatory function' where the SEC stands in the shoes of injured investors to seek recovery, and that funds should go to victims if feasible. Regarding the destination of recovered money, one side states the SEC 'has to pass funds along to victims if it is feasible,' while the other side implies that if the purpose is merely to ensure the defendant does not profit, the destination is not the primary concern.",
+    "answer": "The parties disagree on whether the primary purpose of disgorgement is to ensure the defendant does not profit from its wrong (the government's view) or to serve a compensatory function by restoring funds to injured parties (Speaker_01's view). Regarding where the money goes, the government argues that if it is feasible, funds must be passed along to victims, as this is consistent with equity and the definition of restitution. In contrast, Speaker_01 argues that disgorgement is designed to compensate an injured investor by standing in their shoes to seek recovery, implying the money should go to the injured party, whereas the government views the destination of the money as secondary to the goal of depriving the wrongdoer of gains.",
     "citations": [
       {
         "citation_id": "Sripetch_vs_SEC:60",
@@ -86,11 +97,13 @@
   },
   {
     "id": "out_of_corpus",
+    "source_key": "sripetch",
+    "source_id": "Sripetch_vs_SEC",
     "query": "Who won the FIFA World Cup?",
     "expected_answerable": false,
     "actual_answerable": false,
     "answerability_match": true,
-    "answer": "The provided audio evidence discusses legal proceedings involving the SEC, disgorgement, and private litigation; it does not contain any information about the FIFA World Cup.",
+    "answer": "The provided audio evidence discusses legal proceedings involving the SEC, disgorgement, and private litigation; it does not contain any information about the FIFA World Cup or its winner.",
     "citations": [],
     "retrieved_citation_ids": [
       "Sripetch_vs_SEC:37",
@@ -103,11 +116,13 @@
   },
   {
     "id": "false_premise",
+    "source_key": "sripetch",
+    "source_id": "Sripetch_vs_SEC",
     "query": "Why did the petitioner concede that disgorgement may be punitive?",
     "expected_answerable": false,
     "actual_answerable": false,
     "answerability_match": true,
-    "answer": "The provided audio evidence does not contain information explaining why the petitioner conceded that disgorgement may be punitive. The text discusses the petitioner's arguments regarding the definition of disgorgement, the necessity of showing investor harm, and the distinction between compensatory and punitive remedies, but it does not state that the petitioner made a concession on the punitive nature of disgorgement.",
+    "answer": "The provided audio evidence does not contain any statement where the petitioner concedes that disgorgement may be punitive. In fact, the petitioner (SPEAKER_01) argues that disgorgement is an equitable remedy that 'can't be a punishment' and is limited to restoring the status quo and providing fair compensation.",
     "citations": [],
     "retrieved_citation_ids": [
       "Sripetch_vs_SEC:41",

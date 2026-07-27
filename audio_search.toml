@@ -1,0 +1,33 @@
+[app]
+default_source_id = "sripetch"
+chunk_variant = "speaker"
+
+[paths]
+raw_audio_dir = "data/raw/"
+normalized_audio_dir = "data/processed/normalized_audio"
+transcript_dir = "data/processed/jsons"
+diarization_dir = "data/processed/diarization"
+speaker_transcript_dir = "data/processed/speaker_transcripts"
+chunks_dir = "data/processed/chunks"
+speaker_chunks_dir = "data/processed/speaker_chunks"
+embedding_cache_root = "data/cache/"
+eval_dir = "data/eval"
+
+[models]
+embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+whisper_model = "medium"
+diarization_model = "pyannote/speaker-diarization-community-1"
+
+[llm]
+base_url = "http://127.0.0.1:8080"
+model = "local"
+timeout_seconds = 120
+
+[sources.sripetch]
+audio_filename = "Sripetch_vs_SEC.mp3"
+
+[sources.case_two]
+audio_filename = "Blanche_vs._Lau.mp3"
+
+[sources.case_three]
+audio_filename = "Mullin_vs._Doe.mp3"

@@ -4,6 +4,9 @@ import argparse
 import re
 import string
 import jiwer
+from pathlib import Path
+
+from src.config import load_settings
 
 
 def load_whisper_text(transcript_path):
@@ -123,7 +126,25 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("transcript")
     parser.add_argument("reference")
+    parser.add_argument(
+    "--output",
+    type=Path,
+    default=None,
+)
     args = parser.parse_args()
+
+    settings = load_settings()
+
+    output_path = (
+        args.output
+        or settings.paths.eval_dir
+        / "wer_alignment.txt"
+    )
+
+    output_path.parent.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
     whisper_text = load_whisper_text(args.transcript)
     reference_text = extract_reference_text(args.reference)
@@ -144,14 +165,13 @@ def main():
         line_width=120,
     )
 
-    with open(
-        "data/eval/wer_alignment.txt",
+    with output_path.open(
         "w",
         encoding="utf-8",
     ) as file:
         file.write(alignment_text)
 
-    print("Saved alignment to data/eval/wer_alignment.txt")
+    print(f"Saved alignment to {output_path}")
     print("\nTranscription Evaluation")
     print(f"WER: {result.wer:.3%}")
     print(f"Substitutions: {result.substitutions}")

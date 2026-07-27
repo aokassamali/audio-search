@@ -1,49 +1,43 @@
-#Walk segments in order, accumulating into the current chunk.
-#Once the chunk reaches a soft target of ~120 words, keep extending until you hit a segment ending in . or ?, then close the chunk. Hard cap ~200 words — if no punctuation shows up by then, cut anyway (transcripts are messy; never trust punctuation to arrive).
-#Overlap: start each new chunk with the last segment of the previous chunk.
-#Each chunk: id (0, 1, 2...), text (segment texts joined), start, end, and word_count (you'll thank yourself during debugging).
-#CLI mirrors yesterday: input path argument, output to data/processed/<stem>_chunks.json.
-
-
-#plan
-#parse JSON
-# loop through json and add words to chunk plus extra data
-# once reached soft target look for punctuation and then end chunk or hard cap of 200 words and pull end time
-#calculate word count and store
-
 import argparse
 import json
-from datetime import datetime
 from pathlib import Path
+
+from src.config import load_settings
+
 
 SOFT_TARGET = 120
 HARD_CAP = 200
 
 
-def create_output_path(transcription: str) -> Path:
+def create_output_path(
+    transcription: str | Path,
+    output_directory: str | Path,
+) -> Path:
     transcription_path = Path(transcription)
-    output_directory = Path("data/processed/chunks")
-    output_directory.mkdir(parents=True, exist_ok=True)
+    output_directory = Path(output_directory)
 
-    output_path = output_directory / f"{transcription_path.stem}_chunks.json"
+    output_directory.mkdir(
+        parents=True,
+        exist_ok=True,
+    )
 
-    if output_path.exists():
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        output_path = output_directory / (
-            f"{transcription_path.stem}_chunks_{timestamp}.json"
-        )
-
-    return output_path
+    return (
+        output_directory
+        / f"{transcription_path.stem}_chunks.json"
+    )
 
 
 def build_chunk(
-    segments: list[dict],
-    chunk_id: int,
-    source_id: str,
-) -> dict:
-    text = " ".join(segment["text"].strip() for segment in segments)
+    segments,
+    chunk_id,
+    source_id,
+):
+    text = " ".join(
+        segment["text"].strip()
+        for segment in segments
+    )
 
-    return {
+    chunk = {
         "source_id": source_id,
         "chunk_id": chunk_id,
         "text": text,
@@ -51,6 +45,32 @@ def build_chunk(
         "end": segments[-1]["end"],
         "word_count": len(text.split()),
     }
+
+    has_speaker_data = any(
+        "speaker" in segment
+        for segment in segments
+    )
+
+    if has_speaker_data:
+        speaker_turns = build_speaker_turns(
+            segments
+        )
+
+        chunk["speakers"] = list(
+            dict.fromkeys(
+                turn["speaker"]
+                for turn in speaker_turns
+            )
+        )
+
+        chunk["speaker_turns"] = speaker_turns
+
+        chunk["speaker_text"] = "\n".join(
+            f"{turn['speaker']}: {turn['text']}"
+            for turn in speaker_turns
+        )
+
+    return chunk
 
 
 def create_chunks(
@@ -115,11 +135,13 @@ def create_chunks(
 def chunk_transcript(
     transcription,
     output_path=None,
+    source_id=None,
     soft_target=SOFT_TARGET,
     hard_cap=HARD_CAP,
 ):
     transcription_path = Path(transcription)
-    source_id = transcription_path.stem
+    if source_id is None:
+        source_id = transcription_path.stem
 
     with transcription_path.open(
         "r",
@@ -135,8 +157,13 @@ def chunk_transcript(
     )
 
     if output_path is None:
+        settings = load_settings()
+
         output_path = create_output_path(
-            transcription_path
+            transcription=transcription_path,
+            output_directory=(
+                settings.paths.chunks_dir
+            ),
         )
     else:
         output_path = Path(output_path)
@@ -159,18 +186,69 @@ def chunk_transcript(
     return output_path, len(all_chunks)
 
 
+def build_speaker_turns(
+    segments: list[dict],
+) -> list[dict]:
+    speaker_turns = []
+
+    for segment in segments:
+        text = segment["text"].strip()
+
+        if not text:
+            continue
+
+        speaker = segment.get(
+            "speaker",
+            "UNKNOWN",
+        )
+
+        if (
+            speaker_turns
+            and speaker_turns[-1]["speaker"] == speaker
+        ):
+            speaker_turns[-1]["end"] = segment["end"]
+            speaker_turns[-1]["text"] += f" {text}"
+        else:
+            speaker_turns.append(
+                {
+                    "speaker": speaker,
+                    "start": segment["start"],
+                    "end": segment["end"],
+                    "text": text,
+                }
+            )
+
+    return speaker_turns
+
+
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("transcription")
+
+    parser.add_argument(
+        "transcription",
+    )
+
+    parser.add_argument(
+        "--output",
+        type=Path,
+        default=None,
+    )
+
+    parser.add_argument(
+        "--source-id",
+        default=None,
+    )
+
     args = parser.parse_args()
 
     output_path, chunk_count = chunk_transcript(
-        args.transcription
+        transcription=args.transcription,
+        output_path=args.output,
+        source_id=args.source_id,
     )
 
     print(f"Created {chunk_count} chunks.")
     print(f"Saved to: {output_path}")
-
 
 if __name__ == "__main__":
     main()

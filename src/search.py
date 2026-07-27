@@ -7,14 +7,16 @@ from pathlib import Path
 import numpy as np
 
 
-EMBEDDING_MODEL_NAME = (
+DEFAULT_EMBEDDING_MODEL_NAME = (
     "sentence-transformers/all-MiniLM-L6-v2"
 )
 
-
-def create_embedding_cache_key(texts):
+def create_embedding_cache_key(
+    texts,
+    model_name,
+):
     cache_input = {
-        "model_name": EMBEDDING_MODEL_NAME,
+        "model_name": model_name,
         "texts": texts,
     }
 
@@ -71,11 +73,13 @@ def build_dense_index(
     texts,
     cache_dir=None,
     embedding_model=None,
+    model_name=DEFAULT_EMBEDDING_MODEL_NAME,
 ):
     if embedding_model is None:
         embedding_model = SentenceTransformer(
-            EMBEDDING_MODEL_NAME
+            model_name
         )
+
     if cache_dir is None:
         chunk_embeddings = embedding_model.encode(
             texts,
@@ -90,18 +94,24 @@ def build_dense_index(
         exist_ok=True,
     )
 
-    embeddings_path = cache_dir / "chunk_embeddings.npy"
-    metadata_path = cache_dir / "chunk_embeddings_metadata.json"
+    embeddings_path = (
+        cache_dir / "chunk_embeddings.npy"
+    )
+
+    metadata_path = (
+        cache_dir
+        / "chunk_embeddings_metadata.json"
+    )
 
     current_cache_key = create_embedding_cache_key(
-        texts
+        texts,
+        model_name,
     )
 
     cached_metadata = {}
 
     if metadata_path.exists():
-        with open(
-            metadata_path,
+        with metadata_path.open(
             "r",
             encoding="utf-8",
         ) as file:
@@ -134,12 +144,11 @@ def build_dense_index(
 
         metadata = {
             "cache_key": current_cache_key,
-            "model_name": EMBEDDING_MODEL_NAME,
+            "model_name": model_name,
             "chunk_count": len(texts),
         }
 
-        with open(
-            metadata_path,
+        with metadata_path.open(
             "w",
             encoding="utf-8",
         ) as file:

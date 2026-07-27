@@ -1,6 +1,8 @@
 import json
-from pathlib import Path
 
+from sentence_transformers import SentenceTransformer
+
+from src.config import load_settings
 from src.llm_clients import LlamaCppClient
 from src.rag import answer_question, create_citation_id
 from src.search import (
@@ -12,43 +14,46 @@ from src.search import (
 )
 
 
-CHUNKS_PATH = Path(
-    "data/processed/chunks/Sripetch_vs_SEC_chunks_20260726_145257.json"
-)
+def evaluate_rag(
+    source_key: str | None = None,
+) -> None:
+    settings = load_settings()
+    source = settings.get_source(source_key)
 
-EMBEDDING_CACHE_DIR = Path(
-    "data/cache"
-)
+    eval_path = settings.rag_eval_path
+    results_path = settings.rag_eval_results_path
 
-EVAL_PATH = Path(
-    "data/eval/rag_eval.json"
-)
-
-RESULTS_PATH = Path(
-    "data/eval/rag_eval_results.json"
-)
-
-
-def evaluate_rag() -> None:
-    with EVAL_PATH.open(
+    with eval_path.open(
         "r",
         encoding="utf-8",
     ) as file:
         eval_cases = json.load(file)
 
-    chunks = load_chunks(CHUNKS_PATH)
-    texts = extract_texts(chunks)
+    chunks = load_chunks(
+        source.active_chunks_path
+    )
 
+    texts = extract_texts(chunks)
     bm25 = build_bm25(texts)
+
+    configured_embedding_model = SentenceTransformer(
+        settings.models.embedding_model
+    )
 
     embedding_model, chunk_embeddings = (
         build_dense_index(
             texts,
-            cache_dir=EMBEDDING_CACHE_DIR,
+            cache_dir=source.embedding_cache_dir,
+            embedding_model=configured_embedding_model,
+            model_name=settings.models.embedding_model,
         )
     )
 
-    llm_client = LlamaCppClient()
+    llm_client = LlamaCppClient(
+        base_url=settings.llm.base_url,
+        model=settings.llm.model,
+        timeout=settings.llm.timeout_seconds,
+    )
 
     results = []
 
@@ -72,6 +77,8 @@ def evaluate_rag() -> None:
 
         result = {
             "id": case["id"],
+            "source_key": source.key,
+            "source_id": source.source_id,
             "query": case["query"],
             "expected_answerable": (
                 case["expected_answerable"]
@@ -95,12 +102,12 @@ def evaluate_rag() -> None:
 
         results.append(result)
 
-    RESULTS_PATH.parent.mkdir(
+    results_path.parent.mkdir(
         parents=True,
         exist_ok=True,
     )
 
-    with RESULTS_PATH.open(
+    with results_path.open(
         "w",
         encoding="utf-8",
     ) as file:
@@ -117,12 +124,13 @@ def evaluate_rag() -> None:
     )
 
     print(
+        f"\nSource: {source.key}"
         f"\nAnswerability: "
         f"{passed}/{len(results)} correct"
     )
 
     print(
-        f"Results written to: {RESULTS_PATH}"
+        f"Results written to: {results_path}"
     )
 
 

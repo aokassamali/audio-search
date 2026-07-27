@@ -37,16 +37,25 @@ def create_citation_id(chunk: dict) -> str:
     return f"{chunk['source_id']}:{chunk['chunk_id']}"
 
 
-def build_context(chunks: list[dict]) -> str:
+def build_context(
+    chunks: list[dict],
+) -> str:
     context_blocks = []
 
     for chunk in chunks:
         citation_id = create_citation_id(chunk)
 
+        context_text = chunk.get(
+            "speaker_text",
+            chunk["text"],
+        )
+
         context_block = (
             f"[{citation_id}]\n"
-            f"Timestamp: {chunk['start']:.1f}s–{chunk['end']:.1f}s\n"
-            f"Text: {chunk['text']}"
+            f"Timestamp: "
+            f"{chunk['start']:.1f}s–"
+            f"{chunk['end']:.1f}s\n"
+            f"Transcript:\n{context_text}"
         )
 
         context_blocks.append(context_block)
@@ -212,6 +221,10 @@ describe the disagreement neutrally.
 9.When answerable is false, briefly explain whether:
 - the topic is absent from the evidence, or
 - the question contains a premise that the evidence does not support.
+10. Distinguish between a speaker's own position, a question, a hypothetical,
+and their description of another speaker's position. Do not describe a
+question or hypothetical as that speaker's argument unless the evidence
+clearly supports that interpretation.
 
 Do not answer using outside knowledge.
 

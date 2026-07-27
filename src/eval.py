@@ -1,12 +1,13 @@
 import argparse
 import json
 
-from search import (
-    load_chunks,
-    extract_texts,
+from src.config import load_settings
+from src.search import (
     build_bm25,
-    rank_bm25,
     build_dense_index,
+    extract_texts,
+    load_chunks,
+    rank_bm25,
     rank_dense,
     reciprocal_rank_fusion,
 )
@@ -51,6 +52,8 @@ def indices_to_chunk_ids(ranked_indices, chunks):
 
 
 def main():
+    settings = load_settings()
+
     parser = argparse.ArgumentParser()
     parser.add_argument("chunks")
     parser.add_argument("queries")
@@ -63,7 +66,14 @@ def main():
 
     bm25 = build_bm25(texts)
 
-    embedding_model, chunk_embeddings = build_dense_index(texts)
+    embedding_model, chunk_embeddings = (
+    build_dense_index(
+        texts,
+        model_name=(
+            settings.models.embedding_model
+        ),
+    )
+)
 
     bm25_recalls = []
     dense_recalls = []

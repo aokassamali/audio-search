@@ -1,67 +1,98 @@
 from contextlib import asynccontextmanager
-from pydantic import BaseModel, Field
+
 from fastapi import FastAPI, Request
-from pathlib import Path
+from pydantic import BaseModel, Field
 
-from src.search import (
-    load_chunks,
-    extract_texts,
-    build_bm25,
-    build_dense_index,
-    hybrid_search,
-)
-
+from src.config import load_settings
 from src.llm_clients import LlamaCppClient
 from src.rag import GroundedAnswer, answer_question
+from collections import Counter
+from typing import Literal
 
-CHUNKS_PATH = Path(
-    "data/processed/chunks/Sripetch_vs_SEC_chunks_20260726_145257.json"
+from src.corpus import (
+    build_corpus_index,
+    search_corpus,
 )
 
-EMBEDDING_CACHE_DIR = Path(
-    "data/cache"
-)
 
 class SearchRequest(BaseModel):
     query: str
+
     top_k: int = Field(
         default=5,
         ge=1,
         le=20,
+    )
+
+    source_keys: list[str] | None = None
+
+    retrieval_mode: Literal[
+        "global",
+        "per_source",
+    ] = "global"
+
+    top_k_per_source: int = Field(
+        default=3,
+        ge=1,
+        le=10,
     )
 
 
 class AnswerRequest(BaseModel):
     query: str
+
     top_k: int = Field(
         default=5,
         ge=1,
         le=20,
     )
 
+    source_keys: list[str] | None = None
+
+    retrieval_mode: Literal[
+        "global",
+        "per_source",
+    ] = "global"
+
+    top_k_per_source: int = Field(
+        default=3,
+        ge=1,
+        le=10,
+    )
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    chunks = load_chunks(CHUNKS_PATH)
-    texts = extract_texts(chunks)
+    settings = load_settings()
 
-    bm25 = build_bm25(texts)
-
-    embedding_model, chunk_embeddings = build_dense_index(
-        texts,
-        cache_dir=EMBEDDING_CACHE_DIR,
+    corpus_index = build_corpus_index(
+        settings
     )
 
-    llm_client = LlamaCppClient()
+    if corpus_index is None:
+        raise RuntimeError(
+            "No processed corpus sources found."
+        )
 
-    app.state.chunks = chunks
-    app.state.texts = texts
-    app.state.bm25 = bm25
-    app.state.embedding_model = embedding_model
-    app.state.chunk_embeddings = chunk_embeddings
+    llm_client = LlamaCppClient(
+        base_url=settings.llm.base_url,
+        model=settings.llm.model,
+        timeout=settings.llm.timeout_seconds,
+    )
+
+    app.state.settings = settings
+    app.state.corpus_index = corpus_index
     app.state.llm_client = llm_client
 
-    print(f"Loaded {len(chunks)} chunks")
+    source_counts = Counter(
+        chunk["source_key"]
+        for chunk in corpus_index.chunks
+    )
+
+    print(
+        f"Loaded {len(corpus_index.chunks)} "
+        f"chunks from {len(source_counts)} sources"
+    )
 
     yield
 
@@ -74,9 +105,22 @@ app = FastAPI(
 
 @app.get("/health")
 def health(request: Request):
+    state = request.app.state
+    index = state.corpus_index
+
+    source_counts = Counter(
+        chunk["source_key"]
+        for chunk in index.chunks
+    )
+
     return {
         "status": "ok",
-        "chunks_loaded": len(request.app.state.chunks),
+        "sources_loaded": len(source_counts),
+        "chunks_loaded": len(index.chunks),
+        "chunks_by_source": dict(source_counts),
+        "embedding_model": (
+            state.settings.models.embedding_model
+        ),
     }
 
 @app.post("/search")
@@ -84,22 +128,30 @@ def search(
     search_request: SearchRequest,
     request: Request,
 ):
-    state = request.app.state
+    index = request.app.state.corpus_index
 
-    results = hybrid_search(
+    results = search_corpus(
         query=search_request.query,
-        chunks=state.chunks,
-        bm25=state.bm25,
-        embedding_model=state.embedding_model,
-        chunk_embeddings=state.chunk_embeddings,
+        index=index,
         top_k=search_request.top_k,
+        source_keys=search_request.source_keys,
+        retrieval_mode=(
+            search_request.retrieval_mode
+        ),
+        top_k_per_source=(
+            search_request.top_k_per_source
+        ),
     )
 
     return {
         "query": search_request.query,
-        "top_k": search_request.top_k,
+        "source_keys": search_request.source_keys,
+        "retrieval_mode": (
+            search_request.retrieval_mode
+        ),
         "results": results,
     }
+
 
 @app.post(
     "/answer",
@@ -111,13 +163,17 @@ def answer(
 ):
     state = request.app.state
 
-    retrieved_chunks = hybrid_search(
+    retrieved_chunks = search_corpus(
         query=answer_request.query,
-        chunks=state.chunks,
-        bm25=state.bm25,
-        embedding_model=state.embedding_model,
-        chunk_embeddings=state.chunk_embeddings,
+        index=state.corpus_index,
         top_k=answer_request.top_k,
+        source_keys=answer_request.source_keys,
+        retrieval_mode=(
+            answer_request.retrieval_mode
+        ),
+        top_k_per_source=(
+            answer_request.top_k_per_source
+        ),
     )
 
     return answer_question(

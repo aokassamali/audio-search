@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Virtual environment
+.venv/
+
+# Secrets and local environment
+.env
+.env.*
+!.env.example
+
+# Dagster temporary state
+.tmp_dagster_home_*/
+.dagster/
+
+# Generated data
+data/cache/
+data/processed/*
+!data/processed/.gitignore
+!data/processed/.gitkeep
+
+# Raw audio inputs
+data/raw/*
+!data/raw/.gitkeep
+
+# Common large audio files anywhere
+*.wav
+*.mp3
+
+# Editor/OS files
+.vscode/
+.DS_Store
+Thumbs.db

@@ -1,30 +1,41 @@
 from pathlib import Path
-from src.transcribe import transcribe_audio
+
 import dagster as dg
 from faster_whisper import WhisperModel
 from pydantic import PrivateAttr
-from src.chunk import chunk_transcript
 from sentence_transformers import SentenceTransformer
 
+from src.chunk import chunk_transcript
+from src.config import (
+    SourceSettings,
+    load_settings,
+)
 from src.search import (
-    EMBEDDING_MODEL_NAME,
     build_dense_index,
     extract_texts,
     load_chunks,
 )
+from src.transcribe import transcribe_audio
 
 
-AUDIO_DIR = Path("data/raw")
-TRANSCRIPT_DIR = Path("data\processed\jsons")
-CHUNKS_DIR = Path("data\processed\chunks")
-EMBEDDING_CACHE_ROOT = Path("data\cache")
+SETTINGS = load_settings()
+
 
 audio_partitions = dg.DynamicPartitionsDefinition(
     name="audio_files"
 )
 
+
+def get_partition_source(
+    context: dg.AssetExecutionContext,
+) -> SourceSettings:
+    return SETTINGS.get_source(
+        context.partition_key
+    )
+
+
 class WhisperResource(dg.ConfigurableResource):
-    model_size: str = "medium"
+    model_size: str
     device: str = "cuda"
     compute_type: str = "int8"
 
@@ -35,7 +46,8 @@ class WhisperResource(dg.ConfigurableResource):
         context: dg.InitResourceContext,
     ) -> None:
         context.log.info(
-            f"Loading Whisper model: {self.model_size}"
+            f"Loading Whisper model: "
+            f"{self.model_size}"
         )
 
         self._model = WhisperModel(
@@ -50,7 +62,7 @@ class WhisperResource(dg.ConfigurableResource):
 
 
 class EmbeddingResource(dg.ConfigurableResource):
-    model_name: str = EMBEDDING_MODEL_NAME
+    model_name: str
 
     _model: SentenceTransformer = PrivateAttr()
 
@@ -59,7 +71,8 @@ class EmbeddingResource(dg.ConfigurableResource):
         context: dg.InitResourceContext,
     ) -> None:
         context.log.info(
-            f"Loading embedding model: {self.model_name}"
+            f"Loading embedding model: "
+            f"{self.model_name}"
         )
 
         self._model = SentenceTransformer(
@@ -77,12 +90,14 @@ class EmbeddingResource(dg.ConfigurableResource):
 def raw_audio(
     context: dg.AssetExecutionContext,
 ) -> str:
-    audio_filename = context.partition_key
-    audio_path = AUDIO_DIR / audio_filename
+    source = get_partition_source(context)
+    audio_path = source.raw_audio_path
 
     context.add_output_metadata(
         {
-            "filename": audio_filename,
+            "source_key": source.key,
+            "source_id": source.source_id,
+            "filename": source.audio_filename,
             "path": str(audio_path),
             "file_exists": audio_path.exists(),
             "size_bytes": (
@@ -104,27 +119,26 @@ def transcript(
     raw_audio: str,
     whisper: WhisperResource,
 ) -> str:
+    source = get_partition_source(context)
     audio_path = Path(raw_audio)
-
-    output_path = (
-        TRANSCRIPT_DIR
-        / f"{audio_path.stem}.json"
-    )
 
     output_path = transcribe_audio(
         audio=audio_path,
-        output_path=output_path,
+        output_path=source.transcript_path,
         model=whisper.model,
     )
 
     context.add_output_metadata(
         {
+            "source_key": source.key,
+            "source_id": source.source_id,
             "path": str(output_path),
             "size_bytes": output_path.stat().st_size,
         }
     )
 
     return str(output_path)
+
 
 @dg.asset(
     partitions_def=audio_partitions,
@@ -133,20 +147,19 @@ def chunks(
     context: dg.AssetExecutionContext,
     transcript: str,
 ) -> str:
+    source = get_partition_source(context)
     transcript_path = Path(transcript)
-
-    output_path = (
-        CHUNKS_DIR
-        / f"{transcript_path.stem}_chunks.json"
-    )
 
     output_path, chunk_count = chunk_transcript(
         transcription=transcript_path,
-        output_path=output_path,
+        output_path=source.chunks_path,
+        source_id=source.source_id,
     )
 
     context.add_output_metadata(
         {
+            "source_key": source.key,
+            "source_id": source.source_id,
             "path": str(output_path),
             "chunk_count": chunk_count,
             "size_bytes": output_path.stat().st_size,
@@ -164,20 +177,18 @@ def embeddings(
     chunks: str,
     embedding: EmbeddingResource,
 ) -> str:
+    source = get_partition_source(context)
+
     chunk_data = load_chunks(chunks)
     texts = extract_texts(chunk_data)
 
-    chunks_path = Path(chunks)
-
-    cache_dir = (
-        EMBEDDING_CACHE_ROOT
-        / chunks_path.stem
-    )
+    cache_dir = source.embedding_cache_dir
 
     _, chunk_embeddings = build_dense_index(
         texts,
         cache_dir=cache_dir,
         embedding_model=embedding.model,
+        model_name=embedding.model_name,
     )
 
     embeddings_path = (
@@ -187,16 +198,21 @@ def embeddings(
 
     context.add_output_metadata(
         {
+            "source_key": source.key,
+            "source_id": source.source_id,
             "path": str(embeddings_path),
             "chunk_count": len(texts),
             "embedding_dimensions": (
                 chunk_embeddings.shape[1]
             ),
-            "size_bytes": embeddings_path.stat().st_size,
+            "size_bytes": (
+                embeddings_path.stat().st_size
+            ),
         }
     )
 
     return str(embeddings_path)
+
 
 defs = dg.Definitions(
     assets=[
@@ -207,12 +223,16 @@ defs = dg.Definitions(
     ],
     resources={
         "whisper": WhisperResource(
-            model_size="medium",
+            model_size=(
+                SETTINGS.models.whisper_model
+            ),
             device="cuda",
             compute_type="int8",
         ),
         "embedding": EmbeddingResource(
-            model_name=EMBEDDING_MODEL_NAME,
+            model_name=(
+                SETTINGS.models.embedding_model
+            ),
         ),
     },
 )
