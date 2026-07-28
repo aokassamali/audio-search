@@ -1,0 +1,78 @@
+{
+  "count": 80,
+  "accuracy": 0.225,
+  "macro_f1": 0.17483196485638064,
+  "majority_baseline_accuracy": 0.475,
+  "per_class": {
+    "assertion": {
+      "precision": 0.34782608695652173,
+      "recall": 0.21052631578947367,
+      "f1-score": 0.26229508196721313,
+      "support": 38.0
+    },
+    "hypothetical": {
+      "precision": 0.034482758620689655,
+      "recall": 0.125,
+      "f1-score": 0.05405405405405406,
+      "support": 8.0
+    },
+    "question": {
+      "precision": 0.42857142857142855,
+      "recall": 0.34615384615384615,
+      "f1-score": 0.3829787234042553,
+      "support": 26.0
+    },
+    "characterization": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1-score": 0.0,
+      "support": 8.0
+    }
+  },
+  "gold_counts": {
+    "assertion": 38,
+    "hypothetical": 8,
+    "question": 26,
+    "characterization": 8
+  },
+  "predicted_counts": {
+    "assertion": 23,
+    "hypothetical": 29,
+    "question": 21,
+    "characterization": 7
+  },
+  "confusion_matrix_labels": [
+    "assertion",
+    "hypothetical",
+    "question",
+    "characterization"
+  ],
+  "confusion_matrix": [
+    [
+      8,
+      18,
+      8,
+      4
+    ],
+    [
+      4,
+      1,
+      2,
+      1
+    ],
+    [
+      9,
+      6,
+      9,
+      2
+    ],
+    [
+      2,
+      4,
+      2,
+      0
+    ]
+  ],
+  "mean_confidence_correct": 0.7886964444360924,
+  "mean_confidence_incorrect": 0.800665245239849
+}

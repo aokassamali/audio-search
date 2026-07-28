@@ -1,0 +1,196 @@
+{
+  "research_question": "Does prosodic information improve register classification beyond lexical cues alone in formal speech?",
+  "null_hypothesis": "Prosodic information does not improve register classification beyond text alone.",
+  "dataset": {
+    "source": "SCOTUS oral argument",
+    "gold_turns": 80,
+    "annotators": 1,
+    "observed_classes": [
+      "assertion",
+      "hypothetical",
+      "question",
+      "characterization"
+    ],
+    "unobserved_classes": [
+      "hyperbole",
+      "joke"
+    ]
+  },
+  "experiment_a": {
+    "text_only": {
+      "permissive": {
+        "accuracy": 0.6625,
+        "macro_f1": 0.6078072196620583
+      },
+      "strict": {
+        "accuracy": 0.7375,
+        "macro_f1": 0.6093499720618365
+      }
+    },
+    "prosody_only": {
+      "full_egemaps": {
+        "accuracy": 0.225,
+        "macro_f1": 0.17483196485638064
+      },
+      "compact_features": {
+        "accuracy": 0.325,
+        "macro_f1": 0.28793159775987687
+      },
+      "majority_accuracy": 0.475
+    },
+    "prompt_injection": {
+      "permissive": {
+        "text_accuracy": 0.6625,
+        "real_prosody_accuracy": 0.6375,
+        "shuffled_prosody_accuracy": 0.6375
+      },
+      "strict": {
+        "text_accuracy": 0.7375,
+        "real_prosody_accuracy": 0.75,
+        "shuffled_prosody_accuracy": 0.7375
+      }
+    },
+    "stacker": {
+      "direct_text": {
+        "accuracy": 0.6625,
+        "macro_f1": 0.6078072196620583,
+        "per_class": {
+          "assertion": {
+            "precision": 0.875,
+            "recall": 0.5526315789473685,
+            "f1-score": 0.6774193548387096,
+            "support": 38.0
+          },
+          "hypothetical": {
+            "precision": 0.3125,
+            "recall": 0.625,
+            "f1-score": 0.4166666666666667,
+            "support": 8.0
+          },
+          "question": {
+            "precision": 0.9130434782608695,
+            "recall": 0.8076923076923077,
+            "f1-score": 0.8571428571428571,
+            "support": 26.0
+          },
+          "characterization": {
+            "precision": 0.35294117647058826,
+            "recall": 0.75,
+            "f1-score": 0.48,
+            "support": 8.0
+          }
+        }
+      },
+      "text_stack": {
+        "accuracy": 0.6875,
+        "macro_f1": 0.6285746635610766,
+        "per_class": {
+          "assertion": {
+            "precision": 0.8846153846153846,
+            "recall": 0.6052631578947368,
+            "f1-score": 0.71875,
+            "support": 38.0
+          },
+          "hypothetical": {
+            "precision": 0.3125,
+            "recall": 0.625,
+            "f1-score": 0.4166666666666667,
+            "support": 8.0
+          },
+          "question": {
+            "precision": 0.9130434782608695,
+            "recall": 0.8076923076923077,
+            "f1-score": 0.8571428571428571,
+            "support": 26.0
+          },
+          "characterization": {
+            "precision": 0.4,
+            "recall": 0.75,
+            "f1-score": 0.5217391304347826,
+            "support": 8.0
+          }
+        }
+      },
+      "text_prosody_stack": {
+        "accuracy": 0.6125,
+        "macro_f1": 0.521780303030303,
+        "per_class": {
+          "assertion": {
+            "precision": 0.8214285714285714,
+            "recall": 0.6052631578947368,
+            "f1-score": 0.696969696969697,
+            "support": 38.0
+          },
+          "hypothetical": {
+            "precision": 0.14285714285714285,
+            "recall": 0.25,
+            "f1-score": 0.18181818181818182,
+            "support": 8.0
+          },
+          "question": {
+            "precision": 0.8636363636363636,
+            "recall": 0.7307692307692307,
+            "f1-score": 0.7916666666666666,
+            "support": 26.0
+          },
+          "characterization": {
+            "precision": 0.3125,
+            "recall": 0.625,
+            "f1-score": 0.4166666666666667,
+            "support": 8.0
+          }
+        }
+      },
+      "prosody_vs_text": {
+        "fixes": 0,
+        "regressions": 6,
+        "net_correct": -6,
+        "prediction_changes": 7,
+        "both_correct": 49,
+        "both_wrong": 25
+      }
+    }
+  },
+  "experiment_b": {
+    "overall_agreement_rate": 0.925,
+    "disagreements": 6,
+    "transitions": {
+      "hypothetical->assertion": 3,
+      "hypothetical->question": 3
+    },
+    "hypothetical_flip_rate": 0.75,
+    "easy_disagreement_rate": 0.0,
+    "hard_disagreement_rate": 0.20689655172413793
+  },
+  "experiment_c": {
+    "text_permissive": {
+      "difficulty_auc": 0.5074374577417174,
+      "easy_mean_confidence": 0.9480392156862745,
+      "hard_mean_confidence": 0.946551724137931
+    },
+    "text_strict": {
+      "difficulty_auc": 0.49763353617309,
+      "easy_mean_confidence": 0.946078431372549,
+      "hard_mean_confidence": 0.946551724137931
+    },
+    "multimodal_permissive": {
+      "difficulty_auc": 0.5189317106152805,
+      "easy_mean_confidence": 0.9498039215686274,
+      "hard_mean_confidence": 0.9475862068965517
+    },
+    "multimodal_strict": {
+      "difficulty_auc": 0.5027045300878972,
+      "easy_mean_confidence": 0.9470588235294117,
+      "hard_mean_confidence": 0.9486206896551723
+    }
+  },
+  "conclusion": "The null hypothesis was not rejected. Within this SCOTUS corpus, matched prosodic features did not improve register classification beyond text. Prosody-only models were weak, real prosody did not meaningfully beat a shuffled-prosody placebo, and adding prosody to the text stacker caused six regressions and zero fixes.",
+  "scope_limit": "This result supports the narrower claim that prosody did not help under this corpus, taxonomy, feature set, modeling approach, and sample size. It does not establish that prosody never helps register classification.",
+  "limitations": [
+    "Only 80 labeled turns from one formal SCOTUS argument.",
+    "Single annotator with no inter-annotator agreement.",
+    "No joke or hyperbole examples appeared in the random gold set.",
+    "Speaker-grouped folds were small and had uneven class balance.",
+    "Only hand-crafted eGeMAPS and compact prosodic features were tested."
+  ]
+}

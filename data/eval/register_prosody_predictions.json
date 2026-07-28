@@ -1,0 +1,1220 @@
+{
+  "schema_version": "1.0",
+  "taxonomy_variant": "permissive",
+  "model": "StandardScaler + balanced L2 logistic regression",
+  "feature_names": [
+    "F0semitoneFrom27.5Hz_sma3nz_amean",
+    "F0semitoneFrom27.5Hz_sma3nz_meanFallingSlope",
+    "F0semitoneFrom27.5Hz_sma3nz_meanRisingSlope",
+    "F0semitoneFrom27.5Hz_sma3nz_pctlrange0-2",
+    "F0semitoneFrom27.5Hz_sma3nz_percentile20.0",
+    "F0semitoneFrom27.5Hz_sma3nz_percentile50.0",
+    "F0semitoneFrom27.5Hz_sma3nz_percentile80.0",
+    "F0semitoneFrom27.5Hz_sma3nz_stddevFallingSlope",
+    "F0semitoneFrom27.5Hz_sma3nz_stddevNorm",
+    "F0semitoneFrom27.5Hz_sma3nz_stddevRisingSlope",
+    "F1amplitudeLogRelF0_sma3nz_amean",
+    "F1amplitudeLogRelF0_sma3nz_stddevNorm",
+    "F1bandwidth_sma3nz_amean",
+    "F1bandwidth_sma3nz_stddevNorm",
+    "F1frequency_sma3nz_amean",
+    "F1frequency_sma3nz_stddevNorm",
+    "F2amplitudeLogRelF0_sma3nz_amean",
+    "F2amplitudeLogRelF0_sma3nz_stddevNorm",
+    "F2bandwidth_sma3nz_amean",
+    "F2bandwidth_sma3nz_stddevNorm",
+    "F2frequency_sma3nz_amean",
+    "F2frequency_sma3nz_stddevNorm",
+    "F3amplitudeLogRelF0_sma3nz_amean",
+    "F3amplitudeLogRelF0_sma3nz_stddevNorm",
+    "F3bandwidth_sma3nz_amean",
+    "F3bandwidth_sma3nz_stddevNorm",
+    "F3frequency_sma3nz_amean",
+    "F3frequency_sma3nz_stddevNorm",
+    "HNRdBACF_sma3nz_amean",
+    "HNRdBACF_sma3nz_stddevNorm",
+    "MeanUnvoicedSegmentLength",
+    "MeanVoicedSegmentLengthSec",
+    "StddevUnvoicedSegmentLength",
+    "StddevVoicedSegmentLengthSec",
+    "VoicedSegmentsPerSec",
+    "alphaRatioUV_sma3nz_amean",
+    "alphaRatioV_sma3nz_amean",
+    "alphaRatioV_sma3nz_stddevNorm",
+    "equivalentSoundLevel_dBp",
+    "hammarbergIndexUV_sma3nz_amean",
+    "hammarbergIndexV_sma3nz_amean",
+    "hammarbergIndexV_sma3nz_stddevNorm",
+    "jitterLocal_sma3nz_amean",
+    "jitterLocal_sma3nz_stddevNorm",
+    "logRelF0-H1-A3_sma3nz_amean",
+    "logRelF0-H1-A3_sma3nz_stddevNorm",
+    "logRelF0-H1-H2_sma3nz_amean",
+    "logRelF0-H1-H2_sma3nz_stddevNorm",
+    "loudnessPeaksPerSec",
+    "loudness_sma3_amean",
+    "loudness_sma3_meanFallingSlope",
+    "loudness_sma3_meanRisingSlope",
+    "loudness_sma3_pctlrange0-2",
+    "loudness_sma3_percentile20.0",
+    "loudness_sma3_percentile50.0",
+    "loudness_sma3_percentile80.0",
+    "loudness_sma3_stddevFallingSlope",
+    "loudness_sma3_stddevNorm",
+    "loudness_sma3_stddevRisingSlope",
+    "mfcc1V_sma3nz_amean",
+    "mfcc1V_sma3nz_stddevNorm",
+    "mfcc1_sma3_amean",
+    "mfcc1_sma3_stddevNorm",
+    "mfcc2V_sma3nz_amean",
+    "mfcc2V_sma3nz_stddevNorm",
+    "mfcc2_sma3_amean",
+    "mfcc2_sma3_stddevNorm",
+    "mfcc3V_sma3nz_amean",
+    "mfcc3V_sma3nz_stddevNorm",
+    "mfcc3_sma3_amean",
+    "mfcc3_sma3_stddevNorm",
+    "mfcc4V_sma3nz_amean",
+    "mfcc4V_sma3nz_stddevNorm",
+    "mfcc4_sma3_amean",
+    "mfcc4_sma3_stddevNorm",
+    "pause_count",
+    "shimmerLocaldB_sma3nz_amean",
+    "shimmerLocaldB_sma3nz_stddevNorm",
+    "silence_proportion",
+    "slopeUV0-500_sma3nz_amean",
+    "slopeUV500-1500_sma3nz_amean",
+    "slopeV0-500_sma3nz_amean",
+    "slopeV0-500_sma3nz_stddevNorm",
+    "slopeV500-1500_sma3nz_amean",
+    "slopeV500-1500_sma3nz_stddevNorm",
+    "speaking_rate_wps",
+    "spectralFluxUV_sma3nz_amean",
+    "spectralFluxV_sma3nz_amean",
+    "spectralFluxV_sma3nz_stddevNorm",
+    "spectralFlux_sma3_amean",
+    "spectralFlux_sma3_stddevNorm"
+  ],
+  "items": [
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0003",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.99349341190035,
+      "probabilities": {
+        "assertion": 0.003876948931331212,
+        "characterization": 0.0012810181401639216,
+        "hypothetical": 0.99349341190035,
+        "question": 0.0013486210281548425
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0004",
+      "speaker": "SPEAKER_10",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.722281449934032,
+      "probabilities": {
+        "assertion": 0.722281449934032,
+        "characterization": 0.0182289524788734,
+        "hypothetical": 3.458816169789996e-06,
+        "question": 0.2594861387709247
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0005",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9173513252315695,
+      "probabilities": {
+        "assertion": 0.0441240635657222,
+        "characterization": 0.028390573834939932,
+        "hypothetical": 0.9173513252315695,
+        "question": 0.010134037367768614
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0006",
+      "speaker": "SPEAKER_10",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.825180868020643,
+      "probabilities": {
+        "assertion": 0.00046592464573168583,
+        "characterization": 0.00047207163418213575,
+        "hypothetical": 0.17388113569944322,
+        "question": 0.825180868020643
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0009",
+      "speaker": "SPEAKER_01",
+      "gold_label": "characterization",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9626130331355869,
+      "probabilities": {
+        "assertion": 0.020948577869446854,
+        "characterization": 0.012644475126453461,
+        "hypothetical": 0.9626130331355869,
+        "question": 0.003793913868512896
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0010",
+      "speaker": "SPEAKER_04",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9655631303711834,
+      "probabilities": {
+        "assertion": 0.03130659941835241,
+        "characterization": 0.0029561446592265605,
+        "hypothetical": 0.00017412555123773256,
+        "question": 0.9655631303711834
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0012",
+      "speaker": "SPEAKER_04",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.8879953481118217,
+      "probabilities": {
+        "assertion": 0.8879953481118217,
+        "characterization": 0.015108729257284825,
+        "hypothetical": 0.004401928301414225,
+        "question": 0.09249399432947934
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0013",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.5668129101511834,
+      "probabilities": {
+        "assertion": 0.010161576926601823,
+        "characterization": 0.41531727662423,
+        "hypothetical": 0.5668129101511834,
+        "question": 0.007708236297984652
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0014",
+      "speaker": "SPEAKER_04",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.5181449261131671,
+      "probabilities": {
+        "assertion": 0.5181449261131671,
+        "characterization": 0.06592693327397334,
+        "hypothetical": 0.006009894336327171,
+        "question": 0.4099182462765324
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0020",
+      "speaker": "SPEAKER_04",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.8373897139911256,
+      "probabilities": {
+        "assertion": 0.8373897139911256,
+        "characterization": 0.16260989107180718,
+        "hypothetical": 1.0132436010299727e-07,
+        "question": 2.936127070919113e-07
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0021",
+      "speaker": "SPEAKER_01",
+      "gold_label": "characterization",
+      "predicted_label": "hypothetical",
+      "confidence": 0.8605411417836809,
+      "probabilities": {
+        "assertion": 0.11449342973097486,
+        "characterization": 0.006287605811288522,
+        "hypothetical": 0.8605411417836809,
+        "question": 0.01867782267405563
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0022",
+      "speaker": "SPEAKER_05",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.6731828251084652,
+      "probabilities": {
+        "assertion": 0.6731828251084652,
+        "characterization": 0.00365432399547905,
+        "hypothetical": 0.00036902258056473105,
+        "question": 0.3227938283154911
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0023",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.4169688115853794,
+      "probabilities": {
+        "assertion": 0.40440504273774586,
+        "characterization": 0.11645929805790062,
+        "hypothetical": 0.4169688115853794,
+        "question": 0.062166847618974196
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0025",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.5000481724381457,
+      "probabilities": {
+        "assertion": 0.12554597410419388,
+        "characterization": 0.15848325762073995,
+        "hypothetical": 0.5000481724381457,
+        "question": 0.21592259583692044
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0027",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.8639735550822626,
+      "probabilities": {
+        "assertion": 0.005560650845037466,
+        "characterization": 0.07923049322212845,
+        "hypothetical": 0.8639735550822626,
+        "question": 0.051235300850571444
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0035",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9878617965739439,
+      "probabilities": {
+        "assertion": 0.0036353765893221202,
+        "characterization": 0.006608648632990898,
+        "hypothetical": 0.9878617965739439,
+        "question": 0.0018941782037433122
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0037",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9840366755041625,
+      "probabilities": {
+        "assertion": 0.0069155549119713,
+        "characterization": 0.0018598748550079595,
+        "hypothetical": 0.9840366755041625,
+        "question": 0.007187894728858193
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0038",
+      "speaker": "SPEAKER_02",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9998534463114759,
+      "probabilities": {
+        "assertion": 6.181747509097928e-06,
+        "characterization": 1.9044253187282364e-06,
+        "hypothetical": 0.00013846751569631112,
+        "question": 0.9998534463114759
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0041",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.821835451188967,
+      "probabilities": {
+        "assertion": 0.04459953929714597,
+        "characterization": 0.06842269693221441,
+        "hypothetical": 0.821835451188967,
+        "question": 0.06514231258167268
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0042",
+      "speaker": "SPEAKER_03",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.6848122623151814,
+      "probabilities": {
+        "assertion": 0.11276389564855932,
+        "characterization": 0.00982139899126819,
+        "hypothetical": 0.19260244304499113,
+        "question": 0.6848122623151814
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0043",
+      "speaker": "SPEAKER_01",
+      "gold_label": "hypothetical",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9663571762916341,
+      "probabilities": {
+        "assertion": 0.006570514367491602,
+        "characterization": 0.022181774130425286,
+        "hypothetical": 0.9663571762916341,
+        "question": 0.004890535210448831
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0044",
+      "speaker": "SPEAKER_03",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.46326462687240805,
+      "probabilities": {
+        "assertion": 0.09356647154991798,
+        "characterization": 0.03112770087415469,
+        "hypothetical": 0.4120412007035193,
+        "question": 0.46326462687240805
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0048",
+      "speaker": "SPEAKER_04",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9319491184881651,
+      "probabilities": {
+        "assertion": 0.06221606557085559,
+        "characterization": 0.005098030963217993,
+        "hypothetical": 0.0007367849777612856,
+        "question": 0.9319491184881651
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0049",
+      "speaker": "SPEAKER_01",
+      "gold_label": "characterization",
+      "predicted_label": "hypothetical",
+      "confidence": 0.8228494482605897,
+      "probabilities": {
+        "assertion": 0.10917712396931885,
+        "characterization": 0.053327056853151006,
+        "hypothetical": 0.8228494482605897,
+        "question": 0.014646370916940463
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0053",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.8416687603746437,
+      "probabilities": {
+        "assertion": 0.016310132239106837,
+        "characterization": 0.13198811962574009,
+        "hypothetical": 0.8416687603746437,
+        "question": 0.010032987760509504
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0056",
+      "speaker": "SPEAKER_00",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.6815435092025349,
+      "probabilities": {
+        "assertion": 0.6815435092025349,
+        "characterization": 0.0801208759993062,
+        "hypothetical": 4.7989633173375375e-05,
+        "question": 0.2382876251649854
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0058",
+      "speaker": "SPEAKER_00",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.6103195680388551,
+      "probabilities": {
+        "assertion": 0.6103195680388551,
+        "characterization": 0.0011994335497612666,
+        "hypothetical": 0.004001993591892295,
+        "question": 0.38447900481949127
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0062",
+      "speaker": "SPEAKER_02",
+      "gold_label": "characterization",
+      "predicted_label": "question",
+      "confidence": 0.987576233456956,
+      "probabilities": {
+        "assertion": 0.001386326355684205,
+        "characterization": 6.812473179561804e-05,
+        "hypothetical": 0.010969315455564194,
+        "question": 0.987576233456956
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0063",
+      "speaker": "SPEAKER_01",
+      "gold_label": "characterization",
+      "predicted_label": "hypothetical",
+      "confidence": 0.8432719519476802,
+      "probabilities": {
+        "assertion": 0.021606623694529672,
+        "characterization": 0.06894965602957046,
+        "hypothetical": 0.8432719519476802,
+        "question": 0.06617176832821957
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0066",
+      "speaker": "SPEAKER_05",
+      "gold_label": "hypothetical",
+      "predicted_label": "assertion",
+      "confidence": 0.9744604840863901,
+      "probabilities": {
+        "assertion": 0.9744604840863901,
+        "characterization": 0.00011413940941349097,
+        "hypothetical": 3.1965339638313547e-06,
+        "question": 0.02542217997023256
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0067",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.5142802084739087,
+      "probabilities": {
+        "assertion": 0.13612957258258465,
+        "characterization": 0.01893156633024043,
+        "hypothetical": 0.33065865261326627,
+        "question": 0.5142802084739087
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0072",
+      "speaker": "SPEAKER_05",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9953698796996889,
+      "probabilities": {
+        "assertion": 0.9953698796996889,
+        "characterization": 5.081283441022755e-06,
+        "hypothetical": 7.109540489277193e-05,
+        "question": 0.004553943611977327
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0074",
+      "speaker": "SPEAKER_05",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.721190578773799,
+      "probabilities": {
+        "assertion": 0.721190578773799,
+        "characterization": 0.017413048631903644,
+        "hypothetical": 0.03884931860945678,
+        "question": 0.22254705398484068
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0075",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.6700978347509183,
+      "probabilities": {
+        "assertion": 0.11748284808052327,
+        "characterization": 0.6700978347509183,
+        "hypothetical": 0.18059318729046153,
+        "question": 0.03182612987809702
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0078",
+      "speaker": "SPEAKER_05",
+      "gold_label": "hypothetical",
+      "predicted_label": "assertion",
+      "confidence": 0.5417896086116268,
+      "probabilities": {
+        "assertion": 0.5417896086116268,
+        "characterization": 0.01623368517021815,
+        "hypothetical": 0.0032140566789690744,
+        "question": 0.4387626495391858
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0079",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.48293525382103086,
+      "probabilities": {
+        "assertion": 0.4799766413744018,
+        "characterization": 0.025009924550787713,
+        "hypothetical": 0.48293525382103086,
+        "question": 0.012078180253779552
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0080",
+      "speaker": "SPEAKER_05",
+      "gold_label": "question",
+      "predicted_label": "characterization",
+      "confidence": 0.413579632857804,
+      "probabilities": {
+        "assertion": 0.3041888105720344,
+        "characterization": 0.413579632857804,
+        "hypothetical": 0.060200521164721896,
+        "question": 0.22203103540543978
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0081",
+      "speaker": "SPEAKER_08",
+      "gold_label": "question",
+      "predicted_label": "hypothetical",
+      "confidence": 0.6966399893013978,
+      "probabilities": {
+        "assertion": 0.03517032734975401,
+        "characterization": 0.056662279036221994,
+        "hypothetical": 0.6966399893013978,
+        "question": 0.2115274043126263
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0085",
+      "speaker": "SPEAKER_06",
+      "gold_label": "question",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9999999997589535,
+      "probabilities": {
+        "assertion": 2.092618595931668e-12,
+        "characterization": 2.2167930810202933e-10,
+        "hypothetical": 0.9999999997589535,
+        "question": 1.727459209393325e-11
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0086",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9990045208091508,
+      "probabilities": {
+        "assertion": 0.0005051768132258044,
+        "characterization": 0.0004310499029051487,
+        "hypothetical": 0.9990045208091508,
+        "question": 5.9252474718268684e-05
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0089",
+      "speaker": "SPEAKER_06",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9987108816829515,
+      "probabilities": {
+        "assertion": 0.9987108816829515,
+        "characterization": 4.379319906442e-07,
+        "hypothetical": 0.0012883258439373513,
+        "question": 3.545411202778413e-07
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0091",
+      "speaker": "SPEAKER_00",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.6024595939966862,
+      "probabilities": {
+        "assertion": 0.3931082129894031,
+        "characterization": 0.0011630683347374426,
+        "hypothetical": 0.0032691246791732194,
+        "question": 0.6024595939966862
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0092",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.8442047659451843,
+      "probabilities": {
+        "assertion": 0.00602717357425506,
+        "characterization": 0.1461568276626847,
+        "hypothetical": 0.8442047659451843,
+        "question": 0.003611232817875795
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0093",
+      "speaker": "SPEAKER_00",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.7785094971925164,
+      "probabilities": {
+        "assertion": 0.22149049991484865,
+        "characterization": 0.7785094971925164,
+        "hypothetical": 1.056015756055533e-12,
+        "question": 2.8915788473307834e-09
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0098",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9397116944747559,
+      "probabilities": {
+        "assertion": 0.03246641621224235,
+        "characterization": 0.007567676016612457,
+        "hypothetical": 0.9397116944747559,
+        "question": 0.020254213296389295
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0101",
+      "speaker": "SPEAKER_04",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9691808803092391,
+      "probabilities": {
+        "assertion": 0.9691808803092391,
+        "characterization": 0.024869137718202577,
+        "hypothetical": 2.640389026828693e-05,
+        "question": 0.0059235780822900225
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0106",
+      "speaker": "SPEAKER_10",
+      "gold_label": "hypothetical",
+      "predicted_label": "question",
+      "confidence": 0.6576209259786546,
+      "probabilities": {
+        "assertion": 0.3278105163553289,
+        "characterization": 0.014558444070217936,
+        "hypothetical": 1.0113595798525275e-05,
+        "question": 0.6576209259786546
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0110",
+      "speaker": "SPEAKER_09",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.7949457724853505,
+      "probabilities": {
+        "assertion": 0.7949457724853505,
+        "characterization": 9.490271209313186e-07,
+        "hypothetical": 0.20429842343874838,
+        "question": 0.0007548550487802325
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0111",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9785323511272989,
+      "probabilities": {
+        "assertion": 0.9785323511272989,
+        "characterization": 0.0212894663734455,
+        "hypothetical": 2.656181178089203e-05,
+        "question": 0.0001516206874749901
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0113",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9998654688093933,
+      "probabilities": {
+        "assertion": 0.00013440688793148027,
+        "characterization": 1.0473645119875957e-11,
+        "hypothetical": 0.9998654688093933,
+        "question": 1.2429220151576233e-07
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0114",
+      "speaker": "SPEAKER_09",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9993314215010868,
+      "probabilities": {
+        "assertion": 0.0006357917608194642,
+        "characterization": 2.9711382886814336e-08,
+        "hypothetical": 3.275702671093674e-05,
+        "question": 0.9993314215010868
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0116",
+      "speaker": "SPEAKER_08",
+      "gold_label": "question",
+      "predicted_label": "hypothetical",
+      "confidence": 0.7883050239386423,
+      "probabilities": {
+        "assertion": 0.0426852390434064,
+        "characterization": 0.1260724851569666,
+        "hypothetical": 0.7883050239386423,
+        "question": 0.04293725186098473
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0117",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.9533978327345345,
+      "probabilities": {
+        "assertion": 0.009193213824173355,
+        "characterization": 0.9533978327345345,
+        "hypothetical": 0.000536871111396737,
+        "question": 0.036872082329895334
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0121",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.5217149419998881,
+      "probabilities": {
+        "assertion": 0.5217149419998881,
+        "characterization": 0.2976580518388231,
+        "hypothetical": 0.00019082626567196656,
+        "question": 0.18043617989561678
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0122",
+      "speaker": "SPEAKER_08",
+      "gold_label": "question",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9651168413641567,
+      "probabilities": {
+        "assertion": 0.01074601019426517,
+        "characterization": 0.015572966771557058,
+        "hypothetical": 0.9651168413641567,
+        "question": 0.008564181670021
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0124",
+      "speaker": "SPEAKER_08",
+      "gold_label": "hypothetical",
+      "predicted_label": "question",
+      "confidence": 0.6473709123566213,
+      "probabilities": {
+        "assertion": 0.2831663013787397,
+        "characterization": 0.011901648164692955,
+        "hypothetical": 0.05756113809994607,
+        "question": 0.6473709123566213
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0125",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8979494180144605,
+      "probabilities": {
+        "assertion": 0.8979494180144605,
+        "characterization": 0.06857312323083581,
+        "hypothetical": 0.0015785242128719657,
+        "question": 0.03189893454183165
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0127",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.5698019454305094,
+      "probabilities": {
+        "assertion": 0.3929287147122862,
+        "characterization": 0.0010456699575070775,
+        "hypothetical": 0.5698019454305094,
+        "question": 0.03622366989969726
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0128",
+      "speaker": "SPEAKER_08",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.9870389710119285,
+      "probabilities": {
+        "assertion": 0.004820750502462656,
+        "characterization": 0.9870389710119285,
+        "hypothetical": 0.0002939138014976289,
+        "question": 0.007846364684111254
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0129",
+      "speaker": "SPEAKER_07",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.7474874143534128,
+      "probabilities": {
+        "assertion": 0.7474874143534128,
+        "characterization": 0.060512220194236355,
+        "hypothetical": 0.012110438716148827,
+        "question": 0.1798899267362021
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0132",
+      "speaker": "SPEAKER_08",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.5639365375509034,
+      "probabilities": {
+        "assertion": 0.3131414342504434,
+        "characterization": 0.12278512081606835,
+        "hypothetical": 0.00013690738258482517,
+        "question": 0.5639365375509034
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0137",
+      "speaker": "SPEAKER_07",
+      "gold_label": "hypothetical",
+      "predicted_label": "characterization",
+      "confidence": 0.8584521112993561,
+      "probabilities": {
+        "assertion": 0.03121367128816503,
+        "characterization": 0.8584521112993561,
+        "hypothetical": 0.0006814200971001011,
+        "question": 0.10965279731537875
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0138",
+      "speaker": "SPEAKER_00",
+      "gold_label": "hypothetical",
+      "predicted_label": "assertion",
+      "confidence": 0.6888344356010638,
+      "probabilities": {
+        "assertion": 0.6888344356010638,
+        "characterization": 0.021788279262389503,
+        "hypothetical": 0.0012865875718685016,
+        "question": 0.2880906975646781
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0139",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.6640445241974251,
+      "probabilities": {
+        "assertion": 0.6640445241974251,
+        "characterization": 0.25322047159503086,
+        "hypothetical": 0.0009470467369273661,
+        "question": 0.0817879574706166
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0143",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9996699385992182,
+      "probabilities": {
+        "assertion": 0.00033006139000746684,
+        "characterization": 4.993179578748822e-16,
+        "hypothetical": 0.9996699385992182,
+        "question": 1.0773909925394154e-11
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0144",
+      "speaker": "SPEAKER_08",
+      "gold_label": "question",
+      "predicted_label": "characterization",
+      "confidence": 0.6931917394659193,
+      "probabilities": {
+        "assertion": 0.032874100423310036,
+        "characterization": 0.6931917394659193,
+        "hypothetical": 0.2663719766432152,
+        "question": 0.007562183467555394
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0146",
+      "speaker": "SPEAKER_04",
+      "gold_label": "hypothetical",
+      "predicted_label": "assertion",
+      "confidence": 0.94151518902736,
+      "probabilities": {
+        "assertion": 0.94151518902736,
+        "characterization": 0.023569409795214713,
+        "hypothetical": 2.69222501949851e-05,
+        "question": 0.03488847892723029
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0147",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.807636019796813,
+      "probabilities": {
+        "assertion": 0.13368179069972277,
+        "characterization": 0.05823233755168487,
+        "hypothetical": 0.00044985195177932064,
+        "question": 0.807636019796813
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0149",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.5752311269266284,
+      "probabilities": {
+        "assertion": 0.05992855573628061,
+        "characterization": 0.36002313279887344,
+        "hypothetical": 0.00481718453821755,
+        "question": 0.5752311269266284
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0150",
+      "speaker": "SPEAKER_04",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9232258905510553,
+      "probabilities": {
+        "assertion": 0.9232258905510553,
+        "characterization": 0.07598297415830085,
+        "hypothetical": 0.00011789160318041667,
+        "question": 0.0006732436874635483
+      },
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0152",
+      "speaker": "SPEAKER_08",
+      "gold_label": "question",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9017710515179581,
+      "probabilities": {
+        "assertion": 0.01414197141070672,
+        "characterization": 0.07547100316707288,
+        "hypothetical": 0.9017710515179581,
+        "question": 0.008615973904262341
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0154",
+      "speaker": "SPEAKER_03",
+      "gold_label": "question",
+      "predicted_label": "hypothetical",
+      "confidence": 0.7312400419648935,
+      "probabilities": {
+        "assertion": 0.109111019962462,
+        "characterization": 0.021801541083954133,
+        "hypothetical": 0.7312400419648935,
+        "question": 0.1378473969886903
+      },
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0158",
+      "speaker": "SPEAKER_05",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9412388899593245,
+      "probabilities": {
+        "assertion": 0.9412388899593245,
+        "characterization": 0.0007894689805030181,
+        "hypothetical": 4.1769011596739995e-07,
+        "question": 0.05797122337005637
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0161",
+      "speaker": "SPEAKER_07",
+      "gold_label": "characterization",
+      "predicted_label": "question",
+      "confidence": 0.9431008994135138,
+      "probabilities": {
+        "assertion": 9.177781597389793e-05,
+        "characterization": 0.056797487717586845,
+        "hypothetical": 9.83505292552115e-06,
+        "question": 0.9431008994135138
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0163",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.6040844939242606,
+      "probabilities": {
+        "assertion": 0.004952758804695395,
+        "characterization": 0.38920442261981597,
+        "hypothetical": 0.0017583246512281809,
+        "question": 0.6040844939242606
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0164",
+      "speaker": "SPEAKER_05",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.8140061847579221,
+      "probabilities": {
+        "assertion": 0.18582875322353395,
+        "characterization": 0.00016452135565484712,
+        "hypothetical": 5.40662889174635e-07,
+        "question": 0.8140061847579221
+      },
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0165",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.49525917578958256,
+      "probabilities": {
+        "assertion": 0.05081994503582334,
+        "characterization": 0.45029477242238153,
+        "hypothetical": 0.0036261067522125718,
+        "question": 0.49525917578958256
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0167",
+      "speaker": "SPEAKER_07",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9028247294878503,
+      "probabilities": {
+        "assertion": 0.0763070331952866,
+        "characterization": 0.01891539070806971,
+        "hypothetical": 0.0019528466087934816,
+        "question": 0.9028247294878503
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0168",
+      "speaker": "SPEAKER_09",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9993824854533064,
+      "probabilities": {
+        "assertion": 6.311844051049018e-10,
+        "characterization": 0.0006175109628679027,
+        "hypothetical": 2.9526412364359265e-09,
+        "question": 0.9993824854533064
+      },
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0169",
+      "speaker": "SPEAKER_01",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9997905459982181,
+      "probabilities": {
+        "assertion": 0.0001976215145815439,
+        "characterization": 9.911304949532564e-06,
+        "hypothetical": 0.9997905459982181,
+        "question": 1.9211822507607407e-06
+      },
+      "fold": 1
+    }
+  ]
+}

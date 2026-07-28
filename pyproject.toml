@@ -9,6 +9,7 @@ dependencies = [
     "faster-whisper==1.2.1",
     "httpx>=0.28.1",
     "numpy==2.4.6",
+    "opensmile>=2.6.0",
     "pyannote-audio>=4.0.7",
     "pydantic==2.13.4",
     "rank-bm25==0.2.2",

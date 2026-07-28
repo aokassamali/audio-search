@@ -1,0 +1,1448 @@
+{
+  "schema_version": "1.0",
+  "model": "local",
+  "shuffle_seed": 23,
+  "shuffle_method": "within-speaker derangement",
+  "items": [
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0003",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0075",
+      "text": "I think there's an important distinction. Disgorgement is about identifying an asset before the court that rightfully belongs to someone else. Damages are seeking to make an injured party whole. So in some cases...",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0003",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0003",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0004",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0106",
+      "text": "Aren't you... I thought you were pegging your argument to the existence of an injured party.",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0004",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0004",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0005",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0025",
+      "text": "Oh, we certainly are, Your Honor. But you need some party with a right or entitlement to the proceed, to the asset before the court, in order for disgorgement to have a compensatory function. Now, it is possible that in some cases, disgorgement and damages will overlap. But there are obviously important distinctions, including that disgorgement is capped by net proceeds. And again, if an injured party is only entitled to part of the asset before the court, then disgorgement is limited to that part of the asset. If you go beyond that, you cross the line into a penalty and a windfall.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0005",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0005",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0006",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0004",
+      "text": "Well, let's take a step back. You seem to rely quite a bit on Lue, right? That's right. The world has changed in this area since Lue. And disgorgement is now in, what, Section 7? That's correct. And it has a different statute of limitations. And do you think it's still an equitable remedy? Oh, absolutely, Your Honor. It's not in the equitable section, which is Section 5, right?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0006",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0006",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0009",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0079",
+      "text": "Well, you're not necessarily wrong. But in light of the court's reading in Lue, it said disgorgement is an equitable remedy. And Lue is very clear about what Congress needed to do if it wanted to expand disgorgement beyond its traditional bounds, as identified in Lue. And it said that if a statute only takes the word disgorgement, that does not expand the traditional bounds of the equitable remedy. Yet, that's exactly what Congress did here.",
+      "gold_permissive": "characterization",
+      "gold_strict": "characterization",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0009",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0009",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0010",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0101",
+      "text": "Can we talk about the traditional bounds, though, because I didn't see any case that you're pointing to that suggests that pecuniary harm was a requirement traditionally. So can you help us to understand where that's coming from?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0010",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0010",
+        "label": "question",
+        "confidence": 0.98
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0012",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0150",
+      "text": "I understand, but in Lue, didn't we leave open the question at issue here? I mean, didn't we say that the parties have not identified authorities revealing the traditional equitable principles, what traditional equitable principles govern? For instance, the wrongdoers' profits cannot, when the wrongdoers' profits cannot practically be dispersed to the victims. In other words, in a situation in which you have disgorged the profits, but it is impracticable or infeasible to give them to the victims, we left open whether or not disgorgement was still available under those circumstances. So why doesn't that cut against your view that traditionally there would be no disgorgement available?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0012",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0012",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0013",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0063",
+      "text": "Your Honor, the language addressing feasibility is addressing a very limited exception, where there happens to be, for some reason, we can't get money to the right parties. No, I understand.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0013",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0013",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0014",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0048",
+      "text": "But your argument is that there is no disgorgement in a situation in which there has been no harm to the parties, to the victim. And I appreciate that you say this is a different circumstance. It's where there's been harm, but somehow it's infeasible to get the money back to them. But it does seem to me to cut against your view when here we've left open whether or not disgorgement is available in a situation in which the money is not returnable or can't be returned to any victims, or maybe when there is no victim in any meaningful sense.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0014",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0014",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0020",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0014",
+      "text": "that was never his. Why is that a punishment?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0020",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0020",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0021",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0169",
+      "text": "It's a punishment because the purpose is to deprive and the purpose is to deter. And the court was very clear, both in lieu and in jocacy, that if the purpose isn't remedial, if the purpose isn't to restore funds to the proper owner, to the wronged party, then, in fact, it does cross that line into a penalty.",
+      "gold_permissive": "characterization",
+      "gold_strict": "characterization",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0021",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0021",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0022",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0072",
+      "text": "Mr. Geiser, I'm a little bit confused by your argument, okay, on lots of levels. But let's start with the first. At one point in your brief, you agree that disgorgement should be measured by the defendant's wrongful profits rather than the victim's losses. Do you agree with that?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0022",
+        "label": "question",
+        "confidence": 0.98
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0022",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0023",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0067",
+      "text": "We agree that that is part of the equation, Your Honor.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0023",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0023",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0025",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0009",
+      "text": "We're not debating that they had a legal right invaded. We are debating that they have a right to the proceeds in question.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0025",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0025",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0027",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0037",
+      "text": "I don't think that's quite right, Your Honor. When you're entitled to lost profits is when there is some legal right or entitlement that gives access not just to the property but to the proceeds from the property.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0027",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0027",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0035",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0021",
+      "text": "No, Your Honor, not in this context. And again, remember the context. This is the SEC who's a stranger to the transaction who has the option while they're enforcing the security laws, and they can seek penalties where they can get full gross proceeds from the wrongdoer, if at the same time they want to try to compensate the victim, then they can seek disgorgement. If they think it's difficult to add up those losses and to figure that out, one, seek civil penalties.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0035",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0035",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0037",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0049",
+      "text": "Your Honor, I will say what the court said in lieu, which is you have to provide fair compensation to the person wronged. Fair compensation doesn't mean a windfall. It doesn't mean exceeding the amount of right that the person has to the proceeds. This is a compensatory remedy. It's about restoring the status quo, and it's about not providing windfalls. I'm sorry. Finish what you're saying.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0037",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0037",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0038",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0062",
+      "text": "Please. Well, putting aside the question whether after Congress's most recent enactment, disgorgement under that provision has to be equitable, let's assume that it still has to be equitable, there were forms of equitable disgorgement, right, including an accounting for profits. And you say that under such a claim, the victim has, quote, an underlying substantive entitlement to the profits. So why doesn't the SEC have a substantive entitlement to the profits after the enactment of the current statute?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0038",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0038",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0041",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0086",
+      "text": "There were legal forms of disgorgement, were there not? I don't believe so, Your Honor. Disgorgement, as Liu explained, by its very core is an equitable remedy. So I don't think you can say that, in fact, that this is now a second form of punishment. And if you do read the statute that way, then, again, you're collapsing the distinction between penalties and disgorgement, even though Congress delineated between those two things. Under our reading, each has a separate function.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0041",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0041",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0042",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0044",
+      "text": "If I could just interrupt you, I just want to make sure I understand it, and this goes back to Justice Thomas's first question. You're saying that there is no situation in which disgorgement is appropriate where compensatory damages would not also be appropriate. Is that right, that disgorgement can never go above compensatory damages?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0042",
+        "label": "question",
+        "confidence": 0.98
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0042",
+        "label": "question",
+        "confidence": 0.98
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0043",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0041",
+      "text": "No, Your Honor, and I do want to be clear about this. There are some situations where, by the nature of the way damages are calculated, an injured party could be better off by seeking the net profits, the net proceeds, instead of seeking a damages remedy. But the two overlap.",
+      "gold_permissive": "hypothetical",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0043",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0043",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0044",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0154",
+      "text": "Well, tell me where we're talking about, because the only thing I've heard from you is situations in which disgorgement doesn't come up to the level of compensatory damages. But how could disgorgement, in your view, go over the level of compensatory damages?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0044",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0044",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0048",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0020",
+      "text": "But what about the fact that the compensatory language and the focus of Lew with respect to compensatory seemed rooted in the language of D5, that at the time, Justice Thomas mentions this, that D5 was the only thing on the books. And we say in Lew that this is really about the, quote, appropriate or necessary for the benefit of investors' language, which appears in D5, but not in D7.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0048",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0048",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0049",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0053",
+      "text": "Exactly, Erna. That comes in part three of the opinion. And if part three were the only part of the opinion, I think this would be a harder case for us. In part two, the court is focused exclusively on traditional equitable rules. It has nothing to do with the language of D5. And even when the court did get to D5 in part three, it stressed if you look at page 90, it said it applies both because of the specific language of D5 and traditional equitable constraints.",
+      "gold_permissive": "characterization",
+      "gold_strict": "characterization",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0049",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0049",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0053",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0013",
+      "text": "Well, I think we can win in any of three independent paths. First, if we want to re-litigate first principles about what disgorgement means and how it functions as an equitable remedy, I think we can win on that. I think if you read Lew our way and then you understand that Congress ratified Lew, which I think is the only plausible way to understand what Congress did when it takes a term this Court just defined, I think it's taking this Court's understanding of that term, not some scattershot body of district of circuit law.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0053",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0053",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0056",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0091",
+      "text": "We read it to have a remedial function. But penalties don't have to be limited to net proceeds or gross proceeds. I mean, penalties could be entirely detached from that.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0056",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0056",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0058",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0056",
+      "text": "Okay, last question. The Ninth Circuit said that your victims or your client's victims had suffered a violation of their legal interests. You agree?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0058",
+        "label": "question",
+        "confidence": 0.98
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0058",
+        "label": "question",
+        "confidence": 0.98
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0062",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0038",
+      "text": "Wasn't the aim of the scheme that your client admitted when the consent decree, when he agreed to the consent decree, to obtain from the people who bought the artificially pumped up stocks money that they owned? In other words, didn't he aim to obtain money from... Weren't those people... Wasn't it his intent to make them victims?",
+      "gold_permissive": "characterization",
+      "gold_strict": "characterization",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0062",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0062",
+        "label": "question",
+        "confidence": 0.98
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0063",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0043",
+      "text": "Your Honor, I don't know if that was his intent or not. What I do know... Well, it's inherent in the scheme, is it not? But you still need to have an actual injury to see compensation, which is why if those investors, if an uninjured investor, even if a wrongdoer says, I'm going to target you and I'm going to try to get your money. I'm going to try to trick you into buying the stock. If the stock price goes up and it never drops, they don't have any injury. So Congress made the determination that those investors are not entitled to recovery. The very recovery that the SEC says as a windfall, they are entitled to recovery.",
+      "gold_permissive": "characterization",
+      "gold_strict": "characterization",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0063",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0063",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0066",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0080",
+      "text": "I know you think you can win on three grounds, and I don't want you to panic, but assuming you were to lose, there's two grounds. One would be that discouragement as an equitable remedy never required proof of pecuniary loss, and there's certainly quite a bit, besides Restatement 3, quite a bit of treatises and cases that support that conclusion. Or we could say that 78UD7 has taken out and doesn't require pecuniary loss because it's setting forth just compensable, legal invasion of a legal right. Which of the two would you prefer to win on? Or lose on, I'm sorry.",
+      "gold_permissive": "hypothetical",
+      "gold_strict": "hypothetical",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0066",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0066",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0067",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0092",
+      "text": "Well, I would prefer to win on any of our three grounds. No, no. But if we lose, we lose, Your Honor. I think you can write the opinion however you'd like.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0067",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0067",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0072",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0158",
+      "text": "So why did we bother analyzing that? Why did I bother analyzing that language in Lew? Why so much emphasis by me in Lew on the importance of that language to our determination?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0072",
+        "label": "question",
+        "confidence": 0.98
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0072",
+        "label": "question",
+        "confidence": 0.98
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0074",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0066",
+      "text": "Thank you, Counselor, so you don't care which way.",
+      "gold_permissive": "characterization",
+      "gold_strict": "characterization",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0074",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0074",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0075",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0035",
+      "text": "Well, I care a little. Is that your bottom line? Well, what we're trying to do is have us both construe the common law correctly and to be very clear, too, because I do want to...",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0075",
+        "label": "characterization",
+        "confidence": 0.85
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0075",
+        "label": "characterization",
+        "confidence": 0.85
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0078",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0164",
+      "text": "That's assuming that 78 UD doesn't give them... D7 doesn't give them that legal entitlement.",
+      "gold_permissive": "hypothetical",
+      "gold_strict": "hypothetical",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0078",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0078",
+        "label": "hypothetical",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0079",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0027",
+      "text": "If it gives a legal entitlement that changes and redefines the core definition at its irreducible core of what disgorgement is by simply using the word disgorgement, then I think Congress is going to be very confused on how to write statutes going forward. Okay.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0079",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0079",
+        "label": "hypothetical",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0080",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0078",
+      "text": "You still didn't give me an answer, but thank you. Justice Kagan? Justice Gorsuch?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0080",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0080",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0081",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0152",
+      "text": "Just to follow up on that briefly, Mr. Geiser, is it fair to assume that Congress legislates against the backdrop of the common law? I think so, Your Honor. And is it fair when it uses a word like disgorgement that we just used in lieu, do we usually assume that Congress understands what we've just done?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0081",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0081",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0085",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0089",
+      "text": "On your first principal's argument, do you want to respond to the amicus brief of the professors, Laycock and others, on that succinctly? Because they say you're really quite wrong about the first principles.",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0085",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0085",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0086",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0023",
+      "text": "Well, I'll try to respond as succinctly as possible. I think the first point is that they say when you're trying to restore the status quo, you're looking solely at taking the funds away from the wrongdoer. And Lou made clear that there's that countervailing principle that you have to provide fair compensation to the person wronged. And I think it doesn't make much sense to say you're restoring the status quo by taking money here and giving a windfall somewhere else. That's not leaving things the way they were. That's fundamentally shifting how this looks. And if you don't like my reading of Lou, hopefully you'll like my reading of Jarkusy, where Jarkusy was very clear on pages 123 and 124 that an equitable remedy, and scourgement is an equitable remedy, the scholars in their brief agree with this, involves restoring the victim. It's about returning assets to the injured party. And you don't restore the status quo unless you're giving that money back to the person who's been injured. So I think that the scholars' brief is fundamentally incompatible with what this court wrote in unequivocal language in Jarkusy. I also think that ultimately we agree with the outcome of every case they cite. The real disagreement between us and the scholars' brief is one of pure semantics. When I look at, if I put that $100 in a bank account and the bank gives me back my principal without any diminution of value, I get every dollar but I don't get the interest that I'm owed, I look at that as an economic loss. Now the scholars would say, oh, that's not an economic loss, that's something else. We both agree that if you have a legal entitlement to the asset, then you get it through disgorgement. You can disgorge the asset to the extent that an injured party has a right to that asset. And we're just disagreeing with what we're calling that sort of missing profit. But that doesn't change the analysis, it just changes the terminology.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0086",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0086",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0089",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0085",
+      "text": "Last, do you want to say anything about Seventh Amendment implications of the government's position, if any?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0089",
+        "label": "question",
+        "confidence": 0.98
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0089",
+        "label": "question",
+        "confidence": 0.98
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0091",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0058",
+      "text": "Justice Barrett. Why does that look like a penalty? If all you're taking away is the ill-gotten gains, so they're the proceeds that the wrongdoer isn't entitled to in the first place, as opposed to being entirely punitive because it's going above and beyond, why would that necessarily be a penalty?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0091",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0091",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0092",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0098",
+      "text": "Anything is a penalty if the point is to take it away from you. We're making a judgment that you weren't entitled to this and we're taking it from you. What makes it remedial is you're giving it to the right party. But that means there has to be a right party to give it to. There has to be some party with a right to it. Again, look to Lew, and if you don't like Lew... I like Lew. Okay. I'm sure Justice Sotomayor will appreciate that.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0092",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0092",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0093",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0138",
+      "text": "I don't necessarily like your reading of Lew,",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0093",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0093",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0098",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0005",
+      "text": "Let me try it this way. I think that it's a very traditional principle going back centuries, if not longer, millennia. We cite a Roman case in our brief is that equity doesn't serve punitive functions. The role of equity is not to penalize...",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0098",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0098",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0101",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0010",
+      "text": "And this is... my time is short. How does finding the claimant and identifying their loss help us to know whether or not it was unjust enrichment from the standpoint of the equitable determination that this defendant should not be allowed to retain this amount of money?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0101",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0101",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0106",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0006",
+      "text": "Wouldn't you have a cleaner argument if you would accept the notion that this is a legal remedy?",
+      "gold_permissive": "hypothetical",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0106",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0106",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0110",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0168",
+      "text": "Counsel, several times in his opening brief, your friend looked at our recent case in Jarkosee, and we heard it cited several times this morning. You don't cite it at all in your brief. Do you want to talk about why it's not relevant at all here?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0110",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0110",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0111",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0139",
+      "text": "I mean, I think the reason we didn't regard it as relevant was that Jarkosee was focused on under what circumstances would the SEC impose monetary remedies in its own administrative proceedings? And here the question is, what can the SEC get when it sues in court? And so the SEC kind of has to go before an Article III court. We have to persuade whoever the finder of fact is that there is liability. The court itself will determine the disgorgement amount. It won't be reviewing our assessment of disgorgement under a deferential standard, so it's not really the same question that was presented in Jarkosee.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0111",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0111",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0113",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0163",
+      "text": "I mean, if that's his argument, I don't think it's right because the whole rationale for the court striking down what was done in Jarkosee was that it had been done in an administrative tribunal without a jury rather than by a court. No, no, I mean not for the jury question,",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0113",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0113",
+        "label": "characterization",
+        "confidence": 0.85
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0114",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0110",
+      "text": "but more in terms of how the sanction, the disgorgement or anything else, would be treated.",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0114",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0114",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0116",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0122",
+      "text": "Mr. Stewart, just to follow up on the Chief Justice's questions, yes, Jarkosee concerned administrative proceedings, but it also concerned the Seventh Amendment. And so the question, I think, the Chief is trying to aim at is, okay, you've got this D-7 remedy, but when might it trigger a jury trial, right, rather than remain before the judge in equity? And I just want to make sure I understand a few things. One, you agree that D-7 is for net profits only, right?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0116",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0116",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0117",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0113",
+      "text": "Yes, and I think that's made clear in D-3A. Looking at D-7 by itself, you couldn't tell me.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0117",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0117",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0121",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0111",
+      "text": "We would say yes, but there are... I think it's...",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0121",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0121",
+        "label": "assertion",
+        "confidence": 0.85
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0122",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0132",
+      "text": "Yes, you can keep it in equity before a judge without a jury and make no effort to send the money back to investors.",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0122",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0122",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0124",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0144",
+      "text": "Okay, let's say that's wrong, okay? Let's say the equitable remedy was all about restoring investors. Let's say we think that. Then what?",
+      "gold_permissive": "hypothetical",
+      "gold_strict": "question",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0124",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0124",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0125",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0149",
+      "text": "Then I think it would follow that under D3A2 and D7, we can still get disgorgement without routing it to investors, but it would be considered a legal remedy...",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0125",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0125",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0127",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0161",
+      "text": "We don't agree with that. Well, hold on. Which is it? That's why I said it's a two-part question. We agree that the statute would permit us to get it without routing it to investors because D3A2 lists certain prerequisites and routing to investors is not one of them. Our position would be that would still be equitable and no jury trial would be available. I know there are arguments on the other side that not routing it to investors would...",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0127",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0127",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0128",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0081",
+      "text": "I think that's pretty perilous, Mr. Stewart. I think if you want the equitable remedy, you've got to behave, and without a jury trial right, all of equity. You've got to follow the rules of equity. If you want a legal penalty, then the Seventh Amendment might have something to say about it. Again, I'm... We said that in lieu, right?",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0128",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0128",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0129",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0127",
+      "text": "That is traditional equitable practice. Well, in lieu, you said at the outset that when we see a provision that just generally authorizes equitable relief, we ask whether a particular remedy was typically available at equity. Yes, and the government keeping all the money",
+      "gold_permissive": "characterization",
+      "gold_strict": "characterization",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0129",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0129",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0132",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0128",
+      "text": "Some penalties make the defendant worse off. Others do not. Others can be very modest. It doesn't matter. You still get a jury trial, right?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0132",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0132",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0137",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0117",
+      "text": "I mean, I think it varies from case to case, and I think in some circumstances they probably wind up with what you might call a windfall. That is, you could have a circumstance, for instance, if somebody, if an investment advisor lies about his credentials in order to encourage clients to sign up with them, and then the clients can't point to anything about the advisor's services that was actually deficient, but the SEC, having received disgorgement, may try to give the people who were deluded some portion of the recovery in order to compensate them for the fact that they weren't told the proof.",
+      "gold_permissive": "hypothetical",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0137",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0137",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0138",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0093",
+      "text": "But there are circumstances in which the SEC would say, yeah, we're just going to return to victims what they lost so that we can keep the overage.",
+      "gold_permissive": "hypothetical",
+      "gold_strict": "question",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0138",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0138",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0139",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0147",
+      "text": "I mean, I think Mr. Geiser referred to one situation in which we might not make an effort of distribution, and that is if you have violations that cause very diffuse harms, so the defendant may make a lot of money and may cause very small amounts of harm to a very large number of people, and the SEC may conclude that the administrative costs of identifying all these people and what each of them has lost is just going to eat up too much of the fund in order for...",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0139",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0139",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0143",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0167",
+      "text": "to get this money back? I don't think there's any reason to think that we get half of it. What I've been told... You think it's less than half? Yes. How much less? I don't know exactly how much less. I asked the question of, do we know what percentage of the $6 billion, $1.1 billion was collected, and we're not sure of the answer. Well, so do you know that it is less than half? Or you just don't know? Well, I've also been told that of the amounts collected in, I think it was 2024, it could have been 2025, I believe it was 88% was designated for a distribution. That doesn't mean it would necessarily have been distributed at the end of the day, but that was something that we intended to do. And it's a long and time-consuming... Both the collection and the distribution can be a long and time-consuming process. And... You're getting this from the SEC? Yes. I mean, the other thing I would say about the equitable principles...",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0143",
+        "label": "characterization",
+        "confidence": 0.85
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0143",
+        "label": "characterization",
+        "confidence": 0.85
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0144",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0124",
+      "text": "So you're representing 88% of the money that's actually collected is distributed? Is designated for a... Designated.",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0144",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0144",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0146",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0012",
+      "text": "How important is the distribution part of this analysis to your argument? I mean, I had understood that you were differentiating discouragement from civil penalties. So just in a very simple analogy, this defendant steals a million dollars from a bunch of people. And discouragement would say, you can't keep that million dollars. The court could both order him to give back the million dollars that he stole and fine him for having engaged in that behavior. That would be the civil penalty part, right? It's coming out of his own pocket. It's making him worse off because he's now fined or a civil penalty. And you're saying you'd have to have a jury trial for that part of it, the penalty part. Is that correct?",
+      "gold_permissive": "hypothetical",
+      "gold_strict": "question",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0146",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0146",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0147",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0121",
+      "text": "We would have to have a jury... Even under our view that discouragement wouldn't require a jury. If you were seeking civil penalties as well, you would need a jury trial.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0147",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0147",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0149",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0165",
+      "text": "It's key under D-5, but not under D-3, A-2, and D-7. It's really not relevant at all in our view under D-3, A-2, and D-7. And the reason is traditional equitable principles are not limits on Congress's power. The reason that traditional equitable limits played a key role in Lew was that the statute itself referred to equitable relief. And so to determine what sort of remedies Congress had implicitly authorized, the court looked to what courts of equity had traditionally done. But Congress can always create new remedies or adjust the terms on which existing remedies will be available. And that's what it did in D-3, A-2, and D-7. It said you can get discouragement of any unjust enrichment that is received by the defendant as a result of the violation.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0149",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0149",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0150",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0146",
+      "text": "As distinguished from D-5, which really said something about benefit of the victims.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0150",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0150",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0152",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0116",
+      "text": "I just want to capture this one. Do we even need to decide that question? You said we don't need to decide the Seventh Amendment question if you keep the money. Do we even need to decide whether D-7 authorizes you to keep the money? To answer the question presented is just simply do we need to show injury to the investor? We could answer that hypothetically in your favor, no, without deciding the scope of whether D-7 permits you to extend beyond equity to keep the money. Couldn't we do that?",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0152",
+        "label": "hypothetical",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0152",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0154",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0042",
+      "text": "So if I could just understand, you've been talking about this, but your decision to lead with D7 rather than D5, I guess my question is, what are you worried about on D5? Why do you think that D7 is a better argument? Why do you think that D5 is a comparatively weak one? I mean, I think the biggest problem",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0154",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0154",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0158",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0022",
+      "text": "But that was the victim receiving the money.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0158",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0158",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0161",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0143",
+      "text": "I mean, the point I was going to make is the court in Kansas versus Nebraska in explaining why it made sense to set the disgorgement award at that amount said it will provide additional deterrence to future breaches of the contract, the compact. The parties were in an unusual situation where the water was more valuable to the upstream Nebraska.",
+      "gold_permissive": "characterization",
+      "gold_strict": "characterization",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0161",
+        "label": "characterization",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0161",
+        "label": "characterization",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0163",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0125",
+      "text": "It is simply accomplishing a public-interested effort to deprive the defendant of his unlawful profits.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0163",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0163",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0164",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0074",
+      "text": "For purposes of deterrence, not compensation. That's my point.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0164",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0164",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0165",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0129",
+      "text": "I think substantially for purposes of deterrence, but I think kind of independent of the utilitarian justification, there is a sense that it is inherently unfair, inherently inequitable to have an adjudicated violator and say you can keep the money. But then the other point I'd like to make in response to your question as to why in some circumstances we like D3A2 better is that if push comes to shove, we would rather be in a situation where we can get disgorgement but may have to go through a jury trial to get it than to be in a position where we can't get it at all. And the petitioner's argument is that we can't get it at all except to the extent that it corresponds to identified pecuniary losses.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0165",
+        "label": "characterization",
+        "confidence": 0.92
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0165",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0167",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0137",
+      "text": "And we're happy to win the case under D5, and we think we should win it under D5, because even looking at that provision, the petitioner's argument goes substantially beyond. All right. Thank you, counsel.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0167",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0167",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0168",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0114",
+      "text": "Thank you. Thank you, counsel. Justice Thomas, anything further? Justice Kavanaugh? Justice Barron, anything further? Justice Jackson? Thank you, counsel. Thank you, Mr. Chief Justice.",
+      "gold_permissive": "question",
+      "gold_strict": "question",
+      "difficulty": "easy",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0168",
+        "label": "question",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0168",
+        "label": "question",
+        "confidence": 0.95
+      }
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0169",
+      "prosody_source_turn_id": "Sripetch_vs_SEC:turn_0003",
+      "text": "Rebuttal, Mr. Geiser? Just a few quick points, Your Honor. The first is my friend says we're trying to make it as difficult as possible to get funds to victims. That is not our goal. Our goal is to simply delineate between penalties and disgorgement. And if the government thinks it's hard to distribute funds, then they do have the option. Seek civil penalties. You can deprive us of every penny, including up to gross proceeds that we've collected, or rely on the very inventive, very powerful private securities bar, which is very good at filing lawsuits when someone is actually injured to recover and compensate an injured party. Now, my friend is, I think, equivocated a little, but I think the bottom line answer is that the government does not believe that disgorgement requires returning funds to investors. That is a penalty. Then the government is seeking a penalty. It is indistinguishable from penalties. It looks exactly like the penalty in D3, just with a different cap. That is not the way that Congress writes statutes. I do think, Justice Gorsuch, that you do need to decide whether the government can keep the funds or not, because that's defining what is disgorgement. We can't just kind of put it in this empty vessel and say in this case they can deprive wrongdoers of profit, but we're not going to say what disgorgement means. We're not going to square disgorgement with D3 and the fact that Congress drew a stark distinction between civil penalties and disgorgement, even though I think that distinction collapses under my friend's read. I don't think my friend has any answer for D9. If Congress's point here is simply to deprive wrongdoers of a gain and has nothing to do with remedial function, they can keep it, they don't need to pay the funds back to investors, then I don't know why Congress would have been concerned that anyone would have even imagined that somehow empowering the SEC to seek effectively a second penalty, that they were precluding private investors from bringing their own lawsuits. That reading of D9 doesn't make sense. Our reading does. Under our reading of D9, Congress would have been concerned that because the SEC now has separate authority, explicitly ratifying exactly what Lew, I think under its best reading said to seek fair compensation on behalf of injured parties, that that might now be the exclusive way for private parties to recover, and Congress wanted to make clear no. That compensatory function that the SEC now has doesn't take away the right of private parties to seek that same function. I don't think it's a plausible reading of Congress's amendments in 2021, that they were adopting two-thirds of Lew, and then by negative implication, implicitly redefining in D7 without saying a word about it, the very core of what disgorgement means, which really does have that compensatory function of taking an asset that someone took that doesn't belong to them and it belongs to someone else. We are taking that asset and returning it over. The final point I'd like to make is that if you do look to D3, my friend has said a lot about unjust enrichment, but D3 still says you can seek disgorgement under paragraph 7. If it's not disgorgement under paragraph 7, then you can't do it. You start with saying what is disgorgement and then say this is the amount that you are disgorging. And I think Congress used that language in D3 because it simply was trying to come up with some way to describe the amount that you were taking as a disgorgement remedy and redistributing to an injured investor. If there are no further questions.",
+      "gold_permissive": "assertion",
+      "gold_strict": "assertion",
+      "difficulty": "hard",
+      "permissive_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0169",
+        "label": "assertion",
+        "confidence": 0.95
+      },
+      "strict_prediction": {
+        "turn_id": "Sripetch_vs_SEC:turn_0169",
+        "label": "assertion",
+        "confidence": 0.95
+      }
+    }
+  ]
+}

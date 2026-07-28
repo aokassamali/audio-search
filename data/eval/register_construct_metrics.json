@@ -1,0 +1,25 @@
+{
+  "total_items": 80,
+  "agreement_count": 74,
+  "disagreement_count": 6,
+  "agreement_rate": 0.925,
+  "transitions": {
+    "hypothetical->assertion": 3,
+    "hypothetical->question": 3
+  },
+  "difficulty": {
+    "easy": {
+      "total": 51,
+      "disagreements": 0,
+      "disagreement_rate": 0.0
+    },
+    "hard": {
+      "total": 29,
+      "disagreements": 6,
+      "disagreement_rate": 0.20689655172413793
+    }
+  },
+  "permissive_hypothetical_count": 8,
+  "hypothetical_flip_count": 6,
+  "hypothetical_flip_rate": 0.75
+}

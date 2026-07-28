@@ -1,0 +1,146 @@
+{
+  "permissive": {
+    "variant": "permissive",
+    "count": 80,
+    "accuracy": 0.6375,
+    "text_only_accuracy": 0.6625,
+    "macro_f1_supported_classes": 0.579742703533026,
+    "per_class": {
+      "assertion": {
+        "precision": 0.8333333333333334,
+        "recall": 0.5263157894736842,
+        "f1-score": 0.6451612903225806,
+        "support": 38.0
+      },
+      "hypothetical": {
+        "precision": 0.29411764705882354,
+        "recall": 0.625,
+        "f1-score": 0.4,
+        "support": 8.0
+      },
+      "question": {
+        "precision": 0.9130434782608695,
+        "recall": 0.8076923076923077,
+        "f1-score": 0.8571428571428571,
+        "support": 26.0
+      },
+      "characterization": {
+        "precision": 0.3125,
+        "recall": 0.625,
+        "f1-score": 0.4166666666666667,
+        "support": 8.0
+      },
+      "hyperbole": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "joke": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      }
+    },
+    "predicted_counts": {
+      "assertion": 24,
+      "hypothetical": 17,
+      "question": 23,
+      "characterization": 16,
+      "hyperbole": 0,
+      "joke": 0
+    },
+    "comparison_to_text_only": {
+      "fixes": 1,
+      "regressions": 3,
+      "both_correct": 50,
+      "both_wrong": 26,
+      "prediction_changes": 5
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 51,
+        "accuracy": 0.6862745098039216,
+        "mean_confidence": 0.9498039215686274
+      },
+      "hard": {
+        "count": 29,
+        "accuracy": 0.5517241379310345,
+        "mean_confidence": 0.9475862068965517
+      }
+    }
+  },
+  "strict": {
+    "variant": "strict",
+    "count": 80,
+    "accuracy": 0.75,
+    "text_only_accuracy": 0.7375,
+    "macro_f1_supported_classes": 0.6284172103137621,
+    "per_class": {
+      "assertion": {
+        "precision": 0.8787878787878788,
+        "recall": 0.7073170731707317,
+        "f1-score": 0.7837837837837838,
+        "support": 41.0
+      },
+      "hypothetical": {
+        "precision": 0.5,
+        "recall": 0.5,
+        "f1-score": 0.5,
+        "support": 2.0
+      },
+      "question": {
+        "precision": 0.896551724137931,
+        "recall": 0.896551724137931,
+        "f1-score": 0.896551724137931,
+        "support": 29.0
+      },
+      "characterization": {
+        "precision": 0.25,
+        "recall": 0.5,
+        "f1-score": 0.3333333333333333,
+        "support": 8.0
+      },
+      "hyperbole": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      },
+      "joke": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1-score": 0.0,
+        "support": 0.0
+      }
+    },
+    "predicted_counts": {
+      "assertion": 33,
+      "hypothetical": 2,
+      "question": 29,
+      "characterization": 16,
+      "hyperbole": 0,
+      "joke": 0
+    },
+    "comparison_to_text_only": {
+      "fixes": 4,
+      "regressions": 3,
+      "both_correct": 56,
+      "both_wrong": 17,
+      "prediction_changes": 7
+    },
+    "by_difficulty": {
+      "easy": {
+        "count": 51,
+        "accuracy": 0.8235294117647058,
+        "mean_confidence": 0.9470588235294117
+      },
+      "hard": {
+        "count": 29,
+        "accuracy": 0.6206896551724138,
+        "mean_confidence": 0.9486206896551723
+      }
+    }
+  }
+}
