@@ -2,6 +2,10 @@
 
 Natural language search and Q&A over audio. Answers cite timestamps and speaker.
 
+**WER 6.4%**  
+**Dense retrieval leads BM25 and RRF**  
+**Prosody did not improve speech act classification and failed a shuffled-prosody placebo**
+
 ```
                     ┌─> transcript (faster-whisper) ─┐
 audio ─> normalize ─┤                                ├─> speaker transcript
@@ -20,25 +24,25 @@ audio ─> normalize ─┤                                ├─> speaker trans
                                               grounded answer + timestamp citations
 ```
 
-Orchestrated as a partitioned Dagster DAG. Served via FastAPI.
+Orchestrated as a partitioned Dagster DAG. Served through FastAPI.
 
 ---
 
 ## Status
 
-v2.2
+v2.3
 
 | | Milestone | |
 |---|---|---|
-| M1 | Transcription pipeline (faster-whisper, int8) | ✅ |
-| M2 | Chunking + hybrid retrieval (BM25 + dense, RRF) | ✅ |
-| M3 | Retrieval evaluation (recall@5, MRR) | ✅ |
-| M4 | Transcription evaluation (WER + error decomposition) | ✅ |
+| M1 | Transcription pipeline with faster-whisper int8 | ✅ |
+| M2 | Chunking and hybrid retrieval with BM25, dense search, and RRF | ✅ |
+| M3 | Retrieval evaluation with recall@5 and MRR | ✅ |
+| M4 | Transcription evaluation with WER and error decomposition | ✅ |
 | M5 | FastAPI search service | ✅ |
 | M6 | Dagster orchestration | ✅ |
 | v2.1 | RAG answer layer with enforced citations | ✅ |
-| v2.2 | Diarization + speaker role attribution | ✅ |
-| v2.3 | Prosodic register classification | in design |
+| v2.2 | Diarization and speaker role attribution | ✅ |
+| v2.3 | Speech act and sincerity experiment | ✅ |
 
 ---
 
@@ -46,99 +50,132 @@ v2.2
 
 ### Transcription
 
-Against the official transcript, with case, punctuation, and whitespace normalized on both sides.
+Evaluated against the official transcript after normalizing case, punctuation, and whitespace.
 
 ```
 WER 6.448%   |   Substitutions 202   Insertions 22   Deletions 603   Correct 12,020
 ```
 
-- 387 deletion runs, 88% of 1-2 words. ~1/3 of deleted tokens are adjacent repetitions.
-- Court reporter transcribes verbatim, including false starts and stage directions. WER overstates genuine omissions. Some exist, including one about jury trials.
-- Substitutions are almost all proper nouns. Liu (lew/lieu/lue) = 55, ~27% of substitutions.
-- `iii` → `three` is a citation convention mismatch, not an error.
-- No alias correction applied. With it, 6.4% → ~5.8%.
-- Fix for the proper-noun class is `initial_prompt` vocabulary biasing.
+- 387 deletion runs. 88% contain one or two words. About one third of deleted tokens are adjacent repetitions.
+- The court reporter includes false starts and stage directions. WER overstates genuine omissions. Some real omissions remain, including one about jury trials.
+- Proper nouns dominate substitutions. `Liu` accounts for 55 substitutions, about 27%.
+- `iii` to `three` is a citation convention mismatch.
+- No alias correction was applied. Alias correction would reduce WER from about 6.4% to 5.8%.
+- The production fix for repeated proper-noun errors is vocabulary biasing through `initial_prompt`.
 
 ### Retrieval
 
-Hand-labeled query set, recall@5 and MRR:
+Hand-labeled query set.
 
 | Mode | Recall@5 | MRR |
-|---|---|---|
+|---|---:|---:|
 | BM25 | 0.375 | 0.524 |
 | Dense | **0.417** | **0.650** |
 | RRF | 0.358 | 0.543 |
 
-n=10. Directional only. Separating dense from RRF needs 30+ queries.
+n=10. The result is directional. Separating dense retrieval from RRF needs at least 30 queries.
 
-BM25 is weak because lexical matching doesn't work well on this sort of transcript. RRF degrades when one retriever dominates.
+BM25 is weak on this transcript because lexical overlap is often insufficient. RRF degrades when one retriever is substantially stronger.
 
-Recall prioritized over precision. The LLM tolerates an irrelevant chunk, not a missing one.
+Recall is prioritized because missing evidence limits the answer layer.
 
 ### Answer layer
 
-n=4. Refuses when the topic is absent from the corpus (`out_of_corpus`) and when a question's premise is unsupported (`false_premise`). Answers direct and multi-chunk questions with citations. Answerability only.
+n=4. The system refuses absent topics with `out_of_corpus` and unsupported premises with `false_premise`. It answers direct and multi-chunk questions with timestamped citations. This evaluation covers answerability only.
+
+### Speech act and sincerity classification
+
+The experiment tested whether prosody adds signal beyond text. The gold set contains 80 speaker turns labeled from audio. Evaluation uses speaker-grouped folds.
+
+| Arm | Accuracy | Macro F1 |
+|---|---:|---:|
+| Text-only, permissive labels | 0.662 | 0.608 |
+| Text-only, strict labels | 0.738 | 0.609 |
+| Prosody-only, eGeMAPS, 91 features | 0.225 | 0.175 |
+| Prosody-only, compact, 8 features | 0.325 | 0.288 |
+| Text-only stacker | 0.688 | 0.629 |
+| Text + prosody stacker | 0.613 | 0.522 |
+| Majority baseline | 0.475 | |
+
+The null was not rejected.
+
+Strict labeling raised accuracy from 0.662 to 0.738 while macro F1 stayed flat at about 0.609. The gain came from shifting items into the majority class, not from better classification.
+
+Real and shuffled prosody produced the same permissive accuracy at 0.6375. Strict accuracy was 0.750 with real prosody and 0.7375 with shuffled prosody. Adding prosody to the text stacker produced 0 fixes and 6 regressions.
+
+The 91-feature arm performed worse than the 8-feature arm with 80 labeled turns.
+
+On permissive labels, question F1 was 0.857. Hypothetical F1 was 0.417. Characterization F1 was 0.480. Question syntax was easier to detect. The other two labels required more pragmatic inference.
+
+Strict and permissive labels agreed on 92.5% of turns. Six of eight permissive hypothetical labels changed under the strict definition. Every disagreement occurred on a turn marked hard during annotation.
+
+The prompted models predicted zero jokes and zero hyperboles on the 80 sampled turns. The gold set also contained zero positive examples for those classes, so the rare-class controls were not exercised.
+
+This result applies to one SCOTUS argument, this taxonomy, these features, and n=80. SCOTUS speech is formal and low-affect. That may suppress the prosodic variation needed for this task.
 
 ---
 
 ## Grounding
 
-1. **Schema constraint.** The answer schema restricts citation IDs to an enum of the chunks actually retrieved for this query.
-2. **Prompt rules.** Evidence-only, a citation per claim, refuse when unanswerable, and don't attribute a position to a party on the basis of another speaker describing it.
-3. **Post-validation.** Every returned citation is re-checked against the retrieved set. Empty or invalid citations downgrade the response to a refusal.
+1. **Schema constraint.** Citation IDs are restricted to the chunks retrieved for the query.
+2. **Prompt rules.** Answers use supplied evidence, cite each claim, refuse unsupported questions, and avoid assigning a position from another speaker's description.
+3. **Post-validation.** Returned citations are checked against the retrieved set. Empty or invalid citations downgrade the response to a refusal.
 
-Layer 1 binds only if the inference server enforces the supplied grammar.
+The schema constraint depends on the inference server enforcing the supplied grammar.
 
 ### Speaker attribution
 
-Role and identity are separate fields with separate confidence and separate evidence.
+Role and identity use separate fields, confidence values, and evidence.
 
-Speaker samples plus neighboring-turn context are passed to the LLM. Neighboring turns supply names, since speakers do not state their own. A neighboring name is accepted only when context shows it addressing the target.
+Speaker samples include neighboring-turn context. Neighboring turns can supply names because speakers rarely state their own. A neighboring name is accepted only when the context addresses or introduces the target speaker.
 
-Role or identity returned without a valid evidence sample is downgraded to `unknown`. Evidence belonging to a different speaker is rejected.
+A role or identity without valid evidence is downgraded to `unknown`. Evidence from another speaker is rejected.
 
 Resolution order is manual override → high-confidence identity → high-confidence role → raw speaker ID.
 
-Inferred values are kept alongside the effective label, so an override masking a bad inference is visible.
+Inferred values remain in the artifact beside the effective label. A manual override can therefore be checked against the inference it replaced.
 
-Output format is `Geiser [SPEAKER_01]`.
+Output uses `Geiser [SPEAKER_01]`.
 
-Role prompt contains no domain vocabulary. TOML overrides handle manual correction.
+The role prompt contains no domain vocabulary. TOML overrides support manual correction.
 
-### Attribution ambiguity calcs
+### Attribution ambiguity calculations
 
-- **`speaker_overlap_ratio`** = winning speaker's overlap ÷ total diarized speech in the segment. Near 1.0 = one speaker owns it. Near 0.5 = split.
-- **`diarization_coverage`** = total diarized speech ÷ segment duration. Low coverage with high ratio = dominant speaker, non-diarized audio in segment.
+- **`speaker_overlap_ratio`** = winning speaker overlap ÷ total diarized speech in the segment. A value near 1.0 indicates one dominant speaker. A value near 0.5 indicates a split.
+- **`diarization_coverage`** = total diarized speech ÷ segment duration. Low coverage with a high ratio indicates a dominant speaker plus non-diarized audio.
 
-**82 of ~1,650 segments (5%) have an overlap ratio below 0.8.** These segments span a speaker change. Speaker changes occur at question-answer transitions, so they cluster there rather than distributing evenly.
+82 of about 1,650 segments have an overlap ratio below 0.8. These segments usually span question-answer transitions.
 
 ---
 
 ## Known limitations
 
-- **Faithfulness.** Citations are checked for validity, not entailment. Requires a separate NLI or judge step.
-- **Small eval set.** n=10 retrieval, n=4 answerability.
-- **Chunk retrieval matches mentions, not speakers.** Rule 8 is a stopgap.
-- **Embedding cache key hashes chunk `text` only.** Correct while `text` is the embedded field. Fix is to include the field name in the key.
-- **GPU concurrency capped.** Concurrent partitions load multiple Whisper models against shared VRAM.
-- **Single corpus.** Formal low-affect speech.
+- **Faithfulness.** Citation validity is checked. Entailment is not.
+- **Small retrieval and answer evaluations.** Retrieval uses n=10. Answerability uses n=4.
+- **Speech act gold set.** One annotator labeled 80 turns. There is no inter-annotator agreement.
+- **Rare classes.** The gold set contains zero joke and zero hyperbole examples.
+- **Confidence.** Self-reported LLM confidence showed almost no variance. Mean confidence was 0.948 on easy turns and 0.947 on hard turns. Logprob-based confidence was not tested.
+- **Single corpus.** The current corpus is formal low-affect speech.
+- **Chunk retrieval.** Retrieval matches mentions, not speakers. Prompt rules reduce attribution errors but do not solve retrieval-level ambiguity.
+- **Embedding cache.** The cache key hashes chunk `text` only. The field name should be included if the embedded field changes.
+- **GPU concurrency.** Concurrent partitions can load multiple models onto shared VRAM.
 
 ---
 
 ## Design decisions
 
-- No silent CUDA → CPU fallback. Fails with a `--device cpu` suggestion.
-- No vector DB. NumPy brute force to ~10⁵ vectors.
-- int8 over fp16. Pascal fp16 throughput is degraded. `--compute-type` overrides.
-- Audio normalized to 16 kHz mono PCM before diarization. Compressed MP3 seeking gave inconsistent sample-length errors.
-- Chunk boundaries key on terminal punctuation, not domain keywords.
-- Corpus prep amortized in FastAPI `lifespan`. Per request: embed query, rank.
+- No silent CUDA to CPU fallback. CPU execution must be requested.
+- No vector database. NumPy brute force is sufficient to about 100,000 vectors.
+- int8 is used instead of fp16 because Pascal fp16 throughput is weak.
+- Audio is normalized to 16 kHz mono PCM before diarization. MP3 seeking produced inconsistent sample lengths.
+- Chunk boundaries use terminal punctuation rather than domain keywords.
+- Corpus setup runs once during FastAPI lifespan. Each request embeds the query and ranks stored chunks.
 
 ---
 
 ## Setup
 
-<!-- TODO: fill in from your actual environment -->
+Python 3.13 is required.
 
 ```bash
 git clone https://github.com/aokassamali/audio-search
@@ -146,22 +183,147 @@ cd audio-search
 uv sync
 ```
 
-Configuration lives in `audio_search.toml`, with environment-variable overrides layered on top.
+Install `ffmpeg` on PATH. `ffplay` is only needed for the interactive gold-set annotation script.
 
-Requires `ffmpeg` on PATH. Diarization requires a HuggingFace token with access to the pyannote models.
+Pyannote diarization requires a Hugging Face token.
+
+```bash
+export HF_TOKEN="your_token"
+```
+
+PowerShell uses the following form.
+
+```powershell
+$env:HF_TOKEN = "your_token"
+```
+
+Speaker-role inference and `/answer` require an OpenAI-compatible chat server. Configure it in `audio_search.toml`.
+
+```toml
+[llm]
+base_url = "http://127.0.0.1:8080"
+model = "local"
+timeout_seconds = 120
+```
+
+`AUDIO_SEARCH_CONFIG`, `AUDIO_SEARCH_SOURCE`, `AUDIO_SEARCH_CHUNK_VARIANT`, `LLAMA_CPP_BASE_URL`, `LLAMA_CPP_MODEL`, and `LLAMA_CPP_TIMEOUT_SECONDS` can override the checked-in configuration.
+
+### Add a source
+
+Place the audio file in `data/raw/`. Add a source entry whose key will also be used as the Dagster partition key.
+
+```toml
+[sources.sripetch]
+audio_filename = "Sripetch_vs_SEC.mp3"
+
+[sources.sripetch.speaker_labels]
+SPEAKER_01 = "Geiser"
+```
+
+The source ID defaults to the audio filename without its extension. It can be set explicitly.
+
+```toml
+[sources.sripetch]
+source_id = "Sripetch_vs_SEC"
+audio_filename = "Sripetch_vs_SEC.mp3"
+```
+
+Set the default source and chunk behavior under `[app]`.
+
+```toml
+[app]
+default_source_id = "sripetch"
+chunk_variant = "prefer_speaker"
+```
+
+`plain` uses plain chunks. `prefer_speaker` uses speaker chunks when present and falls back to plain chunks. `require_speaker` requires speaker chunks.
 
 ## Usage
 
-<!-- TODO -->
+### Materialize the Dagster pipeline
+
+Start Dagster.
+
+```bash
+uv run dagster dev -f src/dagster_assets.py
+```
+
+Open `http://127.0.0.1:3000`.
+
+Add a dynamic partition under `audio_files` using the source key from `audio_search.toml`. For the example source, the partition key is `sripetch`.
+
+Select the assets through `embeddings` and materialize the partition. The full path is shown below.
+
+```
+raw_audio
+    ↓
+normalized_audio
+    ├─> transcript ─> chunks
+    └─> diarization
+             ↓
+     speaker_transcript
+             ↓
+       speaker_roles
+             ↓
+      speaker_chunks
+             ↓
+        embeddings
+```
+
+The LLM server must be running before materializing `speaker_roles`.
+
+### Start the API
+
+Materialize at least one source, then start FastAPI.
+
+```bash
+uv run uvicorn src.api:app --host 127.0.0.1 --port 8000
+```
+
+Check the loaded corpus.
+
+```bash
+curl http://127.0.0.1:8000/health
+```
+
+Ask a grounded question.
+
+```bash
+curl -X POST http://127.0.0.1:8000/answer \
+  -H "Content-Type: application/json" \
+  -d '{"query":"How do the petitioner and government disagree about the purpose and limits of disgorgement?","source_keys":["sripetch"],"retrieval_mode":"global","top_k":10}'
+```
+
+Abridged response.
+
+```json
+{
+  "answerable": true,
+  "answer": "Geiser argues that disgorgement must be a remedial remedy that restores funds to the proper owner or injured parties and cannot serve as punishment or deterrence, while the government argues that disgorgement can focus on depriving wrongdoers and deterring misconduct without requiring restoration to investors.",
+  "citations": [
+    {
+      "citation_id": "Sripetch_vs_SEC:1",
+      "source_id": "Sripetch_vs_SEC",
+      "chunk_id": 1,
+      "start": 45,
+      "end": 92
+    },
+    {
+      "citation_id": "Sripetch_vs_SEC:80",
+      "source_id": "Sripetch_vs_SEC",
+      "chunk_id": 80,
+      "start": 3420,
+      "end": 3463
+    }
+  ]
+}
+```
 
 ---
 
 ## Roadmap
 
-**v2.3 — prosodic register classification.** Whether prosody adds signal beyond text for classifying speech register: assertion, hypothetical, question, characterization, hyperbole, joke.
+1. **Learned speech representations.** Compare wav2vec2 and HuBERT against the same gold set. Test frozen representations and a fine-tuned variant.
+2. **Technical writeup.** Document the system, ablation, label perturbation result, confidence result, and limitations.
 
-Three-arm ablation: text-only, prosody-only, text+prosody. eGeMAPS features. Labels from audio. Reported per class.
-
-Label perturbation: strict vs permissive taxonomy variants over the same turns, measuring agreement.
-
-Public-domain government audio only.
+Public artifacts use government audio with clear provenance.
