@@ -1,0 +1,231 @@
+{
+  "schema_version": "1.0",
+  "minimum_similarity": 0.97,
+  "decisions": [
+    {
+      "pair_key": "case_three:SPEAKER_07||sripetch:SPEAKER_04",
+      "left_group": "case_three:SPEAKER_07",
+      "right_group": "sripetch:SPEAKER_04",
+      "similarity": 0.9894405007362366,
+      "selection_reason": "mutual top match",
+      "decision": "same",
+      "notes": "clip 1 and 2 in case 3 seem off, but broadly they both seem to be justice jackson"
+    },
+    {
+      "pair_key": "case_three:SPEAKER_07||case_two:SPEAKER_01",
+      "left_group": "case_three:SPEAKER_07",
+      "right_group": "case_two:SPEAKER_01",
+      "similarity": 0.9860393404960632,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": "both justice jackson"
+    },
+    {
+      "pair_key": "case_three:SPEAKER_06||sripetch:SPEAKER_05",
+      "left_group": "case_three:SPEAKER_06",
+      "right_group": "sripetch:SPEAKER_05",
+      "similarity": 0.9844070672988892,
+      "selection_reason": "mutual top match",
+      "decision": "same",
+      "notes": "i think both justice sotomayor"
+    },
+    {
+      "pair_key": "case_three:SPEAKER_00||case_two:SPEAKER_00",
+      "left_group": "case_three:SPEAKER_00",
+      "right_group": "case_two:SPEAKER_00",
+      "similarity": 0.9843116402626038,
+      "selection_reason": "mutual top match",
+      "decision": "same",
+      "notes": "pretty sure these are both justice barret"
+    },
+    {
+      "pair_key": "case_two:SPEAKER_00||sripetch:SPEAKER_00",
+      "left_group": "case_two:SPEAKER_00",
+      "right_group": "sripetch:SPEAKER_00",
+      "similarity": 0.9820069074630737,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": ""
+    },
+    {
+      "pair_key": "case_four:SPEAKER_07||case_three:SPEAKER_05",
+      "left_group": "case_four:SPEAKER_07",
+      "right_group": "case_three:SPEAKER_05",
+      "similarity": 0.9819442629814148,
+      "selection_reason": "mutual top match",
+      "decision": "same",
+      "notes": "both are justice thomas"
+    },
+    {
+      "pair_key": "case_four:SPEAKER_05||case_three:SPEAKER_07",
+      "left_group": "case_four:SPEAKER_05",
+      "right_group": "case_three:SPEAKER_07",
+      "similarity": 0.9810687303543091,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": "prety sure these are both justice jackson"
+    },
+    {
+      "pair_key": "case_four:SPEAKER_05||case_two:SPEAKER_01",
+      "left_group": "case_four:SPEAKER_05",
+      "right_group": "case_two:SPEAKER_01",
+      "similarity": 0.980839192867279,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": "justice jackson"
+    },
+    {
+      "pair_key": "case_two:SPEAKER_01||sripetch:SPEAKER_04",
+      "left_group": "case_two:SPEAKER_01",
+      "right_group": "sripetch:SPEAKER_04",
+      "similarity": 0.9806115627288818,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": "justice jackson\\"
+    },
+    {
+      "pair_key": "case_four:SPEAKER_11||sripetch:SPEAKER_09",
+      "left_group": "case_four:SPEAKER_11",
+      "right_group": "sripetch:SPEAKER_09",
+      "similarity": 0.9784123301506042,
+      "selection_reason": "mutual top match",
+      "decision": "same",
+      "notes": ""
+    },
+    {
+      "pair_key": "case_four:SPEAKER_06||case_two:SPEAKER_05",
+      "left_group": "case_four:SPEAKER_06",
+      "right_group": "case_two:SPEAKER_05",
+      "similarity": 0.9783366322517395,
+      "selection_reason": "mutual top match",
+      "decision": "same",
+      "notes": "Either both justice kagan or sotamayor"
+    },
+    {
+      "pair_key": "case_three:SPEAKER_00||sripetch:SPEAKER_00",
+      "left_group": "case_three:SPEAKER_00",
+      "right_group": "sripetch:SPEAKER_00",
+      "similarity": 0.9780791401863098,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": "justice barret"
+    },
+    {
+      "pair_key": "case_four:SPEAKER_06||case_three:SPEAKER_06",
+      "left_group": "case_four:SPEAKER_06",
+      "right_group": "case_three:SPEAKER_06",
+      "similarity": 0.9765726327896118,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": "i think these are both justice kagan"
+    },
+    {
+      "pair_key": "case_four:SPEAKER_04||case_three:SPEAKER_08",
+      "left_group": "case_four:SPEAKER_04",
+      "right_group": "case_three:SPEAKER_08",
+      "similarity": 0.9762169718742371,
+      "selection_reason": "mutual top match",
+      "decision": "same",
+      "notes": "i just realized this is justice kagan, and now i know the difference between barret kagan sotomayor and jackson"
+    },
+    {
+      "pair_key": "case_four:SPEAKER_05||sripetch:SPEAKER_04",
+      "left_group": "case_four:SPEAKER_05",
+      "right_group": "sripetch:SPEAKER_04",
+      "similarity": 0.9757033586502075,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": ""
+    },
+    {
+      "pair_key": "case_four:SPEAKER_02||sripetch:SPEAKER_08",
+      "left_group": "case_four:SPEAKER_02",
+      "right_group": "sripetch:SPEAKER_08",
+      "similarity": 0.975299596786499,
+      "selection_reason": "mutual top match",
+      "decision": "same",
+      "notes": "pretty sure this is both justice alito, could be gorsuch though. Not roberts or thomas"
+    },
+    {
+      "pair_key": "case_three:SPEAKER_08||case_two:SPEAKER_03",
+      "left_group": "case_three:SPEAKER_08",
+      "right_group": "case_two:SPEAKER_03",
+      "similarity": 0.9740138649940491,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": "i think both justice kagan"
+    },
+    {
+      "pair_key": "case_four:SPEAKER_04||case_two:SPEAKER_03",
+      "left_group": "case_four:SPEAKER_04",
+      "right_group": "case_two:SPEAKER_03",
+      "similarity": 0.9739402532577515,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": ""
+    },
+    {
+      "pair_key": "case_four:SPEAKER_00||case_two:SPEAKER_00",
+      "left_group": "case_four:SPEAKER_00",
+      "right_group": "case_two:SPEAKER_00",
+      "similarity": 0.9733386039733887,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": ""
+    },
+    {
+      "pair_key": "case_four:SPEAKER_06||sripetch:SPEAKER_05",
+      "left_group": "case_four:SPEAKER_06",
+      "right_group": "sripetch:SPEAKER_05",
+      "similarity": 0.9720866084098816,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": ""
+    },
+    {
+      "pair_key": "case_four:SPEAKER_11||case_two:SPEAKER_07",
+      "left_group": "case_four:SPEAKER_11",
+      "right_group": "case_two:SPEAKER_07",
+      "similarity": 0.9720845222473145,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": ""
+    },
+    {
+      "pair_key": "case_three:SPEAKER_05||sripetch:SPEAKER_10",
+      "left_group": "case_three:SPEAKER_05",
+      "right_group": "sripetch:SPEAKER_10",
+      "similarity": 0.9705501794815063,
+      "selection_reason": "top-three similarity >= 0.97",
+      "decision": "same",
+      "notes": ""
+    },
+    {
+      "pair_key": "case_four:SPEAKER_09||case_three:SPEAKER_01",
+      "left_group": "case_four:SPEAKER_09",
+      "right_group": "case_three:SPEAKER_01",
+      "similarity": 0.9677721858024597,
+      "selection_reason": "mutual top match",
+      "decision": "different",
+      "notes": "all the lawyers or oral arguers for all of the cases were different"
+    },
+    {
+      "pair_key": "case_three:SPEAKER_11||case_two:SPEAKER_02",
+      "left_group": "case_three:SPEAKER_11",
+      "right_group": "case_two:SPEAKER_02",
+      "similarity": 0.9645271301269531,
+      "selection_reason": "mutual top match",
+      "decision": "unsure",
+      "notes": ""
+    },
+    {
+      "pair_key": "case_four:SPEAKER_03||sripetch:SPEAKER_06",
+      "left_group": "case_four:SPEAKER_03",
+      "right_group": "sripetch:SPEAKER_06",
+      "similarity": 0.9552392959594727,
+      "selection_reason": "mutual top match",
+      "decision": "same",
+      "notes": ""
+    }
+  ]
+}

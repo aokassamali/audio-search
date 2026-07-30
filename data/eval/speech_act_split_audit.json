@@ -1,0 +1,223 @@
+{
+  "overall_counts": {
+    "assertion": 227,
+    "question": 140,
+    "characterization": 20,
+    "hypothetical": 13
+  },
+  "majority_baseline_accuracy": 0.5675,
+  "source_counts": {
+    "case_four": {
+      "assertion": 61,
+      "question": 35,
+      "characterization": 4,
+      "hypothetical": 0
+    },
+    "case_three": {
+      "assertion": 60,
+      "question": 35,
+      "characterization": 4,
+      "hypothetical": 1
+    },
+    "case_two": {
+      "assertion": 55,
+      "question": 40,
+      "characterization": 2,
+      "hypothetical": 3
+    },
+    "sripetch": {
+      "assertion": 51,
+      "question": 30,
+      "characterization": 10,
+      "hypothetical": 9
+    }
+  },
+  "minority_class_groups": {
+    "case_four:SPEAKER_03": {
+      "assertion": 2,
+      "question": 4,
+      "characterization": 1,
+      "hypothetical": 0
+    },
+    "case_four:SPEAKER_06": {
+      "assertion": 1,
+      "question": 7,
+      "characterization": 3,
+      "hypothetical": 0
+    },
+    "case_three:SPEAKER_04": {
+      "assertion": 20,
+      "question": 1,
+      "characterization": 1,
+      "hypothetical": 0
+    },
+    "case_three:SPEAKER_06": {
+      "assertion": 4,
+      "question": 3,
+      "characterization": 1,
+      "hypothetical": 1
+    },
+    "case_three:SPEAKER_08": {
+      "assertion": 2,
+      "question": 4,
+      "characterization": 1,
+      "hypothetical": 0
+    },
+    "case_three:SPEAKER_11": {
+      "assertion": 0,
+      "question": 4,
+      "characterization": 1,
+      "hypothetical": 0
+    },
+    "case_two:SPEAKER_00": {
+      "assertion": 2,
+      "question": 9,
+      "characterization": 1,
+      "hypothetical": 1
+    },
+    "case_two:SPEAKER_02": {
+      "assertion": 0,
+      "question": 3,
+      "characterization": 0,
+      "hypothetical": 1
+    },
+    "case_two:SPEAKER_06": {
+      "assertion": 27,
+      "question": 1,
+      "characterization": 1,
+      "hypothetical": 1
+    },
+    "sripetch:SPEAKER_00": {
+      "assertion": 2,
+      "question": 4,
+      "characterization": 0,
+      "hypothetical": 1
+    },
+    "sripetch:SPEAKER_01": {
+      "assertion": 22,
+      "question": 0,
+      "characterization": 6,
+      "hypothetical": 2
+    },
+    "sripetch:SPEAKER_02": {
+      "assertion": 0,
+      "question": 1,
+      "characterization": 1,
+      "hypothetical": 0
+    },
+    "sripetch:SPEAKER_04": {
+      "assertion": 3,
+      "question": 5,
+      "characterization": 0,
+      "hypothetical": 1
+    },
+    "sripetch:SPEAKER_05": {
+      "assertion": 5,
+      "question": 3,
+      "characterization": 1,
+      "hypothetical": 2
+    },
+    "sripetch:SPEAKER_07": {
+      "assertion": 16,
+      "question": 0,
+      "characterization": 2,
+      "hypothetical": 1
+    },
+    "sripetch:SPEAKER_08": {
+      "assertion": 3,
+      "question": 6,
+      "characterization": 0,
+      "hypothetical": 1
+    },
+    "sripetch:SPEAKER_10": {
+      "assertion": 0,
+      "question": 3,
+      "characterization": 0,
+      "hypothetical": 1
+    }
+  },
+  "provisional_group_definition": "source_key:raw_speaker_id",
+  "folds": [
+    {
+      "fold": 1,
+      "train_size": 301,
+      "test_size": 99,
+      "train_counts": {
+        "assertion": 170,
+        "question": 106,
+        "characterization": 15,
+        "hypothetical": 10
+      },
+      "test_counts": {
+        "assertion": 57,
+        "question": 34,
+        "characterization": 5,
+        "hypothetical": 3
+      },
+      "group_overlap": [],
+      "missing_train_labels": [],
+      "missing_test_labels": []
+    },
+    {
+      "fold": 2,
+      "train_size": 301,
+      "test_size": 99,
+      "train_counts": {
+        "assertion": 172,
+        "question": 104,
+        "characterization": 15,
+        "hypothetical": 10
+      },
+      "test_counts": {
+        "assertion": 55,
+        "question": 36,
+        "characterization": 5,
+        "hypothetical": 3
+      },
+      "group_overlap": [],
+      "missing_train_labels": [],
+      "missing_test_labels": []
+    },
+    {
+      "fold": 3,
+      "train_size": 296,
+      "test_size": 104,
+      "train_counts": {
+        "assertion": 168,
+        "question": 105,
+        "characterization": 14,
+        "hypothetical": 9
+      },
+      "test_counts": {
+        "assertion": 59,
+        "question": 35,
+        "characterization": 6,
+        "hypothetical": 4
+      },
+      "group_overlap": [],
+      "missing_train_labels": [],
+      "missing_test_labels": []
+    },
+    {
+      "fold": 4,
+      "train_size": 302,
+      "test_size": 98,
+      "train_counts": {
+        "assertion": 171,
+        "question": 105,
+        "characterization": 16,
+        "hypothetical": 10
+      },
+      "test_counts": {
+        "assertion": 56,
+        "question": 35,
+        "characterization": 4,
+        "hypothetical": 3
+      },
+      "group_overlap": [],
+      "missing_train_labels": [],
+      "missing_test_labels": []
+    }
+  ],
+  "warning": "The grouping is provisional. Recurring justices must later share one canonical group across cases."
+}

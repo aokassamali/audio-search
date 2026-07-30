@@ -21,6 +21,7 @@ data/cache/
 data/processed/*
 !data/processed/.gitignore
 !data/processed/.gitkeep
+data/eval/*.backup.json
 
 # Raw audio inputs
 data/raw/*
@@ -34,3 +35,9 @@ data/raw/*
 .vscode/
 .DS_Store
 Thumbs.db
+
+# Generated evaluation embeddings
+data/eval/wavlm_base_plus_v24.npy
+data/eval/text_embeddings_v24.npy
+data/eval/*.npy
+data/eval/*.npz

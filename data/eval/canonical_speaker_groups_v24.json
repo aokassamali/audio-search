@@ -1,0 +1,436 @@
+{
+  "schema_version": "1.0",
+  "validation_passed": true,
+  "decision_counts": {
+    "same": 23,
+    "different": 1,
+    "unsure": 1
+  },
+  "provisional_group_count": 45,
+  "canonical_group_count": 28,
+  "merged_component_count": 8,
+  "largest_component_size": 4,
+  "mapping": {
+    "case_four:SPEAKER_00": "person_001",
+    "case_three:SPEAKER_00": "person_001",
+    "case_two:SPEAKER_00": "person_001",
+    "sripetch:SPEAKER_00": "person_001",
+    "case_four:SPEAKER_01": "person_002",
+    "case_four:SPEAKER_02": "person_003",
+    "sripetch:SPEAKER_08": "person_003",
+    "case_four:SPEAKER_03": "person_004",
+    "sripetch:SPEAKER_06": "person_004",
+    "case_four:SPEAKER_04": "person_005",
+    "case_three:SPEAKER_08": "person_005",
+    "case_two:SPEAKER_03": "person_005",
+    "case_four:SPEAKER_05": "person_006",
+    "case_three:SPEAKER_07": "person_006",
+    "case_two:SPEAKER_01": "person_006",
+    "sripetch:SPEAKER_04": "person_006",
+    "case_four:SPEAKER_06": "person_007",
+    "case_three:SPEAKER_06": "person_007",
+    "case_two:SPEAKER_05": "person_007",
+    "sripetch:SPEAKER_05": "person_007",
+    "case_four:SPEAKER_07": "person_008",
+    "case_three:SPEAKER_05": "person_008",
+    "sripetch:SPEAKER_10": "person_008",
+    "case_four:SPEAKER_08": "person_009",
+    "case_four:SPEAKER_09": "person_010",
+    "case_four:SPEAKER_10": "person_011",
+    "case_four:SPEAKER_11": "person_012",
+    "case_two:SPEAKER_07": "person_012",
+    "sripetch:SPEAKER_09": "person_012",
+    "case_three:SPEAKER_01": "person_013",
+    "case_three:SPEAKER_02": "person_014",
+    "case_three:SPEAKER_03": "person_015",
+    "case_three:SPEAKER_04": "person_016",
+    "case_three:SPEAKER_09": "person_017",
+    "case_three:SPEAKER_11": "person_018",
+    "case_two:SPEAKER_02": "person_019",
+    "case_two:SPEAKER_04": "person_020",
+    "case_two:SPEAKER_06": "person_021",
+    "case_two:SPEAKER_08": "person_022",
+    "case_two:SPEAKER_10": "person_023",
+    "case_two:UNKNOWN": "person_024",
+    "sripetch:SPEAKER_01": "person_025",
+    "sripetch:SPEAKER_02": "person_026",
+    "sripetch:SPEAKER_03": "person_027",
+    "sripetch:SPEAKER_07": "person_028"
+  },
+  "components": [
+    {
+      "canonical_id": "person_001",
+      "members": [
+        "case_four:SPEAKER_00",
+        "case_three:SPEAKER_00",
+        "case_two:SPEAKER_00",
+        "sripetch:SPEAKER_00"
+      ],
+      "member_count": 4,
+      "sources": [
+        "case_four",
+        "case_three",
+        "case_two",
+        "sripetch"
+      ],
+      "turn_count": 27,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_002",
+      "members": [
+        "case_four:SPEAKER_01"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_four"
+      ],
+      "turn_count": 14,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_003",
+      "members": [
+        "case_four:SPEAKER_02",
+        "sripetch:SPEAKER_08"
+      ],
+      "member_count": 2,
+      "sources": [
+        "case_four",
+        "sripetch"
+      ],
+      "turn_count": 14,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_004",
+      "members": [
+        "case_four:SPEAKER_03",
+        "sripetch:SPEAKER_06"
+      ],
+      "member_count": 2,
+      "sources": [
+        "case_four",
+        "sripetch"
+      ],
+      "turn_count": 9,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_005",
+      "members": [
+        "case_four:SPEAKER_04",
+        "case_three:SPEAKER_08",
+        "case_two:SPEAKER_03"
+      ],
+      "member_count": 3,
+      "sources": [
+        "case_four",
+        "case_three",
+        "case_two"
+      ],
+      "turn_count": 16,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_006",
+      "members": [
+        "case_four:SPEAKER_05",
+        "case_three:SPEAKER_07",
+        "case_two:SPEAKER_01",
+        "sripetch:SPEAKER_04"
+      ],
+      "member_count": 4,
+      "sources": [
+        "case_four",
+        "case_three",
+        "case_two",
+        "sripetch"
+      ],
+      "turn_count": 33,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_007",
+      "members": [
+        "case_four:SPEAKER_06",
+        "case_three:SPEAKER_06",
+        "case_two:SPEAKER_05",
+        "sripetch:SPEAKER_05"
+      ],
+      "member_count": 4,
+      "sources": [
+        "case_four",
+        "case_three",
+        "case_two",
+        "sripetch"
+      ],
+      "turn_count": 44,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_008",
+      "members": [
+        "case_four:SPEAKER_07",
+        "case_three:SPEAKER_05",
+        "sripetch:SPEAKER_10"
+      ],
+      "member_count": 3,
+      "sources": [
+        "case_four",
+        "case_three",
+        "sripetch"
+      ],
+      "turn_count": 15,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_009",
+      "members": [
+        "case_four:SPEAKER_08"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_four"
+      ],
+      "turn_count": 4,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_010",
+      "members": [
+        "case_four:SPEAKER_09"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_four"
+      ],
+      "turn_count": 14,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_011",
+      "members": [
+        "case_four:SPEAKER_10"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_four"
+      ],
+      "turn_count": 23,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_012",
+      "members": [
+        "case_four:SPEAKER_11",
+        "case_two:SPEAKER_07",
+        "sripetch:SPEAKER_09"
+      ],
+      "member_count": 3,
+      "sources": [
+        "case_four",
+        "case_two",
+        "sripetch"
+      ],
+      "turn_count": 13,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_013",
+      "members": [
+        "case_three:SPEAKER_01"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_three"
+      ],
+      "turn_count": 19,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_014",
+      "members": [
+        "case_three:SPEAKER_02"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_three"
+      ],
+      "turn_count": 2,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_015",
+      "members": [
+        "case_three:SPEAKER_03"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_three"
+      ],
+      "turn_count": 4,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_016",
+      "members": [
+        "case_three:SPEAKER_04"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_three"
+      ],
+      "turn_count": 22,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_017",
+      "members": [
+        "case_three:SPEAKER_09"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_three"
+      ],
+      "turn_count": 10,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_018",
+      "members": [
+        "case_three:SPEAKER_11"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_three"
+      ],
+      "turn_count": 5,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_019",
+      "members": [
+        "case_two:SPEAKER_02"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_two"
+      ],
+      "turn_count": 4,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_020",
+      "members": [
+        "case_two:SPEAKER_04"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_two"
+      ],
+      "turn_count": 16,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_021",
+      "members": [
+        "case_two:SPEAKER_06"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_two"
+      ],
+      "turn_count": 30,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_022",
+      "members": [
+        "case_two:SPEAKER_08"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_two"
+      ],
+      "turn_count": 2,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_023",
+      "members": [
+        "case_two:SPEAKER_10"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_two"
+      ],
+      "turn_count": 5,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_024",
+      "members": [
+        "case_two:UNKNOWN"
+      ],
+      "member_count": 1,
+      "sources": [
+        "case_two"
+      ],
+      "turn_count": 1,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_025",
+      "members": [
+        "sripetch:SPEAKER_01"
+      ],
+      "member_count": 1,
+      "sources": [
+        "sripetch"
+      ],
+      "turn_count": 30,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_026",
+      "members": [
+        "sripetch:SPEAKER_02"
+      ],
+      "member_count": 1,
+      "sources": [
+        "sripetch"
+      ],
+      "turn_count": 2,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_027",
+      "members": [
+        "sripetch:SPEAKER_03"
+      ],
+      "member_count": 1,
+      "sources": [
+        "sripetch"
+      ],
+      "turn_count": 3,
+      "same_source_duplicates": {}
+    },
+    {
+      "canonical_id": "person_028",
+      "members": [
+        "sripetch:SPEAKER_07"
+      ],
+      "member_count": 1,
+      "sources": [
+        "sripetch"
+      ],
+      "turn_count": 19,
+      "same_source_duplicates": {}
+    }
+  ],
+  "unknown_review_references": [],
+  "different_conflicts": [],
+  "unsure_inside_components": [],
+  "same_source_collisions": []
+}

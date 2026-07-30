@@ -202,7 +202,7 @@ wheels = [
 
 [[package]]
 name = "audio-search"
-version = "0.2.0"
+version = "0.4.0"
 source = { virtual = "." }
 dependencies = [
     { name = "dagster" },
@@ -214,8 +214,11 @@ dependencies = [
     { name = "pyannote-audio" },
     { name = "pydantic" },
     { name = "rank-bm25" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
     { name = "sentence-transformers" },
     { name = "torchcodec" },
+    { name = "transformers" },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
@@ -238,8 +241,12 @@ requires-dist = [
     { name = "pyannote-audio", specifier = ">=4.0.7" },
     { name = "pydantic", specifier = "==2.13.4" },
     { name = "rank-bm25", specifier = "==0.2.2" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
     { name = "sentence-transformers", specifier = "==5.6.0" },
     { name = "torchcodec", specifier = ">=0.13,<0.16" },
+    { name = "transformers" },
+    { name = "transformers", specifier = ">=5.14.1" },
     { name = "uvicorn", extras = ["standard"], specifier = "==0.51.0" },
 ]
 

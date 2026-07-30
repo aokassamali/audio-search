@@ -1,0 +1,122 @@
+{
+  "minimum_words": 8,
+  "target_count": 300,
+  "current_gold_count": 80,
+  "additional_turns_needed": 220,
+  "total_eligible_turns": 808,
+  "total_remaining_turns": 728,
+  "enough_remaining_turns": true,
+  "sources": {
+    "sripetch": {
+      "status": "ready",
+      "source_id": "Sripetch_vs_SEC",
+      "eligible_turns": 156,
+      "already_sampled": 80,
+      "remaining_turns": 76,
+      "speaker_count": 11,
+      "speaker_turn_counts": {
+        "Sripetch_vs_SEC:SPEAKER_01": 48,
+        "Sripetch_vs_SEC:SPEAKER_07": 28,
+        "Sripetch_vs_SEC:SPEAKER_05": 21,
+        "Sripetch_vs_SEC:SPEAKER_04": 15,
+        "Sripetch_vs_SEC:SPEAKER_08": 14,
+        "Sripetch_vs_SEC:SPEAKER_00": 8,
+        "Sripetch_vs_SEC:SPEAKER_10": 6,
+        "Sripetch_vs_SEC:SPEAKER_09": 5,
+        "Sripetch_vs_SEC:SPEAKER_02": 4,
+        "Sripetch_vs_SEC:SPEAKER_03": 4,
+        "Sripetch_vs_SEC:SPEAKER_06": 3
+      },
+      "duration_seconds": {
+        "minimum": 2.0,
+        "median": 18.5,
+        "p90": 52.0,
+        "maximum": 202.0
+      }
+    },
+    "case_two": {
+      "status": "ready",
+      "source_id": "Blanche_vs._Lau",
+      "eligible_turns": 203,
+      "already_sampled": 0,
+      "remaining_turns": 203,
+      "speaker_count": 12,
+      "speaker_turn_counts": {
+        "Blanche_vs._Lau:SPEAKER_06": 57,
+        "Blanche_vs._Lau:SPEAKER_04": 42,
+        "Blanche_vs._Lau:SPEAKER_05": 21,
+        "Blanche_vs._Lau:SPEAKER_00": 18,
+        "Blanche_vs._Lau:SPEAKER_01": 15,
+        "Blanche_vs._Lau:SPEAKER_02": 13,
+        "Blanche_vs._Lau:SPEAKER_10": 12,
+        "Blanche_vs._Lau:SPEAKER_03": 9,
+        "Blanche_vs._Lau:SPEAKER_08": 7,
+        "Blanche_vs._Lau:SPEAKER_07": 6,
+        "Blanche_vs._Lau:SPEAKER_09": 2,
+        "Blanche_vs._Lau:UNKNOWN": 1
+      },
+      "duration_seconds": {
+        "minimum": 1.7200000000000273,
+        "median": 16.079999999999927,
+        "p90": 49.648000000000046,
+        "maximum": 310.8799999999992
+      }
+    },
+    "case_three": {
+      "status": "ready",
+      "source_id": "Mullin_vs._Doe",
+      "eligible_turns": 242,
+      "already_sampled": 0,
+      "remaining_turns": 242,
+      "speaker_count": 12,
+      "speaker_turn_counts": {
+        "Mullin_vs._Doe:SPEAKER_04": 57,
+        "Mullin_vs._Doe:SPEAKER_01": 37,
+        "Mullin_vs._Doe:SPEAKER_07": 27,
+        "Mullin_vs._Doe:SPEAKER_06": 25,
+        "Mullin_vs._Doe:SPEAKER_09": 23,
+        "Mullin_vs._Doe:SPEAKER_08": 22,
+        "Mullin_vs._Doe:SPEAKER_05": 11,
+        "Mullin_vs._Doe:SPEAKER_03": 9,
+        "Mullin_vs._Doe:SPEAKER_02": 9,
+        "Mullin_vs._Doe:SPEAKER_00": 8,
+        "Mullin_vs._Doe:SPEAKER_11": 8,
+        "Mullin_vs._Doe:SPEAKER_10": 6
+      },
+      "duration_seconds": {
+        "minimum": 1.400000000000091,
+        "median": 17.100000000000364,
+        "p90": 60.360000000000085,
+        "maximum": 185.0
+      }
+    },
+    "case_four": {
+      "status": "ready",
+      "source_id": "Cisco_vs_Doe",
+      "eligible_turns": 207,
+      "already_sampled": 0,
+      "remaining_turns": 207,
+      "speaker_count": 12,
+      "speaker_turn_counts": {
+        "Cisco_vs_Doe:SPEAKER_10": 38,
+        "Cisco_vs_Doe:SPEAKER_09": 33,
+        "Cisco_vs_Doe:SPEAKER_01": 32,
+        "Cisco_vs_Doe:SPEAKER_06": 24,
+        "Cisco_vs_Doe:SPEAKER_05": 15,
+        "Cisco_vs_Doe:SPEAKER_03": 12,
+        "Cisco_vs_Doe:SPEAKER_02": 11,
+        "Cisco_vs_Doe:SPEAKER_11": 10,
+        "Cisco_vs_Doe:SPEAKER_04": 10,
+        "Cisco_vs_Doe:SPEAKER_00": 9,
+        "Cisco_vs_Doe:SPEAKER_08": 7,
+        "Cisco_vs_Doe:SPEAKER_07": 6
+      },
+      "duration_seconds": {
+        "minimum": 1.7200000000002547,
+        "median": 20.8799999999992,
+        "p90": 77.66400000000013,
+        "maximum": 190.60000000000036
+      }
+    }
+  }
+}

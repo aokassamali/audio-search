@@ -1,0 +1,4770 @@
+{
+  "schema_version": "1.0",
+  "task": "four-class permissive speech-act classification",
+  "modality": "TF-IDF text plus WavLM layer 10",
+  "evaluation_status": "canonical cross-case speaker groups",
+  "c_values": [
+    0.01,
+    0.1,
+    1.0,
+    10.0,
+    100.0
+  ],
+  "audio_weights": [
+    0.0,
+    0.03,
+    0.1,
+    0.3,
+    1.0
+  ],
+  "wavlm_layer": 10,
+  "overall": {
+    "accuracy": 0.69,
+    "macro_f1": 0.3656351672186886,
+    "per_class": {
+      "assertion": {
+        "precision": 0.7990430622009569,
+        "recall": 0.73568281938326,
+        "f1": 0.7660550458715596,
+        "support": 227
+      },
+      "question": {
+        "precision": 0.630057803468208,
+        "recall": 0.7785714285714286,
+        "f1": 0.6964856230031949,
+        "support": 140
+      },
+      "characterization": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 20
+      },
+      "hypothetical": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 13
+      }
+    }
+  },
+  "easy": {
+    "accuracy": 0.7491289198606271,
+    "macro_f1": 0.3827186934353972,
+    "per_class": {
+      "assertion": {
+        "precision": 0.8853503184713376,
+        "recall": 0.7473118279569892,
+        "f1": 0.8104956268221575,
+        "support": 186
+      },
+      "question": {
+        "precision": 0.6608695652173913,
+        "recall": 0.7916666666666666,
+        "f1": 0.7203791469194313,
+        "support": 96
+      },
+      "characterization": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 4
+      },
+      "hypothetical": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      }
+    }
+  },
+  "hard": {
+    "accuracy": 0.5398230088495575,
+    "macro_f1": 0.3123023402909551,
+    "per_class": {
+      "assertion": {
+        "precision": 0.5384615384615384,
+        "recall": 0.6829268292682927,
+        "f1": 0.6021505376344086,
+        "support": 41
+      },
+      "question": {
+        "precision": 0.5689655172413793,
+        "recall": 0.75,
+        "f1": 0.6470588235294118,
+        "support": 44
+      },
+      "characterization": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 16
+      },
+      "hypothetical": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 12
+      }
+    }
+  },
+  "fold_macro_f1_mean": 0.3628690044212285,
+  "fold_macro_f1_std": 0.0400280871492964,
+  "folds": [
+    {
+      "fold": 1,
+      "train_size": 304,
+      "test_size": 96,
+      "selected_c": 10.0,
+      "selected_audio_weight": 0.1,
+      "accuracy": 0.7604166666666666,
+      "macro_f1": 0.39028864970645794,
+      "inner_search": [
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.31700063869260603,
+          "fold_macro_f1": [
+            0.2625871908687381,
+            0.37037037037037035,
+            0.3180443548387097
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.31663764274816264,
+          "fold_macro_f1": [
+            0.30007664793050587,
+            0.2657942787583688,
+            0.3840420015556132
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.32472639332781816,
+          "fold_macro_f1": [
+            0.29705215419501135,
+            0.2859259259259259,
+            0.39120109986251717
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.35405681021730534,
+          "fold_macro_f1": [
+            0.3517377064094982,
+            0.2944194194194194,
+            0.41601330482299836
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.353037968181164,
+          "fold_macro_f1": [
+            0.31129032258064515,
+            0.32580469176213855,
+            0.4220188902007084
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.29457718350261003,
+          "fold_macro_f1": [
+            0.29291139240506325,
+            0.27445652173913043,
+            0.31636363636363635
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.32585999120245057,
+          "fold_macro_f1": [
+            0.30621339444868856,
+            0.2604513503514614,
+            0.41091522880720177
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.338057799457321,
+          "fold_macro_f1": [
+            0.3093506493506494,
+            0.29407894736842105,
+            0.4107438016528926
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.34764955654704205,
+          "fold_macro_f1": [
+            0.30957446808510636,
+            0.31135531135531136,
+            0.4220188902007084
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.3456525433146274,
+          "fold_macro_f1": [
+            0.29982493940210075,
+            0.3263888888888889,
+            0.4107438016528926
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.28800513115516174,
+          "fold_macro_f1": [
+            0.28205128205128205,
+            0.28475199020208203,
+            0.2972121212121212
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.3297551280289016,
+          "fold_macro_f1": [
+            0.3058035714285714,
+            0.27254658385093167,
+            0.41091522880720177
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.33924432562517964,
+          "fold_macro_f1": [
+            0.310570987654321,
+            0.29043663710854195,
+            0.41672535211267603
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.3473113825411908,
+          "fold_macro_f1": [
+            0.3002087955108965,
+            0.32499999999999996,
+            0.41672535211267603
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.34169796968283683,
+          "fold_macro_f1": [
+            0.2911184210526315,
+            0.32845905607099635,
+            0.4055164319248826
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.27621237406847743,
+          "fold_macro_f1": [
+            0.2755794234030526,
+            0.2630699088145897,
+            0.28998778998778996
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.3328125934164053,
+          "fold_macro_f1": [
+            0.3330039525691699,
+            0.28367539514036333,
+            0.38175843253968256
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.35501990927543736,
+          "fold_macro_f1": [
+            0.3164313222079589,
+            0.3294670846394984,
+            0.41916132097885483
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.34466484146351856,
+          "fold_macro_f1": [
+            0.2947916666666667,
+            0.32845905607099635,
+            0.4107438016528926
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.3384936717865267,
+          "fold_macro_f1": [
+            0.28891129032258067,
+            0.3235042735042735,
+            0.40306545153272577
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.2767052056301363,
+          "fold_macro_f1": [
+            0.2800599058622165,
+            0.26316334991708124,
+            0.2868923611111111
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.3332265683837486,
+          "fold_macro_f1": [
+            0.3383388950685947,
+            0.2848029163818637,
+            0.3765378937007874
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.35071580071299335,
+          "fold_macro_f1": [
+            0.30896016291205297,
+            0.32530058043117743,
+            0.4178866587957497
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.3401908004490403,
+          "fold_macro_f1": [
+            0.3125404845187201,
+            0.3137244050913116,
+            0.3943075117370892
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.3322838954319827,
+          "fold_macro_f1": [
+            0.29440789473684215,
+            0.31329454858866623,
+            0.3891492429704398
+          ]
+        }
+      ]
+    },
+    {
+      "fold": 2,
+      "train_size": 306,
+      "test_size": 94,
+      "selected_c": 0.01,
+      "selected_audio_weight": 0.03,
+      "accuracy": 0.5851063829787234,
+      "macro_f1": 0.31003300330033,
+      "inner_search": [
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.3414991491953316,
+          "fold_macro_f1": [
+            0.4169047619047619,
+            0.30632456973920386,
+            0.30126811594202896
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.3929089338331713,
+          "fold_macro_f1": [
+            0.4930057388809182,
+            0.29412442396313365,
+            0.3915966386554622
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.3514160534573597,
+          "fold_macro_f1": [
+            0.34776199410345754,
+            0.3149342594889606,
+            0.391551906779661
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.36016619433337493,
+          "fold_macro_f1": [
+            0.3651825584449698,
+            0.3367257742257742,
+            0.37859025032938076
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.3819515154325281,
+          "fold_macro_f1": [
+            0.40620253164556963,
+            0.3416666666666667,
+            0.397985347985348
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.2946315677963215,
+          "fold_macro_f1": [
+            0.2882834757834758,
+            0.28846153846153844,
+            0.30714968914395024
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.3611445479854143,
+          "fold_macro_f1": [
+            0.37612773029439694,
+            0.30611543747136966,
+            0.4011904761904762
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.37291081511249385,
+          "fold_macro_f1": [
+            0.38318452380952384,
+            0.34724742891712035,
+            0.38830049261083743
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.38183666864571403,
+          "fold_macro_f1": [
+            0.40620253164556963,
+            0.34132212630622444,
+            0.397985347985348
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.382506652162007,
+          "fold_macro_f1": [
+            0.3947966658247032,
+            0.36198945981554675,
+            0.3907338308457712
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.29989883667031064,
+          "fold_macro_f1": [
+            0.2783295136236313,
+            0.3008239031169347,
+            0.320543093270366
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.3880024172342517,
+          "fold_macro_f1": [
+            0.39808879392212726,
+            0.359306887532694,
+            0.40661157024793393
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.38747921985884115,
+          "fold_macro_f1": [
+            0.41048824593128386,
+            0.3516226162596186,
+            0.40032679738562094
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.3846149830565539,
+          "fold_macro_f1": [
+            0.3947966658247032,
+            0.36198945981554675,
+            0.39705882352941174
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.3767410271915919,
+          "fold_macro_f1": [
+            0.38863521055301875,
+            0.35528500276701713,
+            0.3863028682547399
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.30021567860181664,
+          "fold_macro_f1": [
+            0.2870609504132231,
+            0.2950184144213995,
+            0.3185676709708274
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.385600113208392,
+          "fold_macro_f1": [
+            0.4017986479961372,
+            0.34786399302528337,
+            0.4071376986037554
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.3870176461709304,
+          "fold_macro_f1": [
+            0.398592062143464,
+            0.3611111111111111,
+            0.401349765258216
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.38102966463166327,
+          "fold_macro_f1": [
+            0.3947966658247032,
+            0.36198945981554675,
+            0.3863028682547399
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.3747973221214422,
+          "fold_macro_f1": [
+            0.39392201834862384,
+            0.3491674270072993,
+            0.38130252100840334
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.30042992148315056,
+          "fold_macro_f1": [
+            0.2870609504132231,
+            0.2950184144213995,
+            0.3192103996148291
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.3881531051871561,
+          "fold_macro_f1": [
+            0.4017986479961372,
+            0.3670179135932561,
+            0.3956427539720751
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.3859811393168485,
+          "fold_macro_f1": [
+            0.39575757575757575,
+            0.372960372960373,
+            0.3892254692325968
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.37407867441700465,
+          "fold_macro_f1": [
+            0.379917054166143,
+            0.3522324997145141,
+            0.39008646937035685
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.35719712244539786,
+          "fold_macro_f1": [
+            0.37607843137254904,
+            0.32028535980148887,
+            0.37522757616215563
+          ]
+        }
+      ]
+    },
+    {
+      "fold": 3,
+      "train_size": 291,
+      "test_size": 109,
+      "selected_c": 10.0,
+      "selected_audio_weight": 1.0,
+      "accuracy": 0.6422018348623854,
+      "macro_f1": 0.33992248062015507,
+      "inner_search": [
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.29252216278031357,
+          "fold_macro_f1": [
+            0.2924369747899159,
+            0.2838785046728972,
+            0.3012510088781275
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.3449014896812829,
+          "fold_macro_f1": [
+            0.2626063001557073,
+            0.37276557711950975,
+            0.3993325917686318
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.32057061642492996,
+          "fold_macro_f1": [
+            0.24506496751624188,
+            0.3652467010900746,
+            0.35140018066847334
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.31655657092658385,
+          "fold_macro_f1": [
+            0.2417517674783975,
+            0.35941091954022986,
+            0.34850702576112413
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.3448265139963799,
+          "fold_macro_f1": [
+            0.2708074534161491,
+            0.37479838709677415,
+            0.3888737014762165
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.30165870301074155,
+          "fold_macro_f1": [
+            0.28071163157302104,
+            0.30352411234764176,
+            0.3207403651115619
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.3495222537629498,
+          "fold_macro_f1": [
+            0.2512276919391544,
+            0.3899099774943736,
+            0.4074290918553214
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.33274007110871057,
+          "fold_macro_f1": [
+            0.23937538273116965,
+            0.39263199369582347,
+            0.36621283689913864
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.3475773283463707,
+          "fold_macro_f1": [
+            0.2708074534161491,
+            0.3780585106382979,
+            0.39386602098466506
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.34687633137127016,
+          "fold_macro_f1": [
+            0.26919779546846295,
+            0.3719520319786809,
+            0.39947916666666666
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.30917967001663166,
+          "fold_macro_f1": [
+            0.27883151855754595,
+            0.32026546250684185,
+            0.32844202898550723
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.36366267202958474,
+          "fold_macro_f1": [
+            0.28778553674991125,
+            0.39962121212121215,
+            0.4035812672176309
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.34664289534545234,
+          "fold_macro_f1": [
+            0.2646298472385429,
+            0.37916666666666665,
+            0.39613217213114754
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.3471066638180984,
+          "fold_macro_f1": [
+            0.26919779546846295,
+            0.37916666666666665,
+            0.39295552931916566
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.34157162763814136,
+          "fold_macro_f1": [
+            0.26945812807881775,
+            0.3689532117367169,
+            0.3863035430988895
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.30179788526347257,
+          "fold_macro_f1": [
+            0.26964285714285713,
+            0.32010353753235543,
+            0.31564726111520514
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.36312720007213023,
+          "fold_macro_f1": [
+            0.2944915254237288,
+            0.39876872302614874,
+            0.3961213517665131
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.3459883740896632,
+          "fold_macro_f1": [
+            0.266709361900326,
+            0.37916666666666665,
+            0.3920890937019969
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.3460495966818241,
+          "fold_macro_f1": [
+            0.2762400489895897,
+            0.3689532117367169,
+            0.39295552931916566
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.36694071603075984,
+          "fold_macro_f1": [
+            0.3320802005012531,
+            0.3712009639844691,
+            0.3975409836065574
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.2986829587960841,
+          "fold_macro_f1": [
+            0.2626063001557073,
+            0.31526075805072673,
+            0.3181818181818182
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.3581249509208553,
+          "fold_macro_f1": [
+            0.29188405797101447,
+            0.3863694430250383,
+            0.3961213517665131
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.34628057637212895,
+          "fold_macro_f1": [
+            0.266709361900326,
+            0.38004327351406386,
+            0.3920890937019969
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.36327585616773256,
+          "fold_macro_f1": [
+            0.3290903890160183,
+            0.37740384615384615,
+            0.3833333333333333
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.36398610639181483,
+          "fold_macro_f1": [
+            0.325,
+            0.3734567901234568,
+            0.39350152905198776
+          ]
+        }
+      ]
+    },
+    {
+      "fold": 4,
+      "train_size": 299,
+      "test_size": 101,
+      "selected_c": 10.0,
+      "selected_audio_weight": 1.0,
+      "accuracy": 0.7722772277227723,
+      "macro_f1": 0.41123188405797106,
+      "inner_search": [
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.2664451472684193,
+          "fold_macro_f1": [
+            0.30046113306982875,
+            0.2501336898395722,
+            0.24874061889585689
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.3237099933687574,
+          "fold_macro_f1": [
+            0.3298080963720409,
+            0.3568840579710145,
+            0.2844378257632167
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.307456337235749,
+          "fold_macro_f1": [
+            0.3299145299145299,
+            0.3195378151260504,
+            0.2729166666666667
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.3506641754106257,
+          "fold_macro_f1": [
+            0.3881822999470058,
+            0.3408422459893048,
+            0.3229679802955665
+          ]
+        },
+        {
+          "c_value": 0.01,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.3766654095409254,
+          "fold_macro_f1": [
+            0.40161993769470405,
+            0.35347985347985345,
+            0.3748964374482187
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.2818239900100199,
+          "fold_macro_f1": [
+            0.3079099597585513,
+            0.26811974789915966,
+            0.2694422623723488
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.34299118912741894,
+          "fold_macro_f1": [
+            0.3573667711598746,
+            0.3548387096774194,
+            0.3167680865449628
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.3638369138369138,
+          "fold_macro_f1": [
+            0.39028314028314026,
+            0.35347985347985345,
+            0.34774774774774775
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.37572309066507614,
+          "fold_macro_f1": [
+            0.40161993769470405,
+            0.3568840579710145,
+            0.3686652763295099
+          ]
+        },
+        {
+          "c_value": 0.1,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.38271054042180014,
+          "fold_macro_f1": [
+            0.3966432185610268,
+            0.3647214854111406,
+            0.3867669172932331
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.2918322512951669,
+          "fold_macro_f1": [
+            0.3118401206636501,
+            0.28160535117056856,
+            0.28205128205128205
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.35606032134525695,
+          "fold_macro_f1": [
+            0.3642857142857143,
+            0.3645509874549745,
+            0.33934426229508197
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.3781175629206559,
+          "fold_macro_f1": [
+            0.4043425076452599,
+            0.3621530382595649,
+            0.3678571428571429
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.3826865066477664,
+          "fold_macro_f1": [
+            0.39475293542074363,
+            0.3647214854111406,
+            0.3885850991114149
+          ]
+        },
+        {
+          "c_value": 1.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.3835978327104398,
+          "fold_macro_f1": [
+            0.3915233415233415,
+            0.3667262969588551,
+            0.3925438596491228
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.3001438575406969,
+          "fold_macro_f1": [
+            0.30946014769544183,
+            0.29059829059829057,
+            0.3003731343283582
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.35760440777121727,
+          "fold_macro_f1": [
+            0.3461394302848576,
+            0.36875,
+            0.3579237930287941
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.384061084636611,
+          "fold_macro_f1": [
+            0.4009009009009009,
+            0.3712271152894607,
+            0.3800552377194713
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.3834918653884171,
+          "fold_macro_f1": [
+            0.3915233415233415,
+            0.3647214854111406,
+            0.3942307692307693
+          ]
+        },
+        {
+          "c_value": 10.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.39423776568046753,
+          "fold_macro_f1": [
+            0.379917054166143,
+            0.430905695611578,
+            0.3718905472636816
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.0,
+          "mean_macro_f1": 0.2933079805265667,
+          "fold_macro_f1": [
+            0.30946014769544183,
+            0.2828048113723346,
+            0.2876589825119237
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.03,
+          "mean_macro_f1": 0.35583328810908366,
+          "fold_macro_f1": [
+            0.3447924624395213,
+            0.36363636363636365,
+            0.3590710382513661
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.1,
+          "mean_macro_f1": 0.38395413455046024,
+          "fold_macro_f1": [
+            0.39475293542074363,
+            0.3712271152894607,
+            0.38588235294117645
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 0.3,
+          "mean_macro_f1": 0.37915010245893177,
+          "fold_macro_f1": [
+            0.3936249073387694,
+            0.3721227621483376,
+            0.37170263788968827
+          ]
+        },
+        {
+          "c_value": 100.0,
+          "audio_weight": 1.0,
+          "mean_macro_f1": 0.35595515549184503,
+          "fold_macro_f1": [
+            0.36425217974513746,
+            0.33774880852256794,
+            0.36586447820782964
+          ]
+        }
+      ]
+    }
+  ],
+  "comparison_to_tfidf": {
+    "text_macro_f1": 0.30041197727710106,
+    "fusion_macro_f1": 0.3656351672186886,
+    "macro_f1_difference": 0.06522318994158754,
+    "unchanged": 243,
+    "fixes": 90,
+    "regressions": 49,
+    "wrong_to_wrong": 18
+  },
+  "predictions": [
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0003",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9097915808219215,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0004",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.8362383174434247,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0005",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9991279173464612,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0006",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.6356954354010459,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0009",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.9999813343284856,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0010",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.5641952944281193,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0012",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.999955114047199,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0013",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8842498183171108,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0014",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.950370092427106,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0020",
+      "gold_label": "question",
+      "predicted_label": "characterization",
+      "confidence": 0.446477443066539,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0021",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.9999871111713561,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0022",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.25963732051700456,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0023",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9955018813323994,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0025",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9995517257752147,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0027",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8284650790173043,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0035",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9973357111001309,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0037",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.999668135216943,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0038",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9031288397628823,
+      "difficulty": "hard",
+      "canonical_group": "person_026",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0041",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9981327160368695,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0042",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2538496396720443,
+      "difficulty": "hard",
+      "canonical_group": "person_027",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0043",
+      "gold_label": "hypothetical",
+      "predicted_label": "assertion",
+      "confidence": 0.9929792786590673,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0044",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.25601547633806493,
+      "difficulty": "easy",
+      "canonical_group": "person_027",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0048",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9996754239269839,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0049",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.9996934347933213,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0053",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9994707245892598,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0056",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8137564065331337,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0058",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.5232436592417615,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0062",
+      "gold_label": "characterization",
+      "predicted_label": "question",
+      "confidence": 0.9853159013411248,
+      "difficulty": "hard",
+      "canonical_group": "person_026",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0063",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.9975540708354852,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0066",
+      "gold_label": "hypothetical",
+      "predicted_label": "question",
+      "confidence": 0.26347265655180785,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0067",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.6068787121623295,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0072",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2633994080515811,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0074",
+      "gold_label": "characterization",
+      "predicted_label": "question",
+      "confidence": 0.2650567253874131,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0075",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.5522385082448917,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0078",
+      "gold_label": "hypothetical",
+      "predicted_label": "question",
+      "confidence": 0.2540002969060322,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0079",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.999572738928767,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0080",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.27466105731460594,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0081",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9212862236274811,
+      "difficulty": "hard",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0085",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.7922356458945837,
+      "difficulty": "easy",
+      "canonical_group": "person_004",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0086",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9868752141028422,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0089",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.8746744467246186,
+      "difficulty": "easy",
+      "canonical_group": "person_004",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0091",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.6933675244428203,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0092",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9929970409168348,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0093",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9969029208904848,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0098",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9992289414779821,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0101",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9773789419399529,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0106",
+      "gold_label": "hypothetical",
+      "predicted_label": "assertion",
+      "confidence": 0.9620339658439323,
+      "difficulty": "hard",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0110",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9424107842535806,
+      "difficulty": "easy",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0111",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.48003950686563146,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0113",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.46309970814984014,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0114",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.4985624884052174,
+      "difficulty": "hard",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0116",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.5110768707668147,
+      "difficulty": "easy",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0117",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9937763280378398,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0121",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9998939651180879,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0122",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9997591336979863,
+      "difficulty": "easy",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0124",
+      "gold_label": "hypothetical",
+      "predicted_label": "assertion",
+      "confidence": 0.9999727258261929,
+      "difficulty": "hard",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0125",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.7589561337853123,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0127",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.5035992699678518,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0128",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9923645490267258,
+      "difficulty": "easy",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0129",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.9998113335102051,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0132",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9798337609649697,
+      "difficulty": "easy",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0137",
+      "gold_label": "hypothetical",
+      "predicted_label": "assertion",
+      "confidence": 0.8758350302962599,
+      "difficulty": "hard",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0138",
+      "gold_label": "hypothetical",
+      "predicted_label": "assertion",
+      "confidence": 0.6930585895382677,
+      "difficulty": "hard",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0139",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9971687922418844,
+      "difficulty": "hard",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0143",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8714348672459674,
+      "difficulty": "hard",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0144",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9997515557451327,
+      "difficulty": "hard",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0146",
+      "gold_label": "hypothetical",
+      "predicted_label": "question",
+      "confidence": 0.6814229810547059,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0147",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.3565779427772621,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0149",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8654749791711277,
+      "difficulty": "hard",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0150",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9977607839757746,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0152",
+      "gold_label": "question",
+      "predicted_label": "hypothetical",
+      "confidence": 0.9031926967536507,
+      "difficulty": "hard",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0154",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.253824353754712,
+      "difficulty": "easy",
+      "canonical_group": "person_027",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0158",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2533458151990554,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0161",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.9800166382384748,
+      "difficulty": "hard",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0163",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.7559007635234853,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0164",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.25701290947215955,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0165",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9945708305163663,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0167",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9841853697993089,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0168",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9387201982756145,
+      "difficulty": "easy",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0169",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.999615988665733,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0001",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999434265320708,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0002",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.5293822353041093,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0016",
+      "gold_label": "question",
+      "predicted_label": "characterization",
+      "confidence": 0.9577512795586907,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0029",
+      "gold_label": "hypothetical",
+      "predicted_label": "assertion",
+      "confidence": 0.9990546494015339,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0039",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.999286741884337,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0045",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9938186472145887,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0052",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.8853601039064515,
+      "difficulty": "hard",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0057",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9696123198668569,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0069",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.9991155414711306,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0071",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.9999575007069585,
+      "difficulty": "hard",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0083",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.5890613558688058,
+      "difficulty": "hard",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0084",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9999990399001005,
+      "difficulty": "easy",
+      "canonical_group": "person_025",
+      "fold": 4
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0109",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8401110850583334,
+      "difficulty": "hard",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0130",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9998069806583998,
+      "difficulty": "easy",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0131",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9993445641274171,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0134",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9964799448189514,
+      "difficulty": "easy",
+      "canonical_group": "person_028",
+      "fold": 3
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0136",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9924868622736919,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0156",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2654054728817875,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0160",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2604151982084342,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Sripetch_vs_SEC:turn_0166",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2577791310467501,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0000",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9257297346393535,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0006",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9194713310074638,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0007",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2662081955075548,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0009",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2653919619016859,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0013",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2648661161940617,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0015",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.26145860281095296,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0016",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.9927343001081629,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0017",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.25730155321590786,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0018",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9702080867307996,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0020",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9497206121477698,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0021",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.8885281791842126,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0023",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9969738692874283,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0027",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9083280278475176,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0029",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9031705918889398,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0030",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9590213147199943,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0032",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.968789889996796,
+      "difficulty": "hard",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0033",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.8695009308520174,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0034",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9842045808317043,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0043",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.8799470024443226,
+      "difficulty": "easy",
+      "canonical_group": "person_019",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0045",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9363832958362661,
+      "difficulty": "easy",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0046",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8697943710492815,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0047",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9767994839811375,
+      "difficulty": "easy",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0048",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8968706649164858,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0050",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9509208136143329,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0054",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8767887120401165,
+      "difficulty": "hard",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0058",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9854748962569825,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0059",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2803904562217965,
+      "difficulty": "easy",
+      "canonical_group": "person_022",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0060",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8386222267044137,
+      "difficulty": "hard",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0065",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8437701735806915,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0067",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9882545344302094,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0068",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.26276827171753847,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0069",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9643040504724723,
+      "difficulty": "hard",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0070",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.26914190531007215,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0071",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9835204855047919,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0076",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2636647140081466,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0079",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.903379330618259,
+      "difficulty": "hard",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0080",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.26492260752428487,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0081",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8057522760107082,
+      "difficulty": "hard",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0083",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.46576584374885677,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0085",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.822264183691022,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0090",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2641129013533021,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0097",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9562166124592325,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0098",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9954905264419988,
+      "difficulty": "easy",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0099",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.983278700866842,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0104",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9999985581497405,
+      "difficulty": "easy",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0105",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9892621948061647,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0108",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9717621148352031,
+      "difficulty": "easy",
+      "canonical_group": "person_023",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0110",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9999999511121893,
+      "difficulty": "hard",
+      "canonical_group": "person_023",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0113",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9751390431000074,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0118",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.7417297906313599,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0119",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9961870494561387,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0120",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.860348522752272,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0122",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9450060045845242,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0125",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.7659858240405912,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0127",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.8484951612603315,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0130",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8854470192701465,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0131",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.6492423596933711,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0132",
+      "gold_label": "hypothetical",
+      "predicted_label": "assertion",
+      "confidence": 0.9969474404496769,
+      "difficulty": "hard",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0134",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9946188795113287,
+      "difficulty": "easy",
+      "canonical_group": "person_021",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0137",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9090283832795588,
+      "difficulty": "hard",
+      "canonical_group": "person_024",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0138",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9965812730603107,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0139",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.27260906820187264,
+      "difficulty": "easy",
+      "canonical_group": "person_022",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0143",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.4564625217697295,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0145",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.38977108318133524,
+      "difficulty": "hard",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0146",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9992298577695587,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0147",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9580933374698832,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0151",
+      "gold_label": "hypothetical",
+      "predicted_label": "question",
+      "confidence": 0.8391840149375127,
+      "difficulty": "hard",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0152",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9991866588304195,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0153",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.5349715900355763,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0155",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.6342848751320963,
+      "difficulty": "hard",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0157",
+      "gold_label": "hypothetical",
+      "predicted_label": "question",
+      "confidence": 0.800154163095958,
+      "difficulty": "hard",
+      "canonical_group": "person_019",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0159",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9994949362258204,
+      "difficulty": "hard",
+      "canonical_group": "person_019",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0162",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9888418423669801,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0168",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.5157007163283072,
+      "difficulty": "hard",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0169",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9518526530423053,
+      "difficulty": "easy",
+      "canonical_group": "person_023",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0170",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.796298131002947,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0171",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9991190598081277,
+      "difficulty": "hard",
+      "canonical_group": "person_023",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0172",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.7890604330665312,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0174",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9589089709060461,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0175",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9448806711862134,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0176",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9850309930708843,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0178",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999052410257906,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0179",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2711367912394985,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0183",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9999223666806519,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0184",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9278894507583961,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0185",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9999679975378136,
+      "difficulty": "easy",
+      "canonical_group": "person_019",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0188",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999776679555773,
+      "difficulty": "hard",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0195",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.5397002004685864,
+      "difficulty": "easy",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0196",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999940478573345,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0197",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.870244664148952,
+      "difficulty": "easy",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0198",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9826749211026252,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0201",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.7121861280836546,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0211",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.6163740991427388,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0217",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.8986443348644375,
+      "difficulty": "easy",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0219",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9916988842852512,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0221",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9858108642882052,
+      "difficulty": "easy",
+      "canonical_group": "person_020",
+      "fold": 3
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0222",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2761368576854574,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0224",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.26221403767213586,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0229",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.7285337802793099,
+      "difficulty": "easy",
+      "canonical_group": "person_023",
+      "fold": 4
+    },
+    {
+      "turn_id": "Blanche_vs._Lau:turn_0230",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.5728183488440406,
+      "difficulty": "easy",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0000",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2576740944834229,
+      "difficulty": "easy",
+      "canonical_group": "person_015",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0002",
+      "gold_label": "question",
+      "predicted_label": "characterization",
+      "confidence": 0.6315746869423732,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0004",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9997812676793683,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0005",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.7771435636778283,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0006",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9999995787819311,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0007",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9999743190109415,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0013",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9998523125897333,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0015",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9474781054133303,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0018",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9996917755258624,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0019",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9994943405474396,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0020",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9994397504100834,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0022",
+      "gold_label": "characterization",
+      "predicted_label": "question",
+      "confidence": 0.2641995242944906,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0033",
+      "gold_label": "characterization",
+      "predicted_label": "assertion",
+      "confidence": 0.9976046873668363,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0035",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.845772145500412,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0036",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9769558935702959,
+      "difficulty": "hard",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0037",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.7729058970531139,
+      "difficulty": "hard",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0041",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9857646475762243,
+      "difficulty": "hard",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0043",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.999957236088263,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0048",
+      "gold_label": "hypothetical",
+      "predicted_label": "question",
+      "confidence": 0.2656555696597003,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0049",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999999999983802,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0054",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.26021653840950865,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0059",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9909635016773525,
+      "difficulty": "hard",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0062",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.998178938512208,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0063",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9998071572335628,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0064",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9932023421977761,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0066",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.7885192653999019,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0071",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.622478239857172,
+      "difficulty": "hard",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0073",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.5390187248342105,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0074",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9996405638420446,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0076",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8730925361269645,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0080",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9939447781801698,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0085",
+      "gold_label": "characterization",
+      "predicted_label": "question",
+      "confidence": 0.9994485678058943,
+      "difficulty": "hard",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0086",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999515041379942,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0087",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.5227510751581883,
+      "difficulty": "easy",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0090",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9997089885441147,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0093",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.5593876375311818,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0099",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999880926846175,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0100",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.26797299878928404,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0101",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9992433302391627,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0102",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.2519985446661325,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0117",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9800362168503876,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0121",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.73240016897331,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0122",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9986822560779517,
+      "difficulty": "easy",
+      "canonical_group": "person_016",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0128",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9997417223528329,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0130",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999475770142155,
+      "difficulty": "hard",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0131",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.8929767405341763,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0132",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9997298513794963,
+      "difficulty": "hard",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0133",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9824728169639492,
+      "difficulty": "hard",
+      "canonical_group": "person_018",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0134",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9988051991557596,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0140",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999756807137526,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0141",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.6160781398798288,
+      "difficulty": "hard",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0142",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9998475315349691,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0147",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.8861841044320803,
+      "difficulty": "easy",
+      "canonical_group": "person_018",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0148",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999771758515977,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0149",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.25875474518710234,
+      "difficulty": "hard",
+      "canonical_group": "person_015",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0150",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9996923614950632,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0152",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999647899026783,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0154",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999999150023905,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0155",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.8578644100358397,
+      "difficulty": "hard",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0162",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9997282928624855,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0164",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9999604622870428,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0165",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9998795322974521,
+      "difficulty": "hard",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0167",
+      "gold_label": "characterization",
+      "predicted_label": "question",
+      "confidence": 0.8162116630608797,
+      "difficulty": "hard",
+      "canonical_group": "person_018",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0168",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999486911716555,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0170",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999090484605377,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0173",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9901990759920747,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0174",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2658766050012482,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0175",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999978424467512,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0176",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.26078928203926177,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0181",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999987921797246,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0184",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2665188069662876,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0189",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999831910017322,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0190",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9947353245002675,
+      "difficulty": "easy",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0193",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.999980648878509,
+      "difficulty": "hard",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0197",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9922905466010633,
+      "difficulty": "easy",
+      "canonical_group": "person_013",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0198",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9997778570869613,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0202",
+      "gold_label": "question",
+      "predicted_label": "characterization",
+      "confidence": 0.9991229369834117,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0208",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9999993730522385,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0209",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9998431030378339,
+      "difficulty": "easy",
+      "canonical_group": "person_017",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0212",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9999998522580295,
+      "difficulty": "easy",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0215",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.998796309910084,
+      "difficulty": "easy",
+      "canonical_group": "person_017",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0216",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9829035807960015,
+      "difficulty": "hard",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0219",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.997603966750734,
+      "difficulty": "hard",
+      "canonical_group": "person_017",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0222",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9956274694511885,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0223",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999921925439827,
+      "difficulty": "easy",
+      "canonical_group": "person_017",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0224",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9625734963915554,
+      "difficulty": "hard",
+      "canonical_group": "person_018",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0225",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9968501090299926,
+      "difficulty": "easy",
+      "canonical_group": "person_017",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0226",
+      "gold_label": "question",
+      "predicted_label": "hypothetical",
+      "confidence": 0.575284098437033,
+      "difficulty": "easy",
+      "canonical_group": "person_018",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0230",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.25620538101481927,
+      "difficulty": "easy",
+      "canonical_group": "person_015",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0231",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9994306633147113,
+      "difficulty": "easy",
+      "canonical_group": "person_017",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0232",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.5634531624088428,
+      "difficulty": "hard",
+      "canonical_group": "person_014",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0236",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9593844458440182,
+      "difficulty": "easy",
+      "canonical_group": "person_014",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0239",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.9983887123161388,
+      "difficulty": "easy",
+      "canonical_group": "person_017",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0245",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9998713673343563,
+      "difficulty": "hard",
+      "canonical_group": "person_017",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0246",
+      "gold_label": "question",
+      "predicted_label": "characterization",
+      "confidence": 0.8558433076628194,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0249",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.995707760228545,
+      "difficulty": "easy",
+      "canonical_group": "person_017",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0251",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9926786715373193,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0260",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.25607816242005493,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0261",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9998414522309649,
+      "difficulty": "easy",
+      "canonical_group": "person_017",
+      "fold": 4
+    },
+    {
+      "turn_id": "Mullin_vs._Doe:turn_0264",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.27225972455287367,
+      "difficulty": "easy",
+      "canonical_group": "person_015",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0008",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9995533268659366,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0009",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9694364630504674,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0011",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.982403257608238,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0012",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9930084955243933,
+      "difficulty": "hard",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0014",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9571652633202491,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0016",
+      "gold_label": "characterization",
+      "predicted_label": "question",
+      "confidence": 0.27171312021709776,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0017",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9723104116318309,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0018",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2614175907564778,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0019",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9961076600986623,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0025",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2636175257217669,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0036",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9543165257227533,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0037",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.26237670227575594,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0040",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9762536617562767,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0041",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2535880469844949,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0042",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.8868359049614635,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0044",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.6984100870429192,
+      "difficulty": "easy",
+      "canonical_group": "person_004",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0045",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.996543587533362,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0047",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9724730703204686,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0048",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.6288516608245062,
+      "difficulty": "hard",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0049",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9699777892722229,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0051",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9774730605004646,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0053",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9337371520057312,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0061",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9471791937359055,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0063",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9892152118224307,
+      "difficulty": "easy",
+      "canonical_group": "person_010",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0064",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9989920209320543,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0066",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.96143574291347,
+      "difficulty": "easy",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0067",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2617588062937453,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0068",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.9999936191730503,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0075",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2608117044695329,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0076",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9996989903430216,
+      "difficulty": "hard",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0079",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.25990783287216535,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0081",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.25862001390907946,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0082",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.6894145619608346,
+      "difficulty": "hard",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0084",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.5602936279317654,
+      "difficulty": "hard",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0085",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2593677663747161,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0086",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9425809149544079,
+      "difficulty": "hard",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0090",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2553789716800098,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0091",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.26483509944867384,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0092",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2589279850806037,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0095",
+      "gold_label": "characterization",
+      "predicted_label": "question",
+      "confidence": 0.26497569631630336,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0096",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2583004200016536,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0097",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.26262250416903515,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0100",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.259161790893254,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0101",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2693662696612306,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0104",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.26086649144777474,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0106",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2604182593508104,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0110",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.25705217588369694,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0111",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.259526440992522,
+      "difficulty": "easy",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0113",
+      "gold_label": "characterization",
+      "predicted_label": "question",
+      "confidence": 0.26217144844566226,
+      "difficulty": "hard",
+      "canonical_group": "person_007",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0114",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2574785923351021,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0118",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.5647570504904939,
+      "difficulty": "easy",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0125",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2571708153349286,
+      "difficulty": "hard",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0126",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.5435038579835109,
+      "difficulty": "hard",
+      "canonical_group": "person_004",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0127",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.25764350284342996,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0129",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.25691976601341965,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0130",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.6800535005608489,
+      "difficulty": "easy",
+      "canonical_group": "person_004",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0131",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2580553887611458,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0132",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.6615857916626762,
+      "difficulty": "hard",
+      "canonical_group": "person_004",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0133",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2564468558943768,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0135",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.6109252213177996,
+      "difficulty": "easy",
+      "canonical_group": "person_012",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0136",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.8324862473533343,
+      "difficulty": "easy",
+      "canonical_group": "person_001",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0137",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2582601541150746,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0139",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2579719999708218,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0146",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.8160259135458087,
+      "difficulty": "hard",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0148",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9989755066692712,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0149",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2625574799018413,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0150",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9973071037862243,
+      "difficulty": "easy",
+      "canonical_group": "person_006",
+      "fold": 3
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0151",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.2557637445535156,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0153",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.2586009323853599,
+      "difficulty": "easy",
+      "canonical_group": "person_011",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0155",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2611339552546458,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0156",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9999958946479569,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0158",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9272576831268782,
+      "difficulty": "hard",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0160",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.9999995187431105,
+      "difficulty": "easy",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0162",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.6788969034226868,
+      "difficulty": "hard",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0165",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.262837740056671,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0167",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2560065895742352,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0168",
+      "gold_label": "question",
+      "predicted_label": "assertion",
+      "confidence": 0.6641912155322396,
+      "difficulty": "easy",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0169",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.27976492833122124,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0172",
+      "gold_label": "assertion",
+      "predicted_label": "assertion",
+      "confidence": 0.9999966641369846,
+      "difficulty": "easy",
+      "canonical_group": "person_003",
+      "fold": 3
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0173",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.25585650848270314,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0181",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2566703925416688,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0182",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9093171540113864,
+      "difficulty": "hard",
+      "canonical_group": "person_004",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0183",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.25901543284574036,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0184",
+      "gold_label": "characterization",
+      "predicted_label": "question",
+      "confidence": 0.9476850990878545,
+      "difficulty": "hard",
+      "canonical_group": "person_004",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0188",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.7763784156044741,
+      "difficulty": "easy",
+      "canonical_group": "person_004",
+      "fold": 1
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0189",
+      "gold_label": "assertion",
+      "predicted_label": "characterization",
+      "confidence": 0.2555358513069192,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0191",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.25629169631895404,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0192",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9627443187238105,
+      "difficulty": "easy",
+      "canonical_group": "person_005",
+      "fold": 4
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0194",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2639777822052904,
+      "difficulty": "easy",
+      "canonical_group": "person_009",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0196",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.2605406534439821,
+      "difficulty": "easy",
+      "canonical_group": "person_009",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0197",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.25659936157403757,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0199",
+      "gold_label": "assertion",
+      "predicted_label": "hypothetical",
+      "confidence": 0.25401454480670455,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0200",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.25953674806614474,
+      "difficulty": "easy",
+      "canonical_group": "person_009",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0204",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.25970495602016147,
+      "difficulty": "easy",
+      "canonical_group": "person_009",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0205",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.2567761800485819,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0213",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9984351022031199,
+      "difficulty": "hard",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0216",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.255849475479072,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0217",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9840639953209331,
+      "difficulty": "easy",
+      "canonical_group": "person_008",
+      "fold": 4
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0218",
+      "gold_label": "assertion",
+      "predicted_label": "question",
+      "confidence": 0.25535856964258974,
+      "difficulty": "easy",
+      "canonical_group": "person_002",
+      "fold": 2
+    },
+    {
+      "turn_id": "Cisco_vs_Doe:turn_0219",
+      "gold_label": "question",
+      "predicted_label": "question",
+      "confidence": 0.9572671591238766,
+      "difficulty": "easy",
+      "canonical_group": "person_012",
+      "fold": 1
+    }
+  ]
+}

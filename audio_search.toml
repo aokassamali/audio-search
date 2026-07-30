@@ -33,5 +33,8 @@ audio_filename = "Blanche_vs._Lau.mp3"
 [sources.case_three]
 audio_filename = "Mullin_vs._Doe.mp3"
 
+[sources.case_four]
+audio_filename = "Cisco_vs_Doe.mp3"
+
 [sources.sripetch.speaker_labels]
 SPEAKER_01 = "Geiser"

@@ -1,0 +1,36 @@
+{
+  "total_items": 400,
+  "complete_items": 400,
+  "frozen_items": 80,
+  "source_counts": {
+    "sripetch": 100,
+    "case_two": 100,
+    "case_three": 100,
+    "case_four": 100
+  },
+  "permissive_counts": {
+    "assertion": 227,
+    "question": 140,
+    "characterization": 20,
+    "hypothetical": 13
+  },
+  "strict_counts": {
+    "assertion": 231,
+    "question": 145,
+    "characterization": 20,
+    "hypothetical": 4
+  },
+  "difficulty_counts": {
+    "easy": 287,
+    "hard": 113
+  },
+  "strict_permissive_agreement": 0.975,
+  "disagreement_count": 10,
+  "transitions": {
+    "hypothetical->assertion": 4,
+    "hypothetical->question": 4,
+    "hypothetical->characterization": 1,
+    "characterization->question": 1
+  },
+  "validation_problems": []
+}
