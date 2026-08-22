@@ -1,7 +1,7 @@
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-clarify-intent';
+  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-cancel-processing';
 
   function showTranscriptViewWithoutLoading() {
     document.querySelectorAll('.nav-item[data-view="transcript"]').forEach(item => {
@@ -13,11 +13,6 @@
     if ($('viewTitle')) $('viewTitle').textContent = 'Audit the transcript';
   }
 
-  // demo_patch.js intentionally navigates to Transcripts before it renders
-  // surrounding citation context. The original app's click handler also loads
-  // the entire transcript on that same synthetic click, which races and can
-  // overwrite the context view. Synthetic navigation is therefore view-only;
-  // normal user clicks still use the ordinary transcript loader.
   window.addEventListener('click', event => {
     const transcriptNav = event.target.closest?.('.nav-item[data-view="transcript"]');
     if (!transcriptNav || event.isTrusted) return;
@@ -57,14 +52,89 @@
     });
   }
 
-  // Clicking the backdrop while a live ingestion is running should behave like
-  // Minimize. The pre-processing confirmation remains explicit and is not
-  // dismissed by an accidental outside click.
+  // X, backdrop click, and Minimize preserve background processing. Cancel is
+  // deliberately separate because it terminates queued/running Dagster jobs.
   $('importModal')?.addEventListener('click', event => {
     if (event.target !== $('importModal')) return;
     const action = $('importAction');
     if (action?.textContent?.trim() === 'Minimize') action.click();
   });
+
+  function syncProcessingCancelButton() {
+    const cancel = $('cancelImport');
+    const action = $('importAction');
+    if (!cancel || !action) return;
+    const processing = action.textContent.trim() === 'Minimize';
+    if (processing) {
+      cancel.hidden = false;
+      if (!cancel.dataset.cancelling) {
+        cancel.disabled = false;
+        cancel.textContent = 'Cancel processing';
+      }
+    }
+  }
+
+  const cancelButton = $('cancelImport');
+  const importAction = $('importAction');
+  if (cancelButton && importAction) {
+    new MutationObserver(syncProcessingCancelButton).observe(cancelButton, {
+      attributes: true,
+      attributeFilter: ['hidden'],
+    });
+    new MutationObserver(syncProcessingCancelButton).observe(importAction, {
+      childList: true,
+      characterData: true,
+      subtree: true,
+    });
+    syncProcessingCancelButton();
+
+    cancelButton.addEventListener('click', async event => {
+      if (importAction.textContent.trim() !== 'Minimize') return;
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      if (cancelButton.dataset.cancelling) return;
+
+      cancelButton.dataset.cancelling = '1';
+      cancelButton.disabled = true;
+      cancelButton.textContent = 'Cancelling…';
+      const message = $('importMessage');
+      if (message) {
+        message.hidden = false;
+        message.className = 'import-message';
+        message.textContent = 'Stopping the active Dagster run and cancelling queued sources…';
+      }
+
+      try {
+        const response = await fetch('/ingest/cancel-all', {method:'POST'});
+        if (!response.ok) throw new Error(`${response.status} ${response.statusText}`);
+
+        // Give Windows taskkill / Dagster a moment to tear down the active
+        // process tree. Queued jobs cancel immediately.
+        for (let attempt = 0; attempt < 32; attempt += 1) {
+          await new Promise(resolve => setTimeout(resolve, 250));
+          const jobsResponse = await fetch('/ingest/jobs');
+          if (!jobsResponse.ok) break;
+          const payload = await jobsResponse.json();
+          const active = (payload.jobs || []).some(job =>
+            ['queued', 'running', 'cancelling'].includes(job.status)
+          );
+          if (!active) break;
+        }
+
+        $('importModal').hidden = true;
+        window.location.reload();
+      } catch (error) {
+        delete cancelButton.dataset.cancelling;
+        cancelButton.disabled = false;
+        cancelButton.textContent = 'Cancel processing';
+        if (message) {
+          message.hidden = false;
+          message.className = 'import-message error';
+          message.textContent = `Could not cancel processing: ${error.message}`;
+        }
+      }
+    }, true);
+  }
 
   const ETA_STORAGE_KEY = 'audio-search-local-rtf-v1';
   let ingestWorkers = 1;
@@ -134,9 +204,6 @@
     const samples = loadStoredRtfSamples();
     const center = median(samples);
     if (center == null) {
-      // Broad initial heuristic for the full local GPU pipeline. It is
-      // deliberately a range; completed runs replace it with machine-specific
-      // measurements automatically.
       return {low: 0.5, high: 1.0, learned: false};
     }
     return {
@@ -175,7 +242,7 @@
         remaining.push(duration * factor);
         continue;
       }
-      if (job.status === 'complete' || job.status === 'failed') continue;
+      if (['complete', 'failed', 'cancelled'].includes(job.status)) continue;
       if (job.status === 'running') {
         const progress = Math.max(0, Math.min(99, Number(job.overall_progress) || 0)) / 100;
         remaining.push(duration * factor * (1 - progress));
@@ -230,11 +297,10 @@
         latestJobs = payload.jobs || [];
       }
     } catch (_) {}
+    syncProcessingCancelButton();
     renderEta();
   }
 
-  // app.js owns the modal and may temporarily write "Not calibrated" during
-  // polling. This observer immediately replaces it with the adaptive estimate.
   const etaNode = $('etaValue');
   if (etaNode) {
     new MutationObserver(() => {
