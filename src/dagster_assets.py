@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import dagster as dg
+import httpx
 from faster_whisper import WhisperModel
 from pyannote.audio import Pipeline
 from pydantic import PrivateAttr
@@ -30,6 +31,8 @@ from src.speaker_alignment import (
     align_transcript_speakers,
 )
 from src.speaker_roles import (
+    SpeakerRolesDraft,
+    finalize_speaker_roles,
     infer_speaker_roles,
     load_speaker_samples,
     save_speaker_roles,
@@ -401,14 +404,36 @@ def speaker_roles(
         speaker_transcript
     )
 
-    artifact = infer_speaker_roles(
-        samples_by_speaker=samples,
-        source_id=source.source_id,
-        llm_client=llm.client,
-        manual_labels=(
-            source.speaker_labels
-        ),
-    )
+    enrichment_status = "llm"
+    enrichment_error = ""
+
+    try:
+        artifact = infer_speaker_roles(
+            samples_by_speaker=samples,
+            source_id=source.source_id,
+            llm_client=llm.client,
+            manual_labels=(
+                source.speaker_labels
+            ),
+        )
+    except httpx.HTTPError as exc:
+        enrichment_status = "fallback_raw_speaker_ids"
+        enrichment_error = (
+            f"{type(exc).__name__}: {exc}"
+        )
+        context.log.warning(
+            "Speaker-role inference is unavailable; "
+            "continuing with raw diarization speaker IDs. "
+            f"{enrichment_error}"
+        )
+        artifact = finalize_speaker_roles(
+            draft=SpeakerRolesDraft(speakers=[]),
+            samples_by_speaker=samples,
+            source_id=source.source_id,
+            manual_labels=(
+                source.speaker_labels
+            ),
+        )
 
     output_path = save_speaker_roles(
         artifact=artifact,
@@ -451,6 +476,12 @@ def speaker_roles(
             ),
             "manual_override_count": (
                 manual_override_count
+            ),
+            "role_enrichment_status": (
+                enrichment_status
+            ),
+            "role_enrichment_error": (
+                enrichment_error
             ),
             "size_bytes": (
                 output_path.stat().st_size
