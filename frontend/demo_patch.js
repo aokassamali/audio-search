@@ -116,7 +116,7 @@
     const keys = new Set(audit.sources.map(source => source.source_key));
     audit.selected = new Set([...previous].filter(key => keys.has(key)));
 
-    if (!audit.initialized || !audit.selected.size) {
+    if (!audit.initialized) {
       const legacy = $('transcriptSource')?.value;
       const fallback = audit.sources[0]?.source_key;
       if (legacy && keys.has(legacy)) audit.selected.add(legacy);
@@ -195,19 +195,33 @@
         chunks = results.flat();
         mode = 'chunk lookup';
       } else if (raw) {
-        const result = await api('/search', {
-          method:'POST',
-          headers:{'Content-Type':'application/json'},
-          body:JSON.stringify({
-            query:raw,
-            top_k:20,
-            source_keys:keys,
-            retrieval_mode:'global',
-            top_k_per_source:5,
+        const [hybridResult, exactResults] = await Promise.all([
+          api('/search', {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+              query:raw,
+              top_k:20,
+              source_keys:keys,
+              retrieval_mode:'global',
+              top_k_per_source:5,
+            }),
           }),
-        });
-        chunks = result.results || [];
-        mode = 'hybrid BM25 + dense retrieval';
+          Promise.all(keys.map(async key => {
+            const params = new URLSearchParams({limit:'50', query:raw});
+            const data = await api(`/sources/${encodeURIComponent(key)}/chunks?${params}`);
+            return data.chunks || [];
+          })),
+        ]);
+        const merged = [...exactResults.flat(), ...(hybridResult.results || [])];
+        const seen = new Set();
+        chunks = merged.filter(chunk => {
+          const id = `${chunk.source_key || chunk.source_id}:${chunk.chunk_id}`;
+          if (seen.has(id)) return false;
+          seen.add(id);
+          return true;
+        }).slice(0, 50);
+        mode = 'hybrid BM25 + dense retrieval + exact transcript matches';
       } else {
         const results = await Promise.all(keys.map(async key => {
           const data = await api(`/sources/${encodeURIComponent(key)}/chunks?limit=800`);
