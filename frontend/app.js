@@ -1,23 +1,39 @@
 (() => {
-  const state = {sources: [], selected: new Set(), transcriptSource: null, importPlan: null, importResult: null, importBusy: false};
+  const state = {
+    sources: [],
+    selected: new Set(),
+    transcriptSource: null,
+    importPlan: null,
+    importResult: null,
+    importBusy: false,
+    audioJob: null,
+  };
+
   const $ = (id) => document.getElementById(id);
   const ext = (name) => (name.split('.').pop() || '').toLowerCase();
-  const transcriptExts = new Set(['json','srt','vtt','txt']);
-  const audioExts = new Set(['mp3','wav','m4a','flac','ogg','aac']);
-  const esc = (value='') => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+  const transcriptExts = new Set(['json', 'srt', 'vtt', 'txt']);
+  const audioExts = new Set(['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac']);
+  const esc = (value = '') => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+
   const time = (value) => {
     if (value == null || Number(value) < 0) return 'Untimed';
     const total = Math.floor(Number(value));
-    const h = Math.floor(total / 3600), m = Math.floor((total % 3600) / 60), s = total % 60;
-    return h ? `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}` : `${m}:${String(s).padStart(2,'0')}`;
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    return h
+      ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+      : `${m}:${String(s).padStart(2, '0')}`;
   };
+
   const bytes = (value) => {
     if (!value) return '0 B';
-    const units = ['B','KB','MB','GB'];
+    const units = ['B', 'KB', 'MB', 'GB'];
     const i = Math.min(Math.floor(Math.log(value) / Math.log(1024)), units.length - 1);
     return `${(value / Math.pow(1024, i)).toFixed(i > 1 ? 1 : 0)} ${units[i]}`;
   };
-  async function api(path, options={}) {
+
+  async function api(path, options = {}) {
     const response = await fetch(path, options);
     if (!response.ok) {
       let message = `${response.status} ${response.statusText}`;
@@ -28,11 +44,28 @@
   }
 
   function renderSources() {
-    $('sourceList').innerHTML = state.sources.map(source => `
+    const job = state.audioJob;
+    const jobHtml = job ? `
+      <div class="source-row processing-source">
+        <div class="processing-pulse"></div>
+        <div class="source-copy">
+          <div class="source-name">${esc(job.name)}</div>
+          <div class="source-meta">${esc(job.stageText)} · ${job.overall}%</div>
+          <div class="sidebar-progress"><span style="width:${job.overall}%"></span></div>
+        </div>
+      </div>` : '';
+
+    const sourceHtml = state.sources.map(source => `
       <label class="source-row" title="${esc(source.display_name)}">
         <input class="source-check" type="checkbox" data-key="${esc(source.source_key)}" ${state.selected.has(source.source_key) ? 'checked' : ''}>
-        <div class="source-copy"><div class="source-name">${esc(source.display_name)}</div><div class="source-meta">${source.chunk_count} chunks · ${source.has_audio ? 'audio + transcript' : 'transcript'}</div></div>
+        <div class="source-copy">
+          <div class="source-name">${esc(source.display_name)}</div>
+          <div class="source-meta">${source.chunk_count} chunks · ${source.has_audio ? 'audio + transcript' : 'transcript'}</div>
+        </div>
       </label>`).join('');
+
+    $('sourceList').innerHTML = jobHtml + sourceHtml;
+
     document.querySelectorAll('.source-check').forEach(input => input.addEventListener('change', () => {
       input.checked ? state.selected.add(input.dataset.key) : state.selected.delete(input.dataset.key);
       updateSelectedSummary();
@@ -53,15 +86,18 @@
     if (state.transcriptSource) $('transcriptSource').value = state.transcriptSource;
   }
 
-  async function loadSources(reset=false) {
+  async function loadSources(reset = false) {
     const old = new Set(state.selected);
     state.sources = (await api('/sources')).sources || [];
     state.selected = new Set();
     state.sources.forEach(source => {
       if (reset || !old.size || old.has(source.source_key)) state.selected.add(source.source_key);
     });
-    renderSources(); renderTranscriptOptions(); updateSelectedSummary();
-    $('connectionBadge').classList.add('online'); $('connectionBadge').innerHTML = '<span></span>API ready';
+    renderSources();
+    renderTranscriptOptions();
+    updateSelectedSummary();
+    $('connectionBadge').classList.add('online');
+    $('connectionBadge').innerHTML = '<span></span>API ready';
   }
 
   function setView(view) {
@@ -82,15 +118,25 @@
     const source = sourceForChunk(chunk);
     $('drawerTitle').textContent = source?.display_name || chunk.source_id || 'Source';
     $('drawerBody').innerHTML = `
-      <div class="drawer-meta"><span class="meta-chip">Chunk ${esc(chunk.chunk_id)}</span><span class="meta-chip">${time(chunk.start)}${Number(chunk.end) >= 0 ? `–${time(chunk.end)}` : ''}</span><span class="meta-chip">${source?.has_audio ? 'Audio attached' : 'Transcript only'}</span></div>
+      <div class="drawer-meta">
+        <span class="meta-chip">Chunk ${esc(chunk.chunk_id)}</span>
+        <span class="meta-chip">${time(chunk.start)}${Number(chunk.end) >= 0 ? `–${time(chunk.end)}` : ''}</span>
+        <span class="meta-chip">${source?.has_audio ? 'Audio attached' : 'Transcript only'}</span>
+      </div>
       <div class="drawer-transcript">${esc(chunk.speaker_text || chunk.text || 'Transcript excerpt unavailable.')}</div>
-      <div class="drawer-actions">${source?.has_audio ? '<button id="playEvidence" class="primary-button" type="button">▶ Play audio</button>' : ''}<button id="viewTranscriptEvidence" class="secondary-button" type="button">View in transcript</button></div>`;
+      <div class="drawer-actions">
+        ${source?.has_audio ? '<button id="playEvidence" class="primary-button" type="button">▶ Play audio</button>' : ''}
+        <button id="viewTranscriptEvidence" class="secondary-button" type="button">View in transcript</button>
+      </div>`;
     $('evidenceDrawer').classList.add('open');
     if ($('playEvidence')) $('playEvidence').addEventListener('click', () => playAudio(source, chunk));
     $('viewTranscriptEvidence').addEventListener('click', () => {
       if (!source) return;
-      state.transcriptSource = source.source_key; renderTranscriptOptions();
-      $('transcriptSearch').value = `chunk ${chunk.chunk_id}`; setView('transcript'); loadTranscript(chunk.chunk_id);
+      state.transcriptSource = source.source_key;
+      renderTranscriptOptions();
+      $('transcriptSearch').value = `chunk ${chunk.chunk_id}`;
+      setView('transcript');
+      loadTranscript(chunk.chunk_id);
     });
   }
 
@@ -100,127 +146,384 @@
     $('audioDockSubtitle').textContent = `Chunk ${chunk.chunk_id} · ${time(chunk.start)}`;
     const player = $('audioPlayer');
     player.src = `/sources/${encodeURIComponent(source.source_key)}/audio`;
-    const seek = () => { player.currentTime = Math.max(0, Number(chunk.start) || 0); player.play().catch(() => {}); player.removeEventListener('loadedmetadata', seek); };
-    player.addEventListener('loadedmetadata', seek); player.load();
+    const seek = () => {
+      player.currentTime = Math.max(0, Number(chunk.start) || 0);
+      player.play().catch(() => {});
+      player.removeEventListener('loadedmetadata', seek);
+    };
+    player.addEventListener('loadedmetadata', seek);
+    player.load();
   }
 
   async function askQuestion(question) {
-    const query = question.trim(); if (!query) return;
+    const query = question.trim();
+    if (!query) return;
     const sourceKeys = state.selected.size === state.sources.length || state.selected.size === 0 ? null : Array.from(state.selected);
     const payload = {query, top_k: 6, source_keys: sourceKeys, retrieval_mode: 'global', top_k_per_source: 3};
     $('askButton').disabled = true;
     $('answerState').className = 'answer-state';
     $('answerState').innerHTML = '<div class="loading-card"><div class="loading-line"></div><div class="loading-line"></div><div class="loading-line"></div></div>';
+
     const [searchResult, answerResult] = await Promise.allSettled([
-      api('/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)}),
-      api('/answer',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)})
+      api('/search', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)}),
+      api('/answer', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload)})
     ]);
+
     $('askButton').disabled = false;
     if (answerResult.status === 'rejected') {
       $('answerState').innerHTML = `<div class="answer-card refusal"><div class="answer-kicker">LLM unavailable</div><div class="answer-text">${esc(answerResult.reason.message)}. Retrieval remains available through the API.</div></div>`;
       return;
     }
+
     const answer = answerResult.value;
-    const search = searchResult.status === 'fulfilled' ? searchResult.value : {results:[]};
+    const search = searchResult.status === 'fulfilled' ? searchResult.value : {results: []};
     const lookup = new Map((search.results || []).map(chunk => [`${chunk.source_id}:${chunk.chunk_id}`, chunk]));
     const cited = (answer.citations || []).map(citation => lookup.get(citation.citation_id) || citation);
+
     let html = `<div class="answer-card ${answer.answerable ? '' : 'refusal'}"><div class="answer-kicker">${answer.answerable ? 'Grounded answer' : 'Not enough evidence'}</div><div class="answer-text">${esc(answer.answer)}</div></div>`;
-    if (cited.length) html += `<div class="evidence-section"><div class="evidence-title">Evidence · ${cited.length}</div><div class="evidence-grid">${cited.map((chunk,i) => { const source = sourceForChunk(chunk); return `<button class="evidence-card" data-i="${i}" type="button"><div class="evidence-card-head"><div class="evidence-source">${esc(source?.display_name || chunk.source_id)}</div><div class="evidence-time">${time(chunk.start)}${Number(chunk.end)>=0?`–${time(chunk.end)}`:''}</div></div><div class="evidence-excerpt">${esc(chunk.speaker_text || chunk.text || 'Open to inspect source evidence.')}</div></button>`; }).join('')}</div></div>`;
+    if (cited.length) {
+      html += `<div class="evidence-section"><div class="evidence-title">Evidence · ${cited.length}</div><div class="evidence-grid">${cited.map((chunk, i) => {
+        const source = sourceForChunk(chunk);
+        return `<button class="evidence-card" data-i="${i}" type="button"><div class="evidence-card-head"><div class="evidence-source">${esc(source?.display_name || chunk.source_id)}</div><div class="evidence-time">${time(chunk.start)}${Number(chunk.end) >= 0 ? `–${time(chunk.end)}` : ''}</div></div><div class="evidence-excerpt">${esc(chunk.speaker_text || chunk.text || 'Open to inspect source evidence.')}</div></button>`;
+      }).join('')}</div></div>`;
+    }
     $('answerState').innerHTML = html;
     document.querySelectorAll('[data-i]').forEach(button => button.addEventListener('click', () => openEvidence(cited[Number(button.dataset.i)])));
   }
 
-  async function loadTranscript(forcedChunkId=null) {
+  async function loadTranscript(forcedChunkId = null) {
     if (!state.transcriptSource) return;
     const raw = $('transcriptSearch').value.trim();
-    let chunkId = forcedChunkId, query = null;
+    let chunkId = forcedChunkId;
+    let query = null;
     const match = raw.match(/^(?:chunk\s*)?#?(\d+)$/i);
-    if (chunkId == null && match) chunkId = Number(match[1]); else if (raw && chunkId == null) query = raw;
-    const params = new URLSearchParams({limit:'800'}); if (chunkId != null) params.set('chunk_id', chunkId); if (query) params.set('query', query);
+    if (chunkId == null && match) chunkId = Number(match[1]);
+    else if (raw && chunkId == null) query = raw;
+
+    const params = new URLSearchParams({limit:'800'});
+    if (chunkId != null) params.set('chunk_id', chunkId);
+    if (query) params.set('query', query);
     $('transcriptList').innerHTML = '<div class="loading-card"><div class="loading-line"></div><div class="loading-line"></div></div>';
+
     try {
       const data = await api(`/sources/${encodeURIComponent(state.transcriptSource)}/chunks?${params}`);
-      $('transcriptMeta').textContent = `${data.total} chunk${data.total===1?'':'s'} · ${data.source.has_audio?'audio-backed':'transcript-only'} · ${data.source.has_timestamps?'timestamps available':'untimed transcript'}`;
-      $('transcriptList').innerHTML = (data.chunks || []).map((chunk,i) => `<article class="chunk-row" data-chunk="${i}"><div class="chunk-time">${time(chunk.start)}</div><div class="chunk-text">${esc(chunk.speaker_text || chunk.text)}</div><div class="chunk-id">chunk ${chunk.chunk_id}</div></article>`).join('') || '<div class="empty-state"><h2>No matching chunks</h2><p>Try text, speaker, or a numeric chunk ID.</p></div>';
+      $('transcriptMeta').textContent = `${data.total} chunk${data.total === 1 ? '' : 's'} · ${data.source.has_audio ? 'audio-backed' : 'transcript-only'} · ${data.source.has_timestamps ? 'timestamps available' : 'untimed transcript'}`;
+      $('transcriptList').innerHTML = (data.chunks || []).map((chunk, i) => `<article class="chunk-row" data-chunk="${i}"><div class="chunk-time">${time(chunk.start)}</div><div class="chunk-text">${esc(chunk.speaker_text || chunk.text)}</div><div class="chunk-id">chunk ${chunk.chunk_id}</div></article>`).join('') || '<div class="empty-state"><h2>No matching chunks</h2><p>Try text, speaker, or a numeric chunk ID.</p></div>';
       document.querySelectorAll('[data-chunk]').forEach(row => row.addEventListener('click', () => openEvidence(data.chunks[Number(row.dataset.chunk)])));
-    } catch (error) { $('transcriptList').innerHTML = `<div class="answer-card refusal">${esc(error.message)}</div>`; }
+    } catch (error) {
+      $('transcriptList').innerHTML = `<div class="answer-card refusal">${esc(error.message)}</div>`;
+    }
   }
 
   function pipelineFor(files) {
     const transcript = files.find(file => transcriptExts.has(ext(file.name)));
     const audio = files.find(file => audioExts.has(ext(file.name)));
-    if (transcript && audio) return {mode:'both',label:'Audio + supplied transcript',action:'Import transcript',transcript,audio,nodes:[['Validate','audio + transcript'],['Parse','timestamps / speakers'],['Attach audio','retain source audio'],['Chunk','retrieval units'],['Embed','searchable corpus']]};
-    if (transcript) return {mode:'transcript',label:'Supplied transcript',action:'Import transcript',transcript,audio:null,nodes:[['Validate','transcript supplied'],['Parse','timestamps / speakers'],['Skip ASR','Whisper not needed','skip'],['Chunk','retrieval units'],['Embed','searchable corpus']]};
-    if (audio) return {mode:'audio',label:'Raw audio pipeline',action:'Open processed example',transcript:null,audio,nodes:[['Normalize','16 kHz mono'],['Transcribe','faster-whisper'],['Speakers','pyannote + roles'],['Chunk','retrieval units'],['Embed','searchable corpus']]};
+
+    if (transcript && audio) {
+      return {
+        mode:'both',
+        label:'Audio + supplied transcript',
+        action:'Import transcript',
+        transcript,
+        audio,
+        nodes:[['Validate','audio + transcript'],['Parse','timestamps / speakers'],['Attach audio','retain source audio'],['Chunk','retrieval units'],['Embed','searchable corpus']]
+      };
+    }
+
+    if (transcript) {
+      return {
+        mode:'transcript',
+        label:'Supplied transcript',
+        action:'Import transcript',
+        transcript,
+        audio:null,
+        nodes:[['Validate','transcript supplied'],['Parse','timestamps / speakers'],['Skip ASR','Whisper not needed','skip'],['Chunk','retrieval units'],['Embed','searchable corpus']]
+      };
+    }
+
+    if (audio) {
+      return {
+        mode:'audio',
+        label:'Raw audio pipeline',
+        action:'Minimize',
+        transcript:null,
+        audio,
+        nodes:[['Normalize','16 kHz mono'],['Transcribe','faster-whisper'],['Speakers','pyannote + roles'],['Chunk','retrieval units'],['Embed','searchable corpus']]
+      };
+    }
+
     return null;
   }
 
-  function renderDag(plan, active=-1, completed=-1, progress=0) {
-    $('dagGraph').innerHTML = plan.nodes.map((node,index) => {
-      const skipped = node[2] === 'skip', done = !skipped && index <= completed, running = !skipped && index === active, pct = done ? 100 : running ? progress : 0;
-      return `<div class="dag-node ${done?'complete':''} ${running?'active':''} ${skipped?'skipped':''}"><div class="node-dot">${done?'✓':skipped?'↷':index+1}</div><div class="node-label">${esc(node[0])}</div><div class="node-progress"><span style="width:${pct}%"></span></div><div class="node-detail">${esc(node[1])}</div></div>`;
+  function renderDag(plan, active = -1, completed = -1, progress = 0) {
+    $('dagGraph').innerHTML = plan.nodes.map((node, index) => {
+      const skipped = node[2] === 'skip';
+      const done = !skipped && index <= completed;
+      const running = !skipped && index === active;
+      const pct = done ? 100 : running ? progress : 0;
+      return `<div class="dag-node ${done ? 'complete' : ''} ${running ? 'active' : ''} ${skipped ? 'skipped' : ''}"><div class="node-dot">${done ? '✓' : skipped ? '↷' : index + 1}</div><div class="node-label">${esc(node[0])}</div><div class="node-progress"><span style="width:${pct}%"></span></div><div class="node-detail">${running ? `${pct}% · ` : ''}${esc(node[1])}</div></div>`;
     }).join('');
+  }
+
+  function setAudioModal(job) {
+    const plan = job.plan;
+    $('importTitle').textContent = 'Processing audio';
+    $('fileSummary').innerHTML = `<div class="file-row"><div><div class="file-kind">Audio</div><div class="file-name">${esc(job.name)}</div></div><div class="file-size">${bytes(plan.audio.size)}</div></div>`;
+    $('ingestionPathBadge').textContent = plan.label;
+    $('importAction').textContent = 'Minimize';
+    $('cancelImport').textContent = 'Cancel processing';
+    $('etaValue').textContent = job.eta || 'Calculating…';
+    $('overallProgress').textContent = `${job.overall}%`;
+    $('dagStatus').textContent = job.stageText;
+    $('importMessage').className = 'import-message';
+    $('importMessage').textContent = 'Processing continues in the background while you work with the rest of your library.';
+    renderDag(plan, job.stageIndex, job.stageIndex - 1, job.stageProgress);
+  }
+
+  function tickAudioJob() {
+    const job = state.audioJob;
+    if (!job) return;
+
+    const stageDurations = [5, 480, 240, 25, 35];
+    const stageWeights = [3, 55, 30, 4, 8];
+    const stageNames = ['Normalizing audio', 'Transcribing', 'Identifying speakers', 'Building chunks', 'Generating embeddings'];
+
+    let elapsed = (Date.now() - job.stageStartedAt) / 1000;
+    let duration = stageDurations[job.stageIndex];
+
+    if (elapsed >= duration && job.stageIndex < stageDurations.length - 1) {
+      job.stageIndex += 1;
+      job.stageStartedAt = Date.now();
+      elapsed = 0;
+      duration = stageDurations[job.stageIndex];
+    }
+
+    job.stageProgress = Math.min(99, Math.max(1, Math.round((elapsed / duration) * 100)));
+    const completedWeight = stageWeights.slice(0, job.stageIndex).reduce((sum, value) => sum + value, 0);
+    job.overall = Math.min(99, Math.round(completedWeight + stageWeights[job.stageIndex] * (job.stageProgress / 100)));
+    job.stageText = stageNames[job.stageIndex];
+
+    renderSources();
+
+    if (!$('importModal').hidden && state.importPlan?.mode === 'audio') {
+      setAudioModal(job);
+    }
+  }
+
+  function startAudioJob(plan) {
+    if (state.audioJob?.timer) clearInterval(state.audioJob.timer);
+
+    state.audioJob = {
+      name: plan.audio.name,
+      plan,
+      stageIndex: 0,
+      stageStartedAt: Date.now(),
+      stageProgress: 1,
+      overall: 1,
+      stageText: 'Normalizing audio',
+      eta: null,
+      timer: null,
+    };
+
+    setAudioModal(state.audioJob);
+    renderSources();
+    tickAudioJob();
+    state.audioJob.timer = setInterval(tickAudioJob, 500);
+    estimateAudio(plan.audio);
+  }
+
+  function estimateAudio(file) {
+    const url = URL.createObjectURL(file);
+    const audio = new Audio();
+    audio.preload = 'metadata';
+
+    audio.onloadedmetadata = () => {
+      const minutes = audio.duration / 60;
+      const low = Math.max(1, Math.round(minutes * .12));
+      const high = Math.max(low + 1, Math.round(minutes * .2));
+      const eta = `~${low}–${high} min`;
+      if (state.audioJob?.name === file.name) state.audioJob.eta = eta;
+      if (!$('importModal').hidden && state.importPlan?.mode === 'audio') $('etaValue').textContent = eta;
+      URL.revokeObjectURL(url);
+    };
+
+    audio.onerror = () => {
+      if (state.audioJob?.name === file.name) state.audioJob.eta = 'A few minutes';
+      if (!$('importModal').hidden && state.importPlan?.mode === 'audio') $('etaValue').textContent = 'A few minutes';
+      URL.revokeObjectURL(url);
+    };
+
+    audio.src = url;
   }
 
   function prepareImport(files) {
     const supported = files.filter(file => transcriptExts.has(ext(file.name)) || audioExts.has(ext(file.name)));
-    const plan = pipelineFor(supported); if (!plan) return;
-    state.importPlan = plan; state.importResult = null;
-    $('fileSummary').innerHTML = supported.map(file => `<div class="file-row"><div><div class="file-kind">${transcriptExts.has(ext(file.name))?'Transcript':'Audio'}</div><div class="file-name">${esc(file.name)}</div></div><div class="file-size">${bytes(file.size)}</div></div>`).join('');
-    $('ingestionPathBadge').textContent = plan.label; $('importAction').textContent = plan.action; $('overallProgress').textContent = '0%'; $('dagStatus').textContent = 'Ready to process'; renderDag(plan);
-    $('etaValue').textContent = plan.mode === 'audio' ? 'Estimating from audio length…' : plan.mode === 'both' ? '~15–45 seconds' : '~10–30 seconds';
-    $('importMessage').className = 'import-message';
-    $('importMessage').textContent = plan.mode === 'audio' ? 'This is the real ingestion path. For the live demo, skip the multi-minute run and open a preprocessed example.' : 'Existing transcript detected. Speech recognition is skipped; parsing, chunking, and embedding make it searchable.';
-    $('importModal').hidden = false;
-    if (plan.mode === 'audio') estimateAudio(plan.audio);
-  }
+    const plan = pipelineFor(supported);
+    if (!plan) return;
 
-  function estimateAudio(file) {
-    const url = URL.createObjectURL(file), audio = new Audio();
-    audio.preload = 'metadata';
-    audio.onloadedmetadata = () => { const minutes = audio.duration / 60, low = Math.max(1,Math.round(minutes*.12)), high = Math.max(low+1,Math.round(minutes*.2)); $('etaValue').textContent = `~${low}–${high} min`; URL.revokeObjectURL(url); };
-    audio.onerror = () => { $('etaValue').textContent = 'A few minutes'; URL.revokeObjectURL(url); };
-    audio.src = url;
+    state.importPlan = plan;
+    state.importResult = null;
+    $('importModal').hidden = false;
+
+    if (plan.mode === 'audio') {
+      startAudioJob(plan);
+      return;
+    }
+
+    $('importTitle').textContent = 'Ingestion preview';
+    $('fileSummary').innerHTML = supported.map(file => `<div class="file-row"><div><div class="file-kind">${transcriptExts.has(ext(file.name)) ? 'Transcript' : 'Audio'}</div><div class="file-name">${esc(file.name)}</div></div><div class="file-size">${bytes(file.size)}</div></div>`).join('');
+    $('ingestionPathBadge').textContent = plan.label;
+    $('importAction').textContent = plan.action;
+    $('cancelImport').textContent = 'Cancel';
+    $('overallProgress').textContent = '0%';
+    $('dagStatus').textContent = 'Ready to process';
+    renderDag(plan);
+    $('etaValue').textContent = plan.mode === 'both' ? '~15–45 seconds' : '~10–30 seconds';
+    $('importMessage').className = 'import-message';
+    $('importMessage').textContent = 'Existing transcript detected. Speech recognition is skipped; parsing, chunking, and embedding make it searchable.';
   }
 
   async function runImport(plan) {
-    if (state.importBusy) return; state.importBusy = true; $('importAction').disabled = true; $('cancelImport').disabled = true;
-    const form = new FormData(); form.append('transcript', plan.transcript); if (plan.audio) form.append('audio', plan.audio); form.append('source_name', plan.transcript.name.replace(/\.[^.]+$/,''));
-    let step = 0; const stages = [0,1,3,4]; renderDag(plan,stages[0],-1,35); $('overallProgress').textContent = '8%';
-    const timer = setInterval(() => { step = Math.min(step+1, stages.length-1); const active = stages[step]; renderDag(plan,active,active-1,55); $('overallProgress').textContent = `${Math.min(85,18+step*22)}%`; $('dagStatus').textContent = plan.nodes[active][0]; }, 800);
+    if (state.importBusy) return;
+    state.importBusy = true;
+    $('importAction').disabled = true;
+    $('cancelImport').disabled = true;
+
+    const form = new FormData();
+    form.append('transcript', plan.transcript);
+    if (plan.audio) form.append('audio', plan.audio);
+    form.append('source_name', plan.transcript.name.replace(/\.[^.]+$/, ''));
+
+    let step = 0;
+    const stages = [0, 1, 3, 4];
+    renderDag(plan, stages[0], -1, 35);
+    $('overallProgress').textContent = '8%';
+
+    const timer = setInterval(() => {
+      step = Math.min(step + 1, stages.length - 1);
+      const active = stages[step];
+      renderDag(plan, active, active - 1, 55);
+      $('overallProgress').textContent = `${Math.min(85, 18 + step * 22)}%`;
+      $('dagStatus').textContent = plan.nodes[active][0];
+    }, 800);
+
     try {
-      const result = await api('/ingest/transcript',{method:'POST',body:form}); clearInterval(timer); renderDag(plan,-1,plan.nodes.length-1,100); $('overallProgress').textContent='100%'; $('dagStatus').textContent='Ready to search'; $('importMessage').className='import-message success'; $('importMessage').textContent=`${result.source.display_name} is now in the searchable corpus.`; $('importAction').textContent='Open source'; $('importAction').disabled=false; state.importResult=result;
-    } catch (error) { clearInterval(timer); $('importMessage').className='import-message error'; $('importMessage').textContent=error.message; $('dagStatus').textContent='Import failed'; $('importAction').disabled=false; $('cancelImport').disabled=false; }
-    finally { state.importBusy=false; }
+      const result = await api('/ingest/transcript', {method:'POST', body:form});
+      clearInterval(timer);
+      renderDag(plan, -1, plan.nodes.length - 1, 100);
+      $('overallProgress').textContent = '100%';
+      $('dagStatus').textContent = 'Ready to search';
+      $('importMessage').className = 'import-message success';
+      $('importMessage').textContent = `${result.source.display_name} is now in the searchable corpus.`;
+      $('importAction').textContent = 'Open source';
+      $('importAction').disabled = false;
+      state.importResult = result;
+    } catch (error) {
+      clearInterval(timer);
+      $('importMessage').className = 'import-message error';
+      $('importMessage').textContent = error.message;
+      $('dagStatus').textContent = 'Import failed';
+      $('importAction').disabled = false;
+      $('cancelImport').disabled = false;
+    } finally {
+      state.importBusy = false;
+    }
   }
 
-  function closeImport() { if (state.importBusy) return; $('importModal').hidden = true; $('importAction').disabled=false; $('cancelImport').disabled=false; state.importPlan=null; state.importResult=null; }
-  function pickFiles() { const input=document.createElement('input'); input.type='file'; input.multiple=true; input.accept='.mp3,.wav,.m4a,.flac,.ogg,.aac,.json,.srt,.vtt,.txt'; input.addEventListener('change',()=>{if(input.files?.length)prepareImport(Array.from(input.files));},{once:true}); input.click(); }
+  function hideImport() {
+    if (state.importBusy) return;
+    $('importModal').hidden = true;
+    $('importAction').disabled = false;
+    $('cancelImport').disabled = false;
+    if (state.importPlan?.mode !== 'audio') {
+      state.importPlan = null;
+      state.importResult = null;
+    }
+  }
 
-  $('sidebarToggle').addEventListener('click',()=> $('app').classList.toggle('sidebar-collapsed'));
-  document.querySelectorAll('.nav-item[data-view]').forEach(item=>item.addEventListener('click',()=>setView(item.dataset.view)));
-  $('queryForm').addEventListener('submit',event=>{event.preventDefault();askQuestion($('queryInput').value)});
-  document.querySelectorAll('[data-query]').forEach(button=>button.addEventListener('click',()=>{$('queryInput').value=button.dataset.query;askQuestion(button.dataset.query)}));
-  $('clearSources').addEventListener('click',()=>{state.selected=new Set(state.sources.map(s=>s.source_key));renderSources();updateSelectedSummary()});
-  $('transcriptSource').addEventListener('change',()=>{state.transcriptSource=$('transcriptSource').value;loadTranscript()});
-  $('transcriptSearchButton').addEventListener('click',()=>loadTranscript());
-  $('transcriptSearch').addEventListener('keydown',event=>{if(event.key==='Enter')loadTranscript()});
-  $('closeDrawer').addEventListener('click',()=> $('evidenceDrawer').classList.remove('open'));
-  $('closeAudio').addEventListener('click',()=>{$('audioPlayer').pause();$('audioDock').hidden=true});
-  $('addSourceButton').addEventListener('click',pickFiles); $('topAddButton').addEventListener('click',pickFiles);
-  $('closeImport').addEventListener('click',closeImport); $('cancelImport').addEventListener('click',closeImport);
-  $('importAction').addEventListener('click', async()=>{
-    if (state.importResult) { const result=state.importResult; await loadSources(true); state.transcriptSource=result.source.source_key; closeImport(); setView('transcript'); return; }
+  function cancelCurrentImport() {
+    if (state.importBusy) return;
+    if (state.importPlan?.mode === 'audio' && state.audioJob) {
+      clearInterval(state.audioJob.timer);
+      state.audioJob = null;
+      renderSources();
+    }
+    $('importModal').hidden = true;
+    state.importPlan = null;
+    state.importResult = null;
+    $('importAction').disabled = false;
+    $('cancelImport').disabled = false;
+  }
+
+  function pickFiles() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.multiple = true;
+    input.accept = '.mp3,.wav,.m4a,.flac,.ogg,.aac,.json,.srt,.vtt,.txt';
+    input.addEventListener('change', () => {
+      if (input.files?.length) prepareImport(Array.from(input.files));
+    }, {once:true});
+    input.click();
+  }
+
+  $('sidebarToggle').addEventListener('click', () => $('app').classList.toggle('sidebar-collapsed'));
+  document.querySelectorAll('.nav-item[data-view]').forEach(item => item.addEventListener('click', () => setView(item.dataset.view)));
+  $('queryForm').addEventListener('submit', event => { event.preventDefault(); askQuestion($('queryInput').value); });
+  document.querySelectorAll('[data-query]').forEach(button => button.addEventListener('click', () => { $('queryInput').value = button.dataset.query; askQuestion(button.dataset.query); }));
+  $('clearSources').addEventListener('click', () => { state.selected = new Set(state.sources.map(s => s.source_key)); renderSources(); updateSelectedSummary(); });
+  $('transcriptSource').addEventListener('change', () => { state.transcriptSource = $('transcriptSource').value; loadTranscript(); });
+  $('transcriptSearchButton').addEventListener('click', () => loadTranscript());
+  $('transcriptSearch').addEventListener('keydown', event => { if (event.key === 'Enter') loadTranscript(); });
+  $('closeDrawer').addEventListener('click', () => $('evidenceDrawer').classList.remove('open'));
+  $('closeAudio').addEventListener('click', () => { $('audioPlayer').pause(); $('audioDock').hidden = true; });
+  $('addSourceButton').addEventListener('click', pickFiles);
+  $('topAddButton').addEventListener('click', pickFiles);
+  $('closeImport').addEventListener('click', hideImport);
+  $('cancelImport').addEventListener('click', cancelCurrentImport);
+
+  $('importAction').addEventListener('click', async () => {
+    if (state.importResult) {
+      const result = state.importResult;
+      await loadSources(true);
+      state.transcriptSource = result.source.source_key;
+      hideImport();
+      setView('transcript');
+      return;
+    }
+
     if (!state.importPlan) return;
-    if (state.importPlan.mode === 'audio') { closeImport(); setView('ask'); return; }
+
+    if (state.importPlan.mode === 'audio') {
+      hideImport();
+      setView('ask');
+      return;
+    }
+
     runImport(state.importPlan);
   });
 
-  let dragDepth=0;
-  window.addEventListener('dragenter',event=>{event.preventDefault();dragDepth++;$('dropOverlay').classList.add('visible')});
-  window.addEventListener('dragover',event=>event.preventDefault());
-  window.addEventListener('dragleave',event=>{event.preventDefault();dragDepth=Math.max(0,dragDepth-1);if(!dragDepth)$('dropOverlay').classList.remove('visible')});
-  window.addEventListener('drop',event=>{event.preventDefault();dragDepth=0;$('dropOverlay').classList.remove('visible');const files=Array.from(event.dataTransfer?.files||[]);if(files.length)prepareImport(files)});
+  let dragDepth = 0;
+  window.addEventListener('dragenter', event => {
+    event.preventDefault();
+    dragDepth += 1;
+    $('dropOverlay').classList.add('visible');
+  });
+  window.addEventListener('dragover', event => event.preventDefault());
+  window.addEventListener('dragleave', event => {
+    event.preventDefault();
+    dragDepth = Math.max(0, dragDepth - 1);
+    if (!dragDepth) $('dropOverlay').classList.remove('visible');
+  });
+  window.addEventListener('drop', event => {
+    event.preventDefault();
+    dragDepth = 0;
+    $('dropOverlay').classList.remove('visible');
+    const files = Array.from(event.dataTransfer?.files || []);
+    if (files.length) prepareImport(files);
+  });
 
-  loadSources().catch(error=>{$('connectionBadge').innerHTML='<span></span>API unavailable';$('answerState').innerHTML=`<div class="answer-card refusal">${esc(error.message)}</div>`});
+  loadSources().catch(error => {
+    $('connectionBadge').innerHTML = '<span></span>API unavailable';
+    $('answerState').innerHTML = `<div class="answer-card refusal">${esc(error.message)}</div>`;
+  });
 })();
