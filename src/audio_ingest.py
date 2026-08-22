@@ -2,6 +2,9 @@ from __future__ import annotations
 
 import os
 import re
+import shutil
+import subprocess
+import sys
 import time
 import uuid
 from concurrent.futures import ThreadPoolExecutor
@@ -11,13 +14,7 @@ from threading import Lock
 import dagster as dg
 
 from src.config import PROJECT_ROOT, Settings, SourceSettings
-from src.ingest_progress import (
-    initialize,
-    mark_complete,
-    mark_failed,
-    mark_running,
-    snapshot,
-)
+from src.ingest_progress import initialize, mark_complete, mark_failed, mark_running, snapshot
 
 
 _STAGE_ORDER = [
@@ -63,6 +60,11 @@ class AudioIngestManager:
         self.dagster_home = dagster_home
         self.instance = dg.DagsterInstance.get()
         self.max_workers = max_workers
+
+        self.runtime_config_dir = PROJECT_ROOT / ".demo_runtime"
+        self.runtime_config_dir.mkdir(parents=True, exist_ok=True)
+        self.log_dir = PROJECT_ROOT / "data" / "ingest_logs"
+        self.log_dir.mkdir(parents=True, exist_ok=True)
 
     @staticmethod
     def _slugify(value: str) -> str:
@@ -120,6 +122,7 @@ class AudioIngestManager:
             "finished_at": None,
             "error": None,
             "run_id": None,
+            "log_path": str(self.log_dir / f"{job_id}.log"),
         }
 
         with self._lock:
@@ -129,9 +132,40 @@ class AudioIngestManager:
         self.executor.submit(self._run, job_id)
         return self.status(job_id)
 
-    def _run(self, job_id: str) -> None:
-        from src import dagster_assets as pipeline
+    def _write_runtime_config(self, job: dict) -> Path:
+        base_config = PROJECT_ROOT / "audio_search.toml"
+        text = base_config.read_text(encoding="utf-8").rstrip()
+        source_key = job["source_key"]
+        filename = job["filename"].replace('"', '\\"')
+        source_id = job["source_id"].replace('"', '\\"')
 
+        text += (
+            "\n\n"
+            f"[sources.{source_key}]\n"
+            f"audio_filename = \"{filename}\"\n"
+            f"source_id = \"{source_id}\"\n"
+        )
+
+        path = self.runtime_config_dir / f"{job['job_id']}.toml"
+        path.write_text(text, encoding="utf-8")
+        return path
+
+    @staticmethod
+    def _dagster_executable() -> str:
+        discovered = shutil.which("dagster")
+        if discovered:
+            return discovered
+
+        scripts_dir = Path(sys.executable).parent
+        candidate = scripts_dir / ("dagster.exe" if os.name == "nt" else "dagster")
+        if candidate.exists():
+            return str(candidate)
+
+        raise RuntimeError(
+            "Could not find the Dagster CLI in the active environment."
+        )
+
+    def _run(self, job_id: str) -> None:
         with self._lock:
             job = self.jobs[job_id]
             job["status"] = "running"
@@ -139,70 +173,53 @@ class AudioIngestManager:
 
         source_key = job["source_key"]
         mark_running(source_key)
-
-        source = self.settings.sources[source_key]
-        pipeline.SETTINGS.sources[source_key] = source
+        runtime_config = None
 
         try:
             self.instance.add_dynamic_partitions(
-                pipeline.audio_partitions.name,
+                "audio_files",
                 [source_key],
             )
 
-            resources = {
-                "whisper": pipeline.WhisperResource(
-                    model_size=self.settings.models.whisper_model,
-                    device="cuda",
-                    compute_type="int8",
-                ),
-                "diarizer": pipeline.DiarizationResource(
-                    model_name=self.settings.models.diarization_model,
-                ),
-                "embedding": pipeline.EmbeddingResource(
-                    model_name=self.settings.models.embedding_model,
-                ),
-                "llm": pipeline.LLMResource(
-                    base_url=self.settings.llm.base_url,
-                    model_name=self.settings.llm.model,
-                    timeout_seconds=self.settings.llm.timeout_seconds,
-                ),
-            }
+            runtime_config = self._write_runtime_config(job)
+            env = os.environ.copy()
+            env["DAGSTER_HOME"] = str(self.dagster_home)
+            env["AUDIO_SEARCH_CONFIG"] = str(runtime_config)
 
-            assets = [
-                pipeline.raw_audio,
-                pipeline.normalized_audio,
-                pipeline.transcript,
-                pipeline.diarization,
-                pipeline.chunks,
-                pipeline.speaker_transcript,
-                pipeline.speaker_roles,
-                pipeline.speaker_chunks,
-                pipeline.embeddings,
+            command = [
+                self._dagster_executable(),
+                "asset",
+                "materialize",
+                "-f",
+                str(PROJECT_ROOT / "src" / "dagster_assets.py"),
+                "--select",
+                "*embeddings",
+                "--partition",
+                source_key,
             ]
 
-            result = dg.materialize(
-                assets=assets,
-                resources=resources,
-                partition_key=source_key,
-                instance=self.instance,
-                raise_on_error=False,
-                tags={
-                    "audio_search/source_key": source_key,
-                    "audio_search/job_id": job_id,
-                    "audio_search/origin": "frontend",
-                },
-            )
+            log_path = Path(job["log_path"])
+            with log_path.open("w", encoding="utf-8") as log_file:
+                process = subprocess.run(
+                    command,
+                    cwd=PROJECT_ROOT,
+                    env=env,
+                    stdout=log_file,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    check=False,
+                )
 
-            with self._lock:
-                job["run_id"] = getattr(result, "run_id", None)
-
-            if result.success:
+            if process.returncode == 0:
                 mark_complete(source_key)
                 with self._lock:
                     job["status"] = "complete"
                     job["finished_at"] = time.time()
             else:
-                error = "Dagster materialization failed. Check Dagster run logs."
+                error = (
+                    "Dagster materialization failed. "
+                    f"See {log_path}."
+                )
                 mark_failed(source_key, error)
                 with self._lock:
                     job["status"] = "failed"
@@ -216,6 +233,13 @@ class AudioIngestManager:
                 job["status"] = "failed"
                 job["error"] = error
                 job["finished_at"] = time.time()
+
+        finally:
+            if runtime_config is not None:
+                try:
+                    runtime_config.unlink(missing_ok=True)
+                except OSError:
+                    pass
 
     def _artifact_stages(self, source_key: str, job_status: str) -> dict[str, dict]:
         source = self.settings.sources[source_key]
