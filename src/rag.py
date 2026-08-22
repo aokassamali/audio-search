@@ -5,26 +5,22 @@ from pydantic import ValidationError
 
 
 SYSTEM_PROMPT = """
-You answer questions about an audio recording using only the supplied evidence.
+You answer questions about selected audio recordings and transcripts using only the supplied evidence.
 
 Rules:
 1. Use only facts explicitly supported by the evidence.
 2. Do not use outside knowledge, even when you know the answer.
 3. Every factual claim in the answer must be supported by at least one citation_id.
 4. Only cite citation_ids that appear in the supplied evidence.
-5. If the evidence does not answer the question, set answerable to false.
+5. If the supplied evidence genuinely does not answer the question, set answerable to false.
 6. When answerable is false, use an empty citation_ids list.
 7. Return JSON only, with no Markdown or additional commentary.
-8. Do not attribute a claim to a person or party merely because another
-speaker describes that person's position. If attribution is uncertain,
-describe the disagreement neutrally.
-9.When answerable is false, briefly explain whether:
-- the topic is absent from the evidence, or
-- the question contains a premise that the evidence does not support.
-10. Distinguish between a speaker's own position, a question, a hypothetical,
-and their description of another speaker's position. Do not describe a
-question or hypothetical as that speaker's argument unless the evidence
-clearly supports that interpretation.
+8. Do not attribute a claim to a person or party merely because another speaker describes that person's position. If attribution is uncertain, describe the disagreement neutrally.
+9. When answerable is false, briefly explain whether the topic is absent from the evidence or the question contains a premise the evidence does not support.
+10. Distinguish between a speaker's own position, a question, a hypothetical, and their description of another speaker's position. Do not describe a question or hypothetical as that speaker's argument unless the evidence clearly supports that interpretation.
+11. Do synthesize across multiple evidence chunks when the question asks for positions, comparisons, arguments, disagreements, causes, timelines, or summaries. A conclusion does not need to appear verbatim in one chunk if it is a faithful synthesis of several cited chunks.
+12. You may infer a party's position from that party's own arguments, concessions, and responses when the cited evidence jointly supports the inference. Do not add facts beyond the evidence.
+13. Source titles are metadata. Minor spelling or punctuation errors in the user's reference to a source title do not make an otherwise supported question unanswerable.
 
 Do not answer using outside knowledge.
 
@@ -46,6 +42,7 @@ class LLMClient(Protocol):
         max_tokens: int = 512,
     ) -> str:
         ...
+
 
 class LLMAnswerDraft(BaseModel):
     answerable: bool
@@ -78,6 +75,10 @@ def build_context(
 
     for chunk in chunks:
         citation_id = create_citation_id(chunk)
+        source_name = chunk.get(
+            "source_display_name",
+            chunk.get("source_key", chunk.get("source_id", "Source")),
+        )
 
         context_text = chunk.get(
             "speaker_text",
@@ -86,6 +87,7 @@ def build_context(
 
         context_block = (
             f"[{citation_id}]\n"
+            f"Source: {source_name}\n"
             f"Timestamp: "
             f"{chunk['start']:.1f}s–"
             f"{chunk['end']:.1f}s\n"
@@ -95,6 +97,7 @@ def build_context(
         context_blocks.append(context_block)
 
     return "\n\n".join(context_blocks)
+
 
 def finalize_answer(
     draft: LLMAnswerDraft,
@@ -115,7 +118,7 @@ def finalize_answer(
             answerable=False,
             answer=refusal,
         )
-    
+
     invalid_citation_ids = [
         citation_id
         for citation_id in draft.citation_ids
@@ -182,7 +185,7 @@ def parse_llm_answer(
             ),
             citation_ids=[],
         )
-    
+
 
 def answer_question(
     query: str,
@@ -236,8 +239,3 @@ def build_answer_schema(
     }
 
     return schema
-
-
-
-
-
