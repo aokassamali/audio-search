@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Audio Intelligence</title>
   <link rel="stylesheet" href="/static/styles.css?v=20260822-ui-cleanup">
-  <link rel="stylesheet" href="/static/demo_patch.css?v=20260822-audit-player">
+  <link rel="stylesheet" href="/static/demo_patch.css?v=20260822-final-evidence-ux">
   <style>[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -21,7 +21,13 @@
         <button class="nav-item" data-view="transcript" type="button"><span>≣</span><span class="sidebar-label">Transcripts</span></button>
       </nav>
       <div class="library-section">
-        <div class="library-head"><div class="section-label sidebar-label">Library</div><button id="selectAllSources" class="library-select-all sidebar-label" type="button">Select all</button></div>
+        <div class="library-head">
+          <div class="section-label sidebar-label">Library</div>
+          <div class="library-actions sidebar-label">
+            <button id="selectAllSources" class="library-select-all" type="button">Select all</button>
+            <button id="clearAllSources" class="library-select-all" type="button">Clear</button>
+          </div>
+        </div>
         <div id="sourceList" class="source-list"></div>
       </div>
       <div class="sidebar-tools">
@@ -79,9 +85,9 @@
   <div id="audioDock" class="audio-dock clip-audio-dock" hidden>
     <div class="clip-audio-meta"><div id="audioDockTitle" class="audio-title"></div><div id="audioDockSubtitle" class="audio-subtitle"></div></div>
     <div class="clip-player" aria-label="Evidence clip player">
-      <button id="clipBack15" class="clip-skip" type="button" title="Back 15 seconds">↶<span>15</span></button>
-      <button id="clipToggle" class="clip-toggle" type="button" title="Play or pause">▶</button>
-      <button id="clipForward15" class="clip-skip" type="button" title="Forward 15 seconds">↷<span>15</span></button>
+      <button id="clipBack15" class="clip-skip" type="button" title="Back 15 seconds" aria-label="Back 15 seconds">−15s</button>
+      <button id="clipToggle" class="clip-toggle" type="button" title="Play or pause" aria-label="Play or pause">▶</button>
+      <button id="clipForward15" class="clip-skip" type="button" title="Forward 15 seconds" aria-label="Forward 15 seconds">+15s</button>
       <span id="clipElapsed" class="clip-time">0:00</span>
       <input id="clipSeek" class="clip-seek" type="range" min="0" max="1" step="0.05" value="0" aria-label="Evidence clip position">
       <span id="clipDuration" class="clip-time">0:00</span>
@@ -105,5 +111,6 @@
 
   <script src="/static/app.js?v=20260822-ui-cleanup"></script>
   <script src="/static/demo_patch.js?v=20260822-audit-player"></script>
+  <script src="/static/final_ux_fix.js?v=20260822-final-evidence-ux"></script>
 </body>
 </html>
