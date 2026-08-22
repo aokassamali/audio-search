@@ -3,11 +3,12 @@ from __future__ import annotations
 import os
 import re
 import shutil
+import signal
 import subprocess
 import sys
 import time
 import uuid
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import Future, ThreadPoolExecutor
 from pathlib import Path
 from threading import Lock
 
@@ -33,12 +34,16 @@ _STAGE_WEIGHTS = {
     "embed": 10.0,
 }
 
+_TERMINAL_STATUSES = {"complete", "failed", "cancelled"}
+
 
 class AudioIngestManager:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.jobs: dict[str, dict] = {}
         self._lock = Lock()
+        self._futures: dict[str, Future] = {}
+        self._processes: dict[str, subprocess.Popen] = {}
 
         max_workers = max(
             1,
@@ -74,30 +79,17 @@ class AudioIngestManager:
         return slug or "audio-source"
 
     def _unique_source_key(self, display_name: str) -> str:
-        """Return a fresh internal key even when the display name is reused.
-
-        Runtime sources are intentionally allowed to have the same human-facing
-        name across sessions. Their internal source IDs must not collide with
-        processed artifacts left on disk by an earlier ingestion, otherwise a
-        new job can appear 100% complete before Dagster has started.
-        """
+        """Return a fresh internal key even when the display name is reused."""
         base = self._slugify(display_name)
         while True:
             key = f"{base}-{uuid.uuid4().hex[:8]}"
             with self._lock:
                 known = set(self.settings.sources)
-                known.update(
-                    job["source_key"]
-                    for job in self.jobs.values()
-                )
+                known.update(job["source_key"] for job in self.jobs.values())
             if key not in known:
                 return key
 
-    def submit(
-        self,
-        audio_path: Path,
-        display_name: str,
-    ) -> dict:
+    def submit(self, audio_path: Path, display_name: str) -> dict:
         source_key = self._unique_source_key(display_name)
         source_id = source_key
         source = SourceSettings(
@@ -108,7 +100,6 @@ class AudioIngestManager:
             speaker_labels={},
             paths=self.settings.paths,
         )
-
         self.settings.sources[source_key] = source
 
         job_id = uuid.uuid4().hex
@@ -132,7 +123,9 @@ class AudioIngestManager:
             self.jobs[job_id] = job
 
         initialize(source_key)
-        self.executor.submit(self._run, job_id)
+        future = self.executor.submit(self._run, job_id)
+        with self._lock:
+            self._futures[job_id] = future
         return self.status(job_id)
 
     def _write_runtime_config(self, job: dict) -> Path:
@@ -164,26 +157,113 @@ class AudioIngestManager:
         if candidate.exists():
             return str(candidate)
 
-        raise RuntimeError(
-            "Could not find the Dagster CLI in the active environment."
-        )
+        raise RuntimeError("Could not find the Dagster CLI in the active environment.")
+
+    @staticmethod
+    def _terminate_process_tree(process: subprocess.Popen) -> None:
+        """Terminate the Dagster CLI and any worker children it spawned."""
+        if process.poll() is not None:
+            return
+
+        if os.name == "nt":
+            try:
+                subprocess.run(
+                    ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                    stdout=subprocess.DEVNULL,
+                    stderr=subprocess.DEVNULL,
+                    check=False,
+                    timeout=8,
+                )
+                return
+            except (OSError, subprocess.TimeoutExpired):
+                pass
+        else:
+            try:
+                os.killpg(os.getpgid(process.pid), signal.SIGTERM)
+                try:
+                    process.wait(timeout=4)
+                    return
+                except subprocess.TimeoutExpired:
+                    os.killpg(os.getpgid(process.pid), signal.SIGKILL)
+                    return
+            except (OSError, ProcessLookupError):
+                pass
+
+        try:
+            process.terminate()
+            process.wait(timeout=3)
+        except (OSError, subprocess.TimeoutExpired):
+            try:
+                process.kill()
+            except OSError:
+                pass
+
+    def _set_cancelled(self, job_id: str) -> None:
+        with self._lock:
+            job = self.jobs.get(job_id)
+            if job is None or job["status"] in {"complete", "failed"}:
+                return
+            job["status"] = "cancelled"
+            job["finished_at"] = job.get("finished_at") or time.time()
+            job["error"] = None
+
+    def cancel(self, job_id: str) -> dict:
+        with self._lock:
+            if job_id not in self.jobs:
+                raise KeyError(job_id)
+            job = self.jobs[job_id]
+            if job["status"] in _TERMINAL_STATUSES:
+                return self.status(job_id)
+            job["status"] = "cancelling"
+            future = self._futures.get(job_id)
+            process = self._processes.get(job_id)
+
+        # A queued ThreadPool job can be cancelled before it ever starts.
+        if future is not None and future.cancel():
+            self._set_cancelled(job_id)
+            return self.status(job_id)
+
+        # A running Dagster CLI is killed as a process tree so Whisper/pyannote
+        # subprocesses do not survive after the user presses Cancel.
+        if process is not None:
+            self._terminate_process_tree(process)
+
+        # If the worker is between queue pickup and Popen(), _run notices the
+        # cancelling state and exits before (or immediately after) spawning.
+        return self.status(job_id)
+
+    def cancel_all(self) -> list[dict]:
+        with self._lock:
+            ids = [
+                job_id
+                for job_id, job in self.jobs.items()
+                if job["status"] not in _TERMINAL_STATUSES
+            ]
+        return [self.cancel(job_id) for job_id in ids]
 
     def _run(self, job_id: str) -> None:
         with self._lock:
             job = self.jobs[job_id]
+            if job["status"] in {"cancelling", "cancelled"}:
+                job["status"] = "cancelled"
+                job["finished_at"] = time.time()
+                return
             job["status"] = "running"
             job["started_at"] = time.time()
 
         source_key = job["source_key"]
         mark_running(source_key)
         runtime_config = None
+        process: subprocess.Popen | None = None
 
         try:
-            self.instance.add_dynamic_partitions(
-                "audio_files",
-                [source_key],
-            )
+            with self._lock:
+                if self.jobs[job_id]["status"] in {"cancelling", "cancelled"}:
+                    self.jobs[job_id]["status"] = "cancelled"
+                    self.jobs[job_id]["finished_at"] = time.time()
+                    return
 
+            self.instance.add_dynamic_partitions("audio_files", [source_key])
             runtime_config = self._write_runtime_config(job)
             env = os.environ.copy()
             env["DAGSTER_HOME"] = str(self.dagster_home)
@@ -201,28 +281,45 @@ class AudioIngestManager:
                 source_key,
             ]
 
+            popen_kwargs = {}
+            if os.name == "nt":
+                popen_kwargs["creationflags"] = subprocess.CREATE_NEW_PROCESS_GROUP
+            else:
+                popen_kwargs["start_new_session"] = True
+
             log_path = Path(job["log_path"])
             with log_path.open("w", encoding="utf-8") as log_file:
-                process = subprocess.run(
+                process = subprocess.Popen(
                     command,
                     cwd=PROJECT_ROOT,
                     env=env,
                     stdout=log_file,
                     stderr=subprocess.STDOUT,
                     text=True,
-                    check=False,
+                    **popen_kwargs,
                 )
+                with self._lock:
+                    self._processes[job_id] = process
+                    cancel_requested = self.jobs[job_id]["status"] in {
+                        "cancelling",
+                        "cancelled",
+                    }
+                if cancel_requested:
+                    self._terminate_process_tree(process)
+                returncode = process.wait()
 
-            if process.returncode == 0:
+            with self._lock:
+                cancelled = self.jobs[job_id]["status"] in {"cancelling", "cancelled"}
+
+            if cancelled:
+                self._set_cancelled(job_id)
+            elif returncode == 0:
                 mark_complete(source_key)
                 with self._lock:
                     job["status"] = "complete"
                     job["finished_at"] = time.time()
             else:
-                error = (
-                    "Dagster materialization failed. "
-                    f"See {log_path}."
-                )
+                error = f"Dagster materialization failed. See {log_path}."
                 mark_failed(source_key, error)
                 with self._lock:
                     job["status"] = "failed"
@@ -230,14 +327,21 @@ class AudioIngestManager:
                     job["finished_at"] = time.time()
 
         except Exception as exc:
-            error = f"{type(exc).__name__}: {exc}"
-            mark_failed(source_key, error)
             with self._lock:
-                job["status"] = "failed"
-                job["error"] = error
-                job["finished_at"] = time.time()
+                cancelled = self.jobs[job_id]["status"] in {"cancelling", "cancelled"}
+            if cancelled:
+                self._set_cancelled(job_id)
+            else:
+                error = f"{type(exc).__name__}: {exc}"
+                mark_failed(source_key, error)
+                with self._lock:
+                    job["status"] = "failed"
+                    job["error"] = error
+                    job["finished_at"] = time.time()
 
         finally:
+            with self._lock:
+                self._processes.pop(job_id, None)
             if runtime_config is not None:
                 try:
                     runtime_config.unlink(missing_ok=True)
@@ -249,8 +353,6 @@ class AudioIngestManager:
         if started_at is None or not path.exists():
             return False
         try:
-            # Small tolerance avoids filesystem timestamp rounding while still
-            # rejecting artifacts from previous runs/sessions.
             return path.stat().st_mtime >= started_at - 1.0
         except OSError:
             return False
@@ -282,7 +384,7 @@ class AudioIngestManager:
             stages[first_incomplete] = {"status": "running", "progress": None}
 
         live = snapshot(job["source_key"])
-        if live:
+        if live and job["status"] == "running":
             for stage, info in live.get("stages", {}).items():
                 if info.get("status") == "running" and info.get("progress") is not None:
                     stages[stage] = dict(info)
