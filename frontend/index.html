@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Audio Intelligence</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-head">
+        <button id="sidebarToggle" class="icon-button" type="button">☰</button>
+        <div class="brand sidebar-label">Audio Intelligence</div>
+      </div>
+      <button id="addSourceButton" class="new-source-button" type="button"><span>＋</span><span class="sidebar-label">Add source</span></button>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="ask" type="button"><span>⌕</span><span class="sidebar-label">Ask</span></button>
+        <button class="nav-item" data-view="transcript" type="button"><span>≣</span><span class="sidebar-label">Transcripts</span></button>
+      </nav>
+      <div class="library-section">
+        <div class="section-label sidebar-label">Library</div>
+        <div id="sourceList" class="source-list"></div>
+      </div>
+      <a class="nav-item" href="/docs" target="_blank" rel="noreferrer"><span>{ }</span><span class="sidebar-label">API docs</span></a>
+    </aside>
+
+    <main class="main-canvas">
+      <header class="topbar">
+        <div><div id="viewEyebrow" class="eyebrow">Search across your library</div><h1 id="viewTitle">Ask your recordings</h1></div>
+        <div class="topbar-actions"><div id="connectionBadge" class="status-pill"><span></span>Connecting</div><button id="topAddButton" class="secondary-button" type="button">Add source</button></div>
+      </header>
+
+      <section id="askView" class="view view-active">
+        <div class="ask-stage">
+          <div class="query-card">
+            <div class="selected-summary"><span id="selectedSourceText">All recordings</span><button id="clearSources" class="text-button" type="button">Reset</button></div>
+            <form id="queryForm">
+              <textarea id="queryInput" rows="2" placeholder="Ask a question about the selected recordings…"></textarea>
+              <div class="query-actions"><span class="hint">Grounded answers only · citations resolve to source evidence</span><button id="askButton" class="primary-button" type="submit">Ask</button></div>
+            </form>
+          </div>
+          <div class="suggestions">
+            <button type="button" data-query="What were the main disagreements discussed?">Main disagreements</button>
+            <button type="button" data-query="What concerns were raised, and by whom?">Key concerns</button>
+            <button type="button" data-query="Summarize the strongest arguments on each side.">Compare arguments</button>
+          </div>
+          <div id="answerState" class="answer-state empty-state"><div class="empty-orb">⌁</div><h2>Ask across hours of audio in seconds.</h2><p>Answers stay traceable to transcript chunks, speakers, timestamps, and the original recording when audio is available.</p></div>
+        </div>
+      </section>
+
+      <section id="transcriptView" class="view">
+        <div class="transcript-toolbar">
+          <label><span>Source</span><select id="transcriptSource"></select></label>
+          <label><span>Audit transcript</span><input id="transcriptSearch" type="search" placeholder="Search text, speaker, or chunk ID…"></label>
+          <button id="transcriptSearchButton" class="primary-button" type="button">Search</button>
+        </div>
+        <div id="transcriptMeta" class="transcript-meta"></div>
+        <div id="transcriptList" class="transcript-list"></div>
+      </section>
+    </main>
+
+    <aside id="evidenceDrawer" class="evidence-drawer" aria-hidden="true">
+      <div class="drawer-head"><div><div class="eyebrow">Evidence</div><h2 id="drawerTitle">Source chunk</h2></div><button id="closeDrawer" class="icon-button" type="button">×</button></div>
+      <div id="drawerBody" class="drawer-body"></div>
+    </aside>
+  </div>
+
+  <div id="audioDock" class="audio-dock" hidden><div><div id="audioDockTitle" class="audio-title"></div><div id="audioDockSubtitle" class="audio-subtitle"></div></div><audio id="audioPlayer" controls preload="metadata"></audio><button id="closeAudio" class="icon-button" type="button">×</button></div>
+
+  <div id="dropOverlay" class="drop-overlay"><div class="drop-card"><div class="drop-icon">↓</div><div class="drop-title">Drop to add to your library</div><div class="drop-subtitle">Audio, JSON, SRT, VTT, or TXT</div></div></div>
+
+  <div id="importModal" class="modal-backdrop" hidden>
+    <section class="import-modal" role="dialog" aria-modal="true">
+      <div class="modal-head"><div><div class="eyebrow">New source</div><h2>Ingestion preview</h2></div><button id="closeImport" class="icon-button" type="button">×</button></div>
+      <div id="fileSummary" class="file-summary"></div>
+      <div class="eta-row"><div><div class="meta-label">Estimated completion</div><div id="etaValue" class="eta-value">Calculating…</div></div><div id="ingestionPathBadge" class="path-badge">Detecting inputs</div></div>
+      <div class="dag-panel"><div class="dag-header"><div><div class="meta-label">Processing graph</div><div id="dagStatus" class="dag-status">Ready to process</div></div><div id="overallProgress" class="overall-progress">0%</div></div><div id="dagGraph" class="dag-graph"></div></div>
+      <div id="importMessage" class="import-message"></div>
+      <div class="modal-actions"><button id="cancelImport" class="secondary-button" type="button">Cancel</button><button id="importAction" class="primary-button" type="button">Continue</button></div>
+    </section>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
