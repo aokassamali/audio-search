@@ -1,10 +1,10 @@
 (() => {
   const $ = (id) => document.getElementById(id);
 
-  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-intent-eta-modal';
+  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-clarify-intent';
 
   function showTranscriptViewWithoutLoading() {
-    document.querySelectorAll('.nav-item[data-view]').forEach(item => {
+    document.querySelectorAll('.nav-item[data-view="transcript"]').forEach(item => {
       item.classList.toggle('active', item.dataset.view === 'transcript');
     });
     $('askView')?.classList.remove('view-active');
@@ -39,6 +39,23 @@
     event.preventDefault();
     clearLibrarySources();
   });
+
+  function relabelClarification() {
+    const answerState = $('answerState');
+    if (!answerState) return;
+    const card = answerState.querySelector('.answer-card.refusal');
+    const text = card?.querySelector('.answer-text')?.textContent?.trim() || '';
+    if (!text.startsWith("I don't understand the question well enough to answer it reliably.")) return;
+    const kicker = card.querySelector('.answer-kicker');
+    if (kicker) kicker.textContent = 'Clarify question';
+  }
+
+  if ($('answerState')) {
+    new MutationObserver(relabelClarification).observe($('answerState'), {
+      childList: true,
+      subtree: true,
+    });
+  }
 
   // Clicking the backdrop while a live ingestion is running should behave like
   // Minimize. The pre-processing confirmation remains explicit and is not
