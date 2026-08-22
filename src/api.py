@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import re
+import uuid
 from collections import Counter
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -13,12 +14,13 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from src.audio_ingest import AudioIngestManager
 from src.chunk import create_chunks
 from src.config import PROJECT_ROOT, load_settings
 from src.corpus import SourceIndex, build_corpus_index, search_corpus
 from src.llm_clients import LlamaCppClient
 from src.rag import GroundedAnswer, answer_question
-from src.search import build_bm25, build_dense_index, extract_texts
+from src.search import build_bm25, build_dense_index, extract_texts, load_chunks
 from src.transcript_import import parse_transcript_bytes
 
 FRONTEND_DIR = PROJECT_ROOT / "frontend"
@@ -107,7 +109,13 @@ def _rebuild_global_index(index) -> None:
     )
 
 
-def _add_runtime_source(state, source_key: str, source_id: str, chunks: list[dict]) -> None:
+def _add_runtime_source(
+    state,
+    source_key: str,
+    source_id: str,
+    chunks: list[dict],
+    cache_dir: Path | None = None,
+) -> None:
     normalized_chunks = []
     for chunk in chunks:
         normalized = dict(chunk)
@@ -115,7 +123,8 @@ def _add_runtime_source(state, source_key: str, source_id: str, chunks: list[dic
         normalized["source_id"] = source_id
         normalized_chunks.append(normalized)
     texts = extract_texts(normalized_chunks)
-    cache_dir = state.settings.paths.embedding_cache_root / "imports" / source_key
+    if cache_dir is None:
+        cache_dir = state.settings.paths.embedding_cache_root / "imports" / source_key
     _, embeddings = build_dense_index(
         texts,
         cache_dir=cache_dir,
@@ -129,6 +138,30 @@ def _add_runtime_source(state, source_key: str, source_id: str, chunks: list[dic
         chunk_embeddings=embeddings,
     )
     _rebuild_global_index(state.corpus_index)
+
+
+def _attach_completed_audio_job(state, job: dict) -> None:
+    if job.get("status") != "complete":
+        return
+    source_key = job["source_key"]
+    if source_key in state.corpus_index.sources:
+        return
+    source = state.settings.sources.get(source_key)
+    if source is None or not source.active_chunks_path.exists():
+        return
+    chunks = load_chunks(source.active_chunks_path)
+    _add_runtime_source(
+        state,
+        source_key=source_key,
+        source_id=source.source_id,
+        chunks=chunks,
+        cache_dir=source.embedding_cache_dir,
+    )
+    state.runtime_sources[source_key] = {
+        "display_name": job["display_name"],
+        "source_type": "processed_audio",
+        "audio_path": job["audio_path"],
+    }
 
 
 @asynccontextmanager
@@ -146,8 +179,14 @@ async def lifespan(app: FastAPI):
     app.state.corpus_index = corpus_index
     app.state.llm_client = llm_client
     app.state.runtime_sources = {}
+    app.state.audio_ingest = AudioIngestManager(settings)
     source_counts = Counter(chunk["source_key"] for chunk in corpus_index.chunks)
     print(f"Loaded {len(corpus_index.chunks)} chunks from {len(source_counts)} sources")
+    print(
+        "Audio ingestion workers: "
+        f"{app.state.audio_ingest.max_workers}; "
+        f"Dagster home: {app.state.audio_ingest.dagster_home}"
+    )
     yield
 
 
@@ -165,6 +204,8 @@ def health(request: Request):
         "chunks_loaded": len(index.chunks),
         "chunks_by_source": dict(source_counts),
         "embedding_model": state.settings.models.embedding_model,
+        "ingest_workers": state.audio_ingest.max_workers,
+        "dagster_home": str(state.audio_ingest.dagster_home),
     }
 
 
@@ -251,6 +292,55 @@ def answer(answer_request: AnswerRequest, request: Request):
         retrieved_chunks=retrieved_chunks,
         llm_client=state.llm_client,
     )
+
+
+@app.post("/ingest/audio")
+async def ingest_audio(
+    request: Request,
+    audio: UploadFile = File(...),
+    source_name: str | None = Form(default=None),
+):
+    extension = Path(audio.filename or "audio").suffix.lower()
+    if extension not in AUDIO_EXTENSIONS:
+        raise HTTPException(status_code=400, detail="Unsupported audio format")
+
+    display_name = (
+        source_name.strip()
+        if source_name and source_name.strip()
+        else Path(audio.filename or "Audio source").stem
+    )
+
+    raw_dir = request.app.state.settings.paths.raw_audio_dir
+    raw_dir.mkdir(parents=True, exist_ok=True)
+    safe_name = _slugify(display_name)
+    target = raw_dir / f"{safe_name}-{uuid.uuid4().hex[:8]}{extension}"
+    target.write_bytes(await audio.read())
+
+    job = request.app.state.audio_ingest.submit(
+        audio_path=target,
+        display_name=display_name,
+    )
+    return job
+
+
+@app.get("/ingest/jobs")
+def ingest_jobs(request: Request):
+    state = request.app.state
+    jobs = state.audio_ingest.list_jobs()
+    for job in jobs:
+        _attach_completed_audio_job(state, job)
+    return {"jobs": jobs}
+
+
+@app.get("/ingest/jobs/{job_id}")
+def ingest_job(job_id: str, request: Request):
+    state = request.app.state
+    try:
+        job = state.audio_ingest.status(job_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Unknown ingestion job") from exc
+    _attach_completed_audio_job(state, job)
+    return job
 
 
 @app.post("/ingest/transcript")
