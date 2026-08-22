@@ -17,9 +17,10 @@ from pydantic import BaseModel, Field
 from src.audio_ingest import AudioIngestManager
 from src.chunk import create_chunks
 from src.config import PROJECT_ROOT, load_settings
-from src.corpus import SourceIndex, build_corpus_index, search_corpus
+from src.corpus import SourceIndex, build_corpus_index
 from src.llm_clients import LlamaCppClient
 from src.rag import GroundedAnswer, answer_question
+from src.retrieval_planner import retrieve_with_plan
 from src.search import build_bm25, build_dense_index, extract_texts, load_chunks
 from src.transcript_import import parse_transcript_bytes
 
@@ -96,6 +97,16 @@ def _source_summary(state, source_key: str) -> dict:
         "source_type": runtime.get("source_type", "processed_audio"),
         "status": "ready",
     }
+
+
+def _source_catalog(state) -> list[dict]:
+    return [
+        {
+            "source_key": key,
+            "display_name": _source_display_name(state, key),
+        }
+        for key in state.corpus_index.sources
+    ]
 
 
 def _rebuild_global_index(index) -> None:
@@ -259,19 +270,21 @@ def source_audio(source_key: str, request: Request):
 
 @app.post("/search")
 def search(search_request: SearchRequest, request: Request):
-    index = request.app.state.corpus_index
-    results = search_corpus(
+    state = request.app.state
+    results, plan = retrieve_with_plan(
         query=search_request.query,
-        index=index,
+        index=state.corpus_index,
+        selected_source_keys=search_request.source_keys,
+        source_catalog=_source_catalog(state),
+        llm_client=state.llm_client,
         top_k=search_request.top_k,
-        source_keys=search_request.source_keys,
-        retrieval_mode=search_request.retrieval_mode,
         top_k_per_source=search_request.top_k_per_source,
     )
     return {
         "query": search_request.query,
         "source_keys": search_request.source_keys,
-        "retrieval_mode": search_request.retrieval_mode,
+        "retrieval_mode": "llm_planned_hybrid",
+        "retrieval_plan": plan.model_dump(),
         "results": results,
     }
 
@@ -279,12 +292,13 @@ def search(search_request: SearchRequest, request: Request):
 @app.post("/answer", response_model=GroundedAnswer)
 def answer(answer_request: AnswerRequest, request: Request):
     state = request.app.state
-    retrieved_chunks = search_corpus(
+    retrieved_chunks, _ = retrieve_with_plan(
         query=answer_request.query,
         index=state.corpus_index,
+        selected_source_keys=answer_request.source_keys,
+        source_catalog=_source_catalog(state),
+        llm_client=state.llm_client,
         top_k=answer_request.top_k,
-        source_keys=answer_request.source_keys,
-        retrieval_mode=answer_request.retrieval_mode,
         top_k_per_source=answer_request.top_k_per_source,
     )
     return answer_question(
