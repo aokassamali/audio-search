@@ -4,6 +4,7 @@ import json
 from src.config import load_settings
 from pathlib import Path
 
+
 def create_output_path(
     audio: str | Path,
     output_directory: str | Path,
@@ -29,6 +30,7 @@ def transcribe_audio(
     device="cuda",
     compute_type="int8",
     model=None,
+    progress_callback=None,
 ):
     if model is None:
         model = WhisperModel(
@@ -42,14 +44,31 @@ def transcribe_audio(
         beam_size=5,
     )
 
-    json_list = [
-        {
-            "start": segment.start,
-            "end": segment.end,
-            "text": segment.text,
-        }
-        for segment in segments
-    ]
+    duration = float(getattr(info, "duration", 0.0) or 0.0)
+    json_list = []
+
+    for segment in segments:
+        json_list.append(
+            {
+                "start": segment.start,
+                "end": segment.end,
+                "text": segment.text,
+            }
+        )
+
+        if progress_callback is not None and duration > 0:
+            progress_callback(
+                min(
+                    100.0,
+                    max(
+                        0.0,
+                        (float(segment.end) / duration) * 100.0,
+                    ),
+                )
+            )
+
+    if progress_callback is not None:
+        progress_callback(100.0)
 
     if output_path is None:
         settings = load_settings()
@@ -127,6 +146,7 @@ def main():
     )
 
     print(f"Saved transcript to {output_path}")
+
 
 if __name__ == "__main__":
     main()
