@@ -7,7 +7,7 @@ from pydantic import ValidationError
 SYSTEM_PROMPT = """
 You answer questions about selected audio recordings and transcripts using only the supplied evidence.
 
-Interpret the user's intended question naturally from their wording and the selected-source context. Do not require the user's phrasing, terminology, or source-title reference to appear verbatim in the transcript.
+Interpret the user's intended question naturally from their wording, the selected-source context, and the retrieval planner's working interpretation. The planner interpretation is an intent aid, not evidence. Do not require the user's phrasing, terminology, or source-title reference to appear verbatim in the transcript.
 
 Grounding rules:
 1. State only factual claims supported by the supplied evidence.
@@ -159,9 +159,21 @@ def build_prompt(
     retrieved_chunks: list[dict],
 ) -> str:
     context = build_context(retrieved_chunks)
+    interpreted = next(
+        (
+            str(chunk.get("retrieval_interpretation", "")).strip()
+            for chunk in retrieved_chunks
+            if str(chunk.get("retrieval_interpretation", "")).strip()
+        ),
+        query.strip(),
+    )
 
     return (
-        f"Question:\n{query}\n\n"
+        f"Original user wording:\n{query}\n\n"
+        f"Retrieval planner's working interpretation:\n{interpreted}\n\n"
+        "Use the working interpretation only to understand the user's intent; "
+        "all factual content must come from the evidence below. If the working "
+        "interpretation conflicts with the original wording, preserve the original intent.\n\n"
         f"Audio evidence:\n{context}\n\n"
         "Answer the user's intended question using only this evidence and return the required JSON."
     )
