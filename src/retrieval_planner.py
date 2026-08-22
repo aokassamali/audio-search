@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 import time
 from threading import Lock
 
@@ -38,6 +39,16 @@ class RetrievalPlan(BaseModel):
 _PLAN_CACHE: dict[tuple, tuple[float, RetrievalPlan]] = {}
 _PLAN_CACHE_LOCK = Lock()
 _PLAN_CACHE_SECONDS = 90.0
+
+
+_COMMON_SHORT_WORDS = {
+    "a", "an", "and", "are", "as", "at", "be", "but", "by", "can", "do", "does",
+    "for", "from", "had", "has", "have", "hav", "he", "her", "him", "his", "how",
+    "i", "if", "in", "is", "it", "its", "me", "my", "of", "on", "or", "our", "she",
+    "so", "that", "the", "their", "them", "then", "they", "this", "to", "was", "we",
+    "were", "what", "when", "where", "which", "who", "why", "will", "with", "wit",
+    "you", "your", "all", "about", "tell", "give", "know", "say", "says", "said",
+}
 
 
 def _plan_schema(allowed_source_keys: list[str]) -> dict:
@@ -88,6 +99,76 @@ def _hint_text(evidence_hints: list[dict] | None) -> str:
             f'  excerpt: {text}'
         )
     return "\n\n".join(blocks) if blocks else "(none)"
+
+
+def _support_text(
+    source_catalog: list[dict],
+    evidence_hints: list[dict] | None,
+) -> str:
+    parts = []
+    for item in source_catalog:
+        parts.append(str(item.get("display_name", "")))
+        parts.append(str(item.get("preview", "")))
+    for chunk in evidence_hints or []:
+        parts.append(str(chunk.get("source_display_name", "")))
+        parts.append(str(chunk.get("speaker_text") or chunk.get("text") or ""))
+    return " ".join(parts).lower()
+
+
+def _unknown_short_tokens(query: str, support: str) -> list[str]:
+    tokens = re.findall(r"\b[a-zA-Z]{2,5}\b", query.lower())
+    unknown = []
+    for token in tokens:
+        if token in _COMMON_SHORT_WORDS:
+            continue
+        if re.search(rf"\b{re.escape(token)}\b", support):
+            continue
+        if token not in unknown:
+            unknown.append(token)
+    return unknown
+
+
+def _unsupported_interpretation(
+    query: str,
+    interpreted_question: str,
+    source_catalog: list[dict],
+    evidence_hints: list[dict] | None,
+) -> str | None:
+    """Return the ambiguous raw token when the planner invents unsupported entities.
+
+    The LLM is allowed to paraphrase freely, but it is not allowed to turn an
+    unexplained shorthand token into a specific named entity or acronym expansion
+    that appears nowhere in the selected corpus context. This deterministic check
+    catches that class of overconfident interpretation before answer generation.
+    """
+    support = _support_text(source_catalog, evidence_hints)
+    unknown_tokens = _unknown_short_tokens(query, support)
+    if not unknown_tokens:
+        return None
+
+    # Explicit acronym expansions such as "Independent Police Panel (INDP)".
+    expansion_pattern = re.compile(
+        r"\b([A-Z][A-Za-z]+(?:\s+(?:[A-Z][A-Za-z]+|of|the|and|for)){1,6})\s*\(([A-Z]{2,10})\)"
+    )
+    for phrase, acronym in expansion_pattern.findall(interpreted_question):
+        if acronym.lower() not in unknown_tokens:
+            continue
+        if phrase.lower() not in support:
+            return acronym.lower()
+
+    # More generally, a newly introduced multi-word proper name is suspicious
+    # when the user supplied unresolved shorthand and that name has no support
+    # anywhere in the selected source context.
+    proper_name_pattern = re.compile(
+        r"\b(?:[A-Z][a-z]{2,})(?:\s+(?:[A-Z][a-z]{2,})){1,4}\b"
+    )
+    for phrase in proper_name_pattern.findall(interpreted_question):
+        lowered = phrase.lower()
+        if lowered in support or lowered in query.lower():
+            continue
+        return unknown_tokens[0]
+
+    return None
 
 
 def plan_retrieval(
@@ -171,10 +252,23 @@ def plan_retrieval(
         interpreted_question = plan.interpreted_question.strip() or query.strip()
         needs_clarification = bool(plan.needs_clarification)
         clarification_question = plan.clarification_question.strip()
+
+        unsupported_token = _unsupported_interpretation(
+            query=query,
+            interpreted_question=interpreted_question,
+            source_catalog=catalog,
+            evidence_hints=evidence_hints,
+        )
+        if unsupported_token:
+            needs_clarification = True
+            clarification_question = (
+                f'What do you mean by "{unsupported_token}"? '
+                "I can’t reliably infer that term from the selected recordings."
+            )
+
         if needs_clarification and not clarification_question:
             clarification_question = (
-                "I don't understand the question well enough to answer it reliably. "
-                "Could you clarify or rewrite it more clearly?"
+                "Could you clarify or rewrite the ambiguous part of the question?"
             )
         if not needs_clarification:
             clarification_question = ""
