@@ -6,6 +6,7 @@
     batch: null,
     importBusy: false,
     audioJobs: [],
+    audioTimer: null,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -13,6 +14,7 @@
   const stem = (name) => name.replace(/\.[^.]+$/, '');
   const transcriptExts = new Set(['json', 'srt', 'vtt', 'txt']);
   const audioExts = new Set(['mp3', 'wav', 'm4a', 'flac', 'ogg', 'aac']);
+  const stageKeys = ['normalize', 'transcribe', 'speakers', 'chunk', 'embed'];
   const esc = (value = '') => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
   const formatTime = (value) => {
@@ -57,14 +59,28 @@
     return `<div style="height:4px;margin-top:6px;border-radius:999px;background:#e5e5e9;overflow:hidden"><span style="display:block;height:100%;width:${pct}%;background:#171719;border-radius:999px;transition:width .25s ease"></span></div>`;
   }
 
+  function jobStageText(job) {
+    if (job.status === 'queued') return 'Queued';
+    if (job.status === 'failed') return 'Failed';
+    if (job.status === 'complete') return 'Ready';
+    const labels = {
+      normalize: 'Normalizing audio',
+      transcribe: 'Transcribing',
+      speakers: 'Identifying speakers',
+      chunk: 'Building chunks',
+      embed: 'Generating embeddings',
+    };
+    return labels[job.active_stage] || 'Starting Dagster run';
+  }
+
   function renderSources() {
     const jobHtml = state.audioJobs.map(job => `
-      <div class="source-row" title="${esc(job.name)}">
-        <div style="width:8px;height:8px;border-radius:50%;background:#171719;flex:0 0 auto"></div>
+      <div class="source-row" title="${esc(job.display_name || job.plan?.name || 'Audio source')}">
+        <div style="width:8px;height:8px;border-radius:50%;background:${job.status === 'failed' ? '#a43b37' : job.status === 'complete' ? '#14804a' : '#171719'};flex:0 0 auto"></div>
         <div class="source-copy">
-          <div class="source-name">${esc(job.name)}</div>
-          <div class="source-meta">${esc(job.stageText)} · ${job.overall}%</div>
-          ${progressBar(job.overall)}
+          <div class="source-name">${esc(job.display_name || job.plan?.name || 'Audio source')}</div>
+          <div class="source-meta">${esc(jobStageText(job))}${job.status === 'running' ? ` · ${Math.round(job.overall_progress || 0)}%` : ''}</div>
+          ${job.status === 'running' || job.status === 'queued' ? progressBar(job.overall_progress || 0) : ''}
         </div>
       </div>`).join('');
 
@@ -289,13 +305,17 @@
     return {supported, plans};
   }
 
-  function renderDag(plan, active = -1, completed = -1, progress = 0) {
+  function renderDag(plan, stages = null) {
     $('dagGraph').innerHTML = plan.nodes.map((node, index) => {
       const skipped = node[2] === 'skip';
-      const done = !skipped && index <= completed;
-      const running = !skipped && index === active;
-      const pct = done ? 100 : running ? progress : 0;
-      return `<div class="dag-node ${done ? 'complete' : ''} ${running ? 'active' : ''} ${skipped ? 'skipped' : ''}"><div class="node-dot">${done ? '✓' : skipped ? '↷' : index + 1}</div><div class="node-label">${esc(node[0])}</div><div class="node-progress"><span style="width:${pct}%"></span></div><div class="node-detail">${running ? `${pct}% · ` : ''}${esc(node[1])}</div></div>`;
+      const stage = stages && plan.mode === 'audio' ? stages[stageKeys[index]] : null;
+      const done = skipped ? false : stage?.status === 'complete';
+      const running = skipped ? false : stage?.status === 'running';
+      const pct = done ? 100 : Number.isFinite(stage?.progress) ? Math.round(stage.progress) : 0;
+      const statusText = running
+        ? `${Number.isFinite(stage?.progress) ? `${pct}% · ` : 'Running · '}${esc(node[1])}`
+        : esc(node[1]);
+      return `<div class="dag-node ${done ? 'complete' : ''} ${running ? 'active' : ''} ${skipped ? 'skipped' : ''}"><div class="node-dot">${done ? '✓' : skipped ? '↷' : index + 1}</div><div class="node-label">${esc(node[0])}</div><div class="node-progress"><span style="width:${pct}%"></span></div><div class="node-detail">${statusText}</div></div>`;
     }).join('');
   }
 
@@ -345,7 +365,8 @@
     $('importMessage').className = 'import-message';
     $('importMessage').textContent = batch.plans.length === 1
       ? 'Review the source and processing path, then start ingestion.'
-      : `${batch.plans.length} sources will be added as separate ingestion jobs. Files with matching base names are paired as audio + transcript.`;
+      : `${batch.plans.length} sources will be submitted as separate ingestion jobs. Matching audio and transcript filenames are paired automatically.`;
+    $('cancelImport').hidden = false;
     $('cancelImport').textContent = 'Cancel';
     $('importAction').textContent = 'Process';
     $('importAction').disabled = false;
@@ -353,85 +374,111 @@
   }
 
   function currentAudioJob() {
-    return state.audioJobs.find(job => !job.cancelled) || null;
+    return state.audioJobs.find(job => job.status !== 'complete' && job.status !== 'failed') || state.audioJobs[0] || null;
+  }
+
+  function batchOverall() {
+    const audio = state.audioJobs;
+    const imported = state.batch?.importedCount || 0;
+    const total = state.batch?.plans.length || 1;
+    const audioTotal = audio.reduce((sum, job) => sum + Number(job.overall_progress || 0), 0);
+    const completedTranscriptPoints = imported * 100;
+    return Math.round((audioTotal + completedTranscriptPoints) / total);
   }
 
   function setProcessingModal() {
     const batch = state.batch;
     if (!batch) return;
     const job = currentAudioJob();
-    const completedImports = batch.importedCount || 0;
     const totalItems = batch.plans.length;
 
     $('importTitle').textContent = totalItems === 1 ? 'Processing source' : `Processing ${totalItems} sources`;
     renderFileSummary();
-    $('cancelImport').textContent = 'Cancel processing';
+    $('cancelImport').hidden = true;
     $('importAction').textContent = 'Minimize';
+    $('etaValue').textContent = 'Not calibrated';
+    $('overallProgress').textContent = `${batchOverall()}%`;
 
     if (job) {
       $('ingestionPathBadge').textContent = totalItems === 1 ? job.plan.label : `${totalItems} sources`;
-      $('etaValue').textContent = 'Not calibrated';
-      $('overallProgress').textContent = `${Math.round(state.audioJobs.reduce((sum, item) => sum + item.overall, 0) / Math.max(1, state.audioJobs.length))}%`;
-      $('dagStatus').textContent = totalItems > 1 ? `${job.stageText} · ${job.name}` : job.stageText;
-      renderDag(job.plan, job.stageIndex, job.stageIndex - 1, job.stageProgress);
-      $('importMessage').className = 'import-message';
-      $('importMessage').textContent = 'Processing continues in the background while you work with the rest of your library.';
+      $('dagStatus').textContent = totalItems > 1 ? `${jobStageText(job)} · ${job.display_name || job.plan.name}` : jobStageText(job);
+      renderDag(job.plan, job.stages || null);
+      $('importMessage').className = job.status === 'failed' ? 'import-message error' : 'import-message';
+      $('importMessage').textContent = job.status === 'failed'
+        ? (job.error || 'Dagster materialization failed.')
+        : 'This is a live Dagster ingestion job. You can minimize this window and keep using the rest of the library.';
       return;
     }
 
     const first = batch.plans[0];
     $('ingestionPathBadge').textContent = totalItems === 1 ? first.label : `${totalItems} sources`;
-    $('etaValue').textContent = 'Not calibrated';
-    $('overallProgress').textContent = totalItems ? `${Math.round((completedImports / totalItems) * 100)}%` : '0%';
-    $('dagStatus').textContent = state.importBusy ? 'Importing transcript' : 'Ready';
-    renderDag(first, state.importBusy ? 1 : -1, state.importBusy ? 0 : -1, state.importBusy ? 50 : 0);
+    $('dagStatus').textContent = state.importBusy ? 'Importing transcript' : 'Processing complete';
+    renderDag(first);
+    $('importMessage').className = 'import-message';
     $('importMessage').textContent = state.importBusy ? 'Parsing, chunking, and embedding supplied transcript data.' : 'Processing complete.';
   }
 
-  function tickAudioJobs() {
-    const stageDurations = [5, 480, 240, 25, 35];
-    const stageWeights = [3, 55, 30, 4, 8];
-    const stageNames = ['Normalizing audio', 'Transcribing', 'Identifying speakers', 'Building chunks', 'Generating embeddings'];
-
-    for (const job of state.audioJobs) {
-      if (job.cancelled) continue;
-      let elapsed = (Date.now() - job.stageStartedAt) / 1000;
-      let duration = stageDurations[job.stageIndex];
-      if (elapsed >= duration && job.stageIndex < stageDurations.length - 1) {
-        job.stageIndex += 1;
-        job.stageStartedAt = Date.now();
-        elapsed = 0;
-        duration = stageDurations[job.stageIndex];
-      }
-      job.stageProgress = Math.min(99, Math.max(1, Math.round((elapsed / duration) * 100)));
-      const completedWeight = stageWeights.slice(0, job.stageIndex).reduce((sum, value) => sum + value, 0);
-      job.overall = Math.min(99, Math.round(completedWeight + stageWeights[job.stageIndex] * (job.stageProgress / 100)));
-      job.stageText = stageNames[job.stageIndex];
-    }
-
-    renderSources();
-    if (!$('importModal').hidden && state.batch?.started) setProcessingModal();
+  async function submitAudioPlan(plan) {
+    const form = new FormData();
+    form.append('audio', plan.audio);
+    form.append('source_name', plan.name);
+    const job = await api('/ingest/audio', {method:'POST', body:form});
+    job.plan = plan;
+    state.audioJobs.push(job);
+    return job;
   }
 
-  function startAudioPlans(plans) {
-    const now = Date.now();
-    for (const plan of plans) {
-      state.audioJobs.push({
-        id:plan.id,
-        name:plan.name,
-        plan,
-        stageIndex:0,
-        stageStartedAt:now,
-        stageProgress:1,
-        overall:1,
-        stageText:'Normalizing audio',
-        cancelled:false,
-      });
+  async function pollAudioJobs() {
+    if (!state.audioJobs.length) return;
+
+    let changedSources = false;
+    await Promise.all(state.audioJobs.map(async job => {
+      if (!job.job_id || job.status === 'failed') return;
+      try {
+        const updated = await api(`/ingest/jobs/${encodeURIComponent(job.job_id)}`);
+        const wasComplete = job.status === 'complete';
+        Object.assign(job, updated);
+        if (!wasComplete && job.status === 'complete') changedSources = true;
+      } catch (error) {
+        job.status = 'failed';
+        job.error = error.message;
+      }
+    }));
+
+    if (changedSources) await loadSources(true);
+    else renderSources();
+
+    if (!$('importModal').hidden && state.batch?.started) setProcessingModal();
+
+    const allDone = state.audioJobs.every(job => job.status === 'complete' || job.status === 'failed');
+    if (allDone && !state.importBusy && state.audioTimer) {
+      clearInterval(state.audioTimer);
+      state.audioTimer = null;
     }
-    if (state.audioJobs.length && !state.audioTimer) {
-      state.audioTimer = setInterval(tickAudioJobs, 500);
+  }
+
+  async function startAudioPlans(plans) {
+    if (!plans.length) return;
+    await Promise.all(plans.map(async plan => {
+      try {
+        await submitAudioPlan(plan);
+      } catch (error) {
+        state.audioJobs.push({
+          plan,
+          display_name: plan.name,
+          status:'failed',
+          overall_progress:0,
+          stages:null,
+          error:error.message,
+        });
+      }
+    }));
+
+    renderSources();
+    await pollAudioJobs();
+    if (state.audioJobs.some(job => job.job_id) && !state.audioTimer) {
+      state.audioTimer = setInterval(pollAudioJobs, 1000);
     }
-    tickAudioJobs();
   }
 
   async function importTranscriptPlan(plan) {
@@ -448,7 +495,7 @@
     try {
       for (const plan of plans) {
         if (!state.batch?.started) break;
-        setProcessingModal();
+        if (!$('importModal').hidden) setProcessingModal();
         try {
           await importTranscriptPlan(plan);
           state.batch.importedCount = (state.batch.importedCount || 0) + 1;
@@ -464,18 +511,24 @@
     }
   }
 
-  function startBatch() {
+  async function startBatch() {
     const batch = state.batch;
     if (!batch || batch.started) return;
     batch.started = true;
     batch.importedCount = 0;
     batch.errors = [];
+    state.audioJobs = [];
 
     const rawAudioPlans = batch.plans.filter(plan => plan.mode === 'audio');
     const transcriptPlans = batch.plans.filter(plan => plan.mode !== 'audio');
-    startAudioPlans(rawAudioPlans);
-    runTranscriptPlans(transcriptPlans);
+
     setProcessingModal();
+    await Promise.all([
+      startAudioPlans(rawAudioPlans),
+      runTranscriptPlans(transcriptPlans),
+    ]);
+
+    if (!$('importModal').hidden) setProcessingModal();
   }
 
   function prepareImport(files) {
@@ -490,6 +543,7 @@
       errors:[],
     };
 
+    state.audioJobs = [];
     $('importModal').hidden = false;
     previewBatch();
 
@@ -504,15 +558,9 @@
   }
 
   function cancelBatch() {
-    if (state.importBusy) return;
     if (state.batch?.started) {
-      const ids = new Set(state.batch.plans.map(plan => plan.id));
-      state.audioJobs = state.audioJobs.filter(job => !ids.has(job.id));
-      if (!state.audioJobs.length && state.audioTimer) {
-        clearInterval(state.audioTimer);
-        state.audioTimer = null;
-      }
-      renderSources();
+      minimizeImport();
+      return;
     }
     state.batch = null;
     $('importModal').hidden = true;
@@ -548,9 +596,9 @@
   $('topAddButton').addEventListener('click', pickFiles);
   $('closeImport').addEventListener('click', closeImport);
   $('cancelImport').addEventListener('click', cancelBatch);
-  $('importAction').addEventListener('click', () => {
+  $('importAction').addEventListener('click', async () => {
     if (!state.batch) return;
-    if (!state.batch.started) startBatch();
+    if (!state.batch.started) await startBatch();
     else minimizeImport();
   });
 
