@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Audio Intelligence</title>
   <link rel="stylesheet" href="/static/styles.css?v=20260822-ui-cleanup">
+  <link rel="stylesheet" href="/static/demo_patch.css?v=20260822-demo-ux">
   <style>[hidden]{display:none!important}</style>
 </head>
 <body>
@@ -20,10 +21,13 @@
         <button class="nav-item" data-view="transcript" type="button"><span>≣</span><span class="sidebar-label">Transcripts</span></button>
       </nav>
       <div class="library-section">
-        <div class="section-label sidebar-label">Library</div>
+        <div class="library-head"><div class="section-label sidebar-label">Library</div><button id="selectAllSources" class="library-select-all sidebar-label" type="button">Select all</button></div>
         <div id="sourceList" class="source-list"></div>
       </div>
-      <a class="nav-item" href="/docs" target="_blank" rel="noreferrer"><span>{ }</span><span class="sidebar-label">API docs</span></a>
+      <div class="sidebar-tools">
+        <a class="nav-item" href="/docs" target="_blank" rel="noreferrer"><span>{ }</span><span class="sidebar-label">API docs</span></a>
+        <a class="nav-item" href="http://127.0.0.1:3000" target="_blank" rel="noreferrer"><span>◇</span><span class="sidebar-label">Dagster</span></a>
+      </div>
     </aside>
 
     <main class="main-canvas">
@@ -47,7 +51,17 @@
 
       <section id="transcriptView" class="view">
         <div class="transcript-toolbar">
-          <label><span>Source</span><select id="transcriptSource"></select></label>
+          <div class="transcript-source-field" id="transcriptSourcePicker">
+            <span>Sources</span>
+            <div class="multi-select">
+              <button id="transcriptSourceButton" class="multi-select-trigger" type="button"><span class="picker-value">Select sources</span><span>⌄</span></button>
+              <div id="transcriptSourceMenu" class="multi-select-menu" hidden>
+                <div class="multi-select-actions"><button id="transcriptSelectAll" type="button">Select all</button><button id="transcriptClearAll" type="button">Clear</button></div>
+                <div id="transcriptSourceOptions" class="multi-select-options"></div>
+              </div>
+            </div>
+            <select id="transcriptSource" hidden aria-hidden="true"></select>
+          </div>
           <label><span>Audit transcript</span><input id="transcriptSearch" type="search" placeholder="Search text, speaker, or chunk ID…"></label>
           <button id="transcriptSearchButton" class="primary-button" type="button">Search</button>
         </div>
@@ -78,5 +92,6 @@
   </div>
 
   <script src="/static/app.js?v=20260822-ui-cleanup"></script>
+  <script src="/static/demo_patch.js?v=20260822-demo-ux"></script>
 </body>
 </html>
