@@ -3,7 +3,7 @@ from __future__ import annotations
 import time
 from threading import Lock
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 
 from src.corpus import CorpusIndex, search_corpus
 
@@ -11,17 +11,16 @@ from src.corpus import CorpusIndex, search_corpus
 PLANNER_SYSTEM_PROMPT = """
 You are a retrieval planner for a grounded question-answering system over audio transcripts.
 
-Your job is NOT to answer the user's question. Your job is to decide which selected recordings are relevant and write a small set of search queries that will retrieve the evidence needed to answer it.
+Infer the user's information need from their wording and the selected-source context, then plan retrieval that is likely to gather enough transcript evidence to answer it. Do not answer the question yourself.
 
 Rules:
 1. You may choose only source_keys listed in the selected source catalog.
-2. Resolve obvious misspellings, abbreviations, punctuation differences, and approximate references to source titles. A user may type a source title imperfectly.
-3. If the user clearly refers to one or more source titles, choose those sources. Otherwise keep all selected sources in scope.
-4. Remove source-title wording from semantic retrieval queries when it is merely identifying the recording.
-5. Use the short transcript previews only to understand what each recording is about and to choose useful retrieval language. Do not answer from the previews.
-6. For synthesis, comparison, "positions of each side", arguments, disagreements, causes, timelines, or other multi-part questions, decompose the request into 2-4 complementary retrieval queries so the evidence covers the distinct parts of the answer.
-7. Write concise retrieval queries using language likely to appear in the transcript. It is fine to use concepts revealed by the source preview, but do not invent facts.
-8. Return JSON only.
+2. Treat source titles as metadata. Resolve approximate references to them from the catalog rather than requiring exact wording.
+3. If the user is clearly referring to one or more selected recordings, scope retrieval to those recordings. Otherwise keep all selected recordings in scope.
+4. Use transcript previews only to understand the recordings and formulate useful searches. The previews are not answer evidence.
+5. Generate one or more concise semantic retrieval queries that together cover the user's information need. Decompose the request when doing so would improve evidence coverage.
+6. Prefer language likely to occur in the transcript, but do not invent facts.
+7. Return JSON only.
 """.strip()
 
 
@@ -189,9 +188,8 @@ def retrieve_with_plan(
         llm_client=llm_client,
     )
 
-    # Retrieve several candidates for each sub-question, then round-robin them.
-    # This prevents a broad synthesis question from spending all of its evidence
-    # budget on one side of the issue.
+    # Retrieve several candidates for each planned evidence search, then
+    # interleave them so one search cannot consume the entire evidence budget.
     per_query_k = max(3, min(6, top_k))
     ranked_lists = []
     for retrieval_query in plan.queries:
