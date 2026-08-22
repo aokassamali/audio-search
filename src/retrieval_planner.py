@@ -11,16 +11,16 @@ from src.corpus import CorpusIndex, search_corpus
 PLANNER_SYSTEM_PROMPT = """
 You are a retrieval planner for a grounded question-answering system over audio transcripts.
 
-Infer the user's information need from their wording and the selected-source context, then plan retrieval that is likely to gather enough transcript evidence to answer it. Do not answer the question yourself.
+Infer the user's information need from their wording, the selected-source context, and query-specific transcript hints, then plan retrieval that is likely to gather enough transcript evidence to answer it. Do not answer the question yourself.
 
 Rules:
 1. You may choose only source_keys listed in the selected source catalog.
 2. Treat source titles as metadata. Resolve approximate references to them from the catalog rather than requiring exact wording.
 3. If the user is clearly referring to one or more selected recordings, scope retrieval to those recordings. Otherwise keep all selected recordings in scope.
-4. Use transcript previews only to understand the recordings and formulate useful searches. The previews are not answer evidence.
+4. Transcript hints are real excerpts retrieved from the selected corpus for this query. Use them to disambiguate shorthand, typos, abbreviations, and ambiguous wording. Do not treat an unsupported expansion from general world knowledge as the intended meaning when the corpus context supports a different reading.
 5. Produce interpreted_question as a concise, neutral restatement of the user's intended information need in clear language. Preserve uncertainty if the request is genuinely ambiguous. Do not answer it and do not add facts.
 6. Generate one or more concise semantic retrieval queries that together cover the user's information need. Decompose the request when doing so would improve evidence coverage.
-7. Prefer language likely to occur in the transcript, but do not invent facts.
+7. Prefer language supported by the source catalog and transcript hints and likely to occur in the transcript. Do not invent named entities, acronym expansions, or subject matter that are not supported by the selected corpus context.
 8. Return JSON only.
 """.strip()
 
@@ -57,11 +57,33 @@ def _fallback_plan(query: str, selected_source_keys: list[str]) -> RetrievalPlan
     )
 
 
+def _hint_text(evidence_hints: list[dict] | None) -> str:
+    if not evidence_hints:
+        return "(none)"
+
+    blocks = []
+    for chunk in evidence_hints[:10]:
+        source_name = chunk.get(
+            "source_display_name",
+            chunk.get("source_key", chunk.get("source_id", "Source")),
+        )
+        text = str(chunk.get("speaker_text") or chunk.get("text") or "").strip()
+        if len(text) > 700:
+            text = text[:700] + "…"
+        blocks.append(
+            f'- source: {source_name}\n'
+            f'  chunk_id: {chunk.get("chunk_id")}\n'
+            f'  excerpt: {text}'
+        )
+    return "\n\n".join(blocks) if blocks else "(none)"
+
+
 def plan_retrieval(
     query: str,
     selected_source_keys: list[str],
     source_catalog: list[dict],
     llm_client,
+    evidence_hints: list[dict] | None = None,
 ) -> RetrievalPlan:
     allowed = [
         item["source_key"]
@@ -81,10 +103,18 @@ def plan_retrieval(
         if item["source_key"] in allowed
     ]
 
+    hint_signature = tuple(
+        (
+            str(item.get("source_key", "")),
+            str(item.get("chunk_id", "")),
+        )
+        for item in (evidence_hints or [])[:10]
+    )
     cache_key = (
         query.strip().lower(),
         tuple(allowed),
         tuple((item["source_key"], item["display_name"], item["preview"]) for item in catalog),
+        hint_signature,
     )
     now = time.time()
 
@@ -106,6 +136,7 @@ def plan_retrieval(
         prompt = (
             f"User question:\n{query}\n\n"
             f"Selected source catalog:\n{catalog_text}\n\n"
+            f"Query-specific transcript hints:\n{_hint_text(evidence_hints)}\n\n"
             "Return the retrieval plan."
         )
 
@@ -188,11 +219,35 @@ def retrieve_with_plan(
     if not selected:
         return [], RetrievalPlan(interpreted_question=query.strip(), source_keys=[], queries=[])
 
+    display_names = {
+        item["source_key"]: item["display_name"]
+        for item in source_catalog
+    }
+
+    # Bootstrap with ordinary hybrid retrieval on the user's raw wording. These
+    # snippets are not used as the final answer packet; they give the planner
+    # corpus-grounded context for resolving shorthand and typos before it writes
+    # better semantic searches.
+    bootstrap = search_corpus(
+        query=query,
+        index=index,
+        top_k=max(8, min(12, top_k * 2)),
+        source_keys=selected,
+        retrieval_mode="global",
+        top_k_per_source=top_k_per_source,
+    )
+    for chunk in bootstrap:
+        chunk["source_display_name"] = display_names.get(
+            chunk.get("source_key"),
+            chunk.get("source_id", "Source"),
+        )
+
     plan = plan_retrieval(
         query=query,
         selected_source_keys=selected,
         source_catalog=source_catalog,
         llm_client=llm_client,
+        evidence_hints=bootstrap,
     )
 
     # Retrieve several candidates for each planned evidence search, then
@@ -245,10 +300,6 @@ def retrieve_with_plan(
             if len(results) >= top_k:
                 break
 
-    display_names = {
-        item["source_key"]: item["display_name"]
-        for item in source_catalog
-    }
     for chunk in results:
         chunk["source_display_name"] = display_names.get(
             chunk.get("source_key"),
