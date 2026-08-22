@@ -18,13 +18,15 @@ Rules:
 2. Treat source titles as metadata. Resolve approximate references to them from the catalog rather than requiring exact wording.
 3. If the user is clearly referring to one or more selected recordings, scope retrieval to those recordings. Otherwise keep all selected recordings in scope.
 4. Use transcript previews only to understand the recordings and formulate useful searches. The previews are not answer evidence.
-5. Generate one or more concise semantic retrieval queries that together cover the user's information need. Decompose the request when doing so would improve evidence coverage.
-6. Prefer language likely to occur in the transcript, but do not invent facts.
-7. Return JSON only.
+5. Produce interpreted_question as a concise, neutral restatement of the user's intended information need in clear language. Preserve uncertainty if the request is genuinely ambiguous. Do not answer it and do not add facts.
+6. Generate one or more concise semantic retrieval queries that together cover the user's information need. Decompose the request when doing so would improve evidence coverage.
+7. Prefer language likely to occur in the transcript, but do not invent facts.
+8. Return JSON only.
 """.strip()
 
 
 class RetrievalPlan(BaseModel):
+    interpreted_question: str = ""
     source_keys: list[str] = Field(default_factory=list)
     queries: list[str] = Field(default_factory=list)
 
@@ -36,7 +38,7 @@ _PLAN_CACHE_SECONDS = 90.0
 
 def _plan_schema(allowed_source_keys: list[str]) -> dict:
     schema = RetrievalPlan.model_json_schema()
-    schema["required"] = ["source_keys", "queries"]
+    schema["required"] = ["interpreted_question", "source_keys", "queries"]
     schema["additionalProperties"] = False
     schema["properties"]["source_keys"]["items"] = {
         "type": "string",
@@ -47,9 +49,11 @@ def _plan_schema(allowed_source_keys: list[str]) -> dict:
 
 
 def _fallback_plan(query: str, selected_source_keys: list[str]) -> RetrievalPlan:
+    cleaned = query.strip()
     return RetrievalPlan(
+        interpreted_question=cleaned,
         source_keys=list(selected_source_keys),
-        queries=[query.strip()] if query.strip() else [],
+        queries=[cleaned] if cleaned else [],
     )
 
 
@@ -110,7 +114,7 @@ def plan_retrieval(
                 system_prompt=PLANNER_SYSTEM_PROMPT,
                 user_prompt=prompt,
                 response_schema=_plan_schema(allowed),
-                max_tokens=256,
+                max_tokens=320,
             )
             plan = RetrievalPlan.model_validate_json(raw)
         except Exception:
@@ -120,6 +124,8 @@ def plan_retrieval(
         valid_sources = [key for key in plan.source_keys if key in allowed]
         if not valid_sources:
             valid_sources = allowed
+
+        interpreted_question = plan.interpreted_question.strip() or query.strip()
 
         queries = []
         seen_queries = set()
@@ -132,9 +138,10 @@ def plan_retrieval(
             if len(queries) == 4:
                 break
         if not queries:
-            queries = [query.strip()]
+            queries = [interpreted_question or query.strip()]
 
         normalized_plan = RetrievalPlan(
+            interpreted_question=interpreted_question,
             source_keys=valid_sources,
             queries=queries,
         )
@@ -179,7 +186,7 @@ def retrieve_with_plan(
         else available
     )
     if not selected:
-        return [], RetrievalPlan(source_keys=[], queries=[])
+        return [], RetrievalPlan(interpreted_question=query.strip(), source_keys=[], queries=[])
 
     plan = plan_retrieval(
         query=query,
@@ -222,7 +229,7 @@ def retrieve_with_plan(
 
     if len(results) < top_k:
         fallback = search_corpus(
-            query=query,
+            query=plan.interpreted_question or query,
             index=index,
             top_k=top_k,
             source_keys=plan.source_keys,
@@ -247,5 +254,6 @@ def retrieve_with_plan(
             chunk.get("source_key"),
             chunk.get("source_id", "Source"),
         )
+        chunk["retrieval_interpretation"] = plan.interpreted_question
 
     return results, plan
