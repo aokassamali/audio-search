@@ -79,7 +79,11 @@ def _source_display_name(state, source_key: str) -> str:
 def _source_summary(state, source_key: str) -> dict:
     source_index = state.corpus_index.sources[source_key]
     chunks = source_index.chunks
-    timed = [chunk for chunk in chunks if chunk.get("start", -1) >= 0 and chunk.get("end", -1) >= 0]
+    timed = [
+        chunk
+        for chunk in chunks
+        if chunk.get("start", -1) >= 0 and chunk.get("end", -1) >= 0
+    ]
     speakers = []
     for chunk in chunks:
         for label in chunk.get("speaker_labels", {}).values():
@@ -248,7 +252,10 @@ def source_chunks(
             for chunk in chunks
             if needle in chunk.get("text", "").lower()
             or needle in chunk.get("speaker_text", "").lower()
-            or any(needle in str(label).lower() for label in chunk.get("speaker_labels", {}).values())
+            or any(
+                needle in str(label).lower()
+                for label in chunk.get("speaker_labels", {}).values()
+            )
         ]
     return {
         "source": _source_summary(state, source_key),
@@ -313,11 +320,7 @@ def answer(answer_request: AnswerRequest, request: Request):
                 "I don't understand the question well enough to answer it reliably. "
                 "Could you clarify or rewrite it more clearly?"
             )
-        return GroundedAnswer(
-            answerable=False,
-            answer=message,
-            citations=[],
-        )
+        return GroundedAnswer(answerable=False, answer=message, citations=[])
     return answer_question(
         query=answer_request.query,
         retrieved_chunks=retrieved_chunks,
@@ -374,6 +377,23 @@ def ingest_job(job_id: str, request: Request):
     return job
 
 
+@app.post("/ingest/jobs/{job_id}/cancel")
+def cancel_ingest_job(job_id: str, request: Request):
+    try:
+        return request.app.state.audio_ingest.cancel(job_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Unknown ingestion job") from exc
+
+
+@app.post("/ingest/cancel-all")
+def cancel_all_ingest(request: Request):
+    jobs = request.app.state.audio_ingest.cancel_all()
+    return {
+        "status": "cancellation_requested",
+        "jobs": jobs,
+    }
+
+
 @app.post("/ingest/transcript")
 async def ingest_transcript(
     request: Request,
@@ -384,10 +404,18 @@ async def ingest_transcript(
     state = request.app.state
     payload = await transcript.read()
     try:
-        segments, metadata = parse_transcript_bytes(transcript.filename or "transcript.txt", payload)
+        segments, metadata = parse_transcript_bytes(
+            transcript.filename or "transcript.txt",
+            payload,
+        )
     except (UnicodeDecodeError, ValueError, json.JSONDecodeError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
-    display_name = source_name.strip() if source_name and source_name.strip() else Path(transcript.filename or "Imported transcript").stem
+
+    display_name = (
+        source_name.strip()
+        if source_name and source_name.strip()
+        else Path(transcript.filename or "Imported transcript").stem
+    )
     base_key = _slugify(display_name)
     source_key = base_key
     suffix = 2
@@ -395,18 +423,31 @@ async def ingest_transcript(
         source_key = f"{base_key}-{suffix}"
         suffix += 1
     source_id = source_key
+
     speaker_labels = {
         segment["speaker"]: segment["speaker"]
         for segment in segments
         if segment.get("speaker")
     }
-    chunks = create_chunks(segments, source_id=source_id, speaker_labels=speaker_labels)
+    chunks = create_chunks(
+        segments,
+        source_id=source_id,
+        speaker_labels=speaker_labels,
+    )
+
     source_dir = IMPORT_ROOT / source_key
     source_dir.mkdir(parents=True, exist_ok=True)
     transcript_path = source_dir / "transcript.json"
     chunks_path = source_dir / "chunks.json"
-    transcript_path.write_text(json.dumps(segments, indent=2, ensure_ascii=False), encoding="utf-8")
-    chunks_path.write_text(json.dumps(chunks, indent=2, ensure_ascii=False), encoding="utf-8")
+    transcript_path.write_text(
+        json.dumps(segments, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+    chunks_path.write_text(
+        json.dumps(chunks, indent=2, ensure_ascii=False),
+        encoding="utf-8",
+    )
+
     audio_path = None
     if audio is not None and audio.filename:
         extension = Path(audio.filename).suffix.lower()
@@ -414,7 +455,13 @@ async def ingest_transcript(
             raise HTTPException(status_code=400, detail="Unsupported audio format")
         audio_path = source_dir / f"audio{extension}"
         audio_path.write_bytes(await audio.read())
-    _add_runtime_source(state, source_key=source_key, source_id=source_id, chunks=chunks)
+
+    _add_runtime_source(
+        state,
+        source_key=source_key,
+        source_id=source_id,
+        chunks=chunks,
+    )
     state.runtime_sources[source_key] = {
         "display_name": display_name,
         "source_type": "imported_transcript",
