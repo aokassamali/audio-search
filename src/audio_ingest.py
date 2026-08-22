@@ -74,19 +74,24 @@ class AudioIngestManager:
         return slug or "audio-source"
 
     def _unique_source_key(self, display_name: str) -> str:
+        """Return a fresh internal key even when the display name is reused.
+
+        Runtime sources are intentionally allowed to have the same human-facing
+        name across sessions. Their internal source IDs must not collide with
+        processed artifacts left on disk by an earlier ingestion, otherwise a
+        new job can appear 100% complete before Dagster has started.
+        """
         base = self._slugify(display_name)
-        key = base
-        suffix = 2
-        with self._lock:
-            known = set(self.settings.sources)
-            known.update(
-                job["source_key"]
-                for job in self.jobs.values()
-            )
-            while key in known:
-                key = f"{base}-{suffix}"
-                suffix += 1
-        return key
+        while True:
+            key = f"{base}-{uuid.uuid4().hex[:8]}"
+            with self._lock:
+                known = set(self.settings.sources)
+                known.update(
+                    job["source_key"]
+                    for job in self.jobs.values()
+                )
+            if key not in known:
+                return key
 
     def submit(
         self,
@@ -239,16 +244,28 @@ class AudioIngestManager:
                 except OSError:
                     pass
 
-    def _artifact_stages(self, source_key: str, job_status: str) -> dict[str, dict]:
-        source = self.settings.sources[source_key]
+    @staticmethod
+    def _artifact_is_current(path: Path, started_at: float | None) -> bool:
+        if started_at is None or not path.exists():
+            return False
+        try:
+            # Small tolerance avoids filesystem timestamp rounding while still
+            # rejecting artifacts from previous runs/sessions.
+            return path.stat().st_mtime >= started_at - 1.0
+        except OSError:
+            return False
+
+    def _artifact_stages(self, job: dict) -> dict[str, dict]:
+        source = self.settings.sources[job["source_key"]]
         embedding_path = source.embedding_cache_dir / "chunk_embeddings.npy"
+        started_at = job.get("started_at")
 
         complete = {
-            "normalize": source.normalized_audio_path.exists(),
-            "transcribe": source.transcript_path.exists(),
-            "speakers": source.speaker_roles_path.exists(),
-            "chunk": source.speaker_chunks_path.exists(),
-            "embed": embedding_path.exists(),
+            "normalize": self._artifact_is_current(source.normalized_audio_path, started_at),
+            "transcribe": self._artifact_is_current(source.transcript_path, started_at),
+            "speakers": self._artifact_is_current(source.speaker_roles_path, started_at),
+            "chunk": self._artifact_is_current(source.speaker_chunks_path, started_at),
+            "embed": self._artifact_is_current(embedding_path, started_at),
         }
 
         stages: dict[str, dict] = {}
@@ -261,10 +278,10 @@ class AudioIngestManager:
                     first_incomplete = stage
                 stages[stage] = {"status": "pending", "progress": None}
 
-        if job_status == "running" and first_incomplete is not None:
+        if job["status"] == "running" and first_incomplete is not None:
             stages[first_incomplete] = {"status": "running", "progress": None}
 
-        live = snapshot(source_key)
+        live = snapshot(job["source_key"])
         if live:
             for stage, info in live.get("stages", {}).items():
                 if info.get("status") == "running" and info.get("progress") is not None:
@@ -278,7 +295,7 @@ class AudioIngestManager:
                 raise KeyError(job_id)
             job = dict(self.jobs[job_id])
 
-        stages = self._artifact_stages(job["source_key"], job["status"])
+        stages = self._artifact_stages(job)
 
         overall = 0.0
         active_stage = None
