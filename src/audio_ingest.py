@@ -217,16 +217,49 @@ class AudioIngestManager:
                 job["error"] = error
                 job["finished_at"] = time.time()
 
+    def _artifact_stages(self, source_key: str, job_status: str) -> dict[str, dict]:
+        source = self.settings.sources[source_key]
+        embedding_path = source.embedding_cache_dir / "chunk_embeddings.npy"
+
+        complete = {
+            "normalize": source.normalized_audio_path.exists(),
+            "transcribe": source.transcript_path.exists(),
+            "speakers": source.speaker_roles_path.exists(),
+            "chunk": source.speaker_chunks_path.exists(),
+            "embed": embedding_path.exists(),
+        }
+
+        stages: dict[str, dict] = {}
+        first_incomplete = None
+        for stage in _STAGE_ORDER:
+            if complete[stage]:
+                stages[stage] = {"status": "complete", "progress": 100.0}
+            else:
+                if first_incomplete is None:
+                    first_incomplete = stage
+                stages[stage] = {"status": "pending", "progress": None}
+
+        if job_status == "running" and first_incomplete is not None:
+            stages[first_incomplete] = {"status": "running", "progress": None}
+
+        live = snapshot(source_key)
+        if live:
+            for stage, info in live.get("stages", {}).items():
+                if info.get("status") == "running" and info.get("progress") is not None:
+                    stages[stage] = dict(info)
+
+        return stages
+
     def status(self, job_id: str) -> dict:
         with self._lock:
             if job_id not in self.jobs:
                 raise KeyError(job_id)
             job = dict(self.jobs[job_id])
 
-        progress = snapshot(job["source_key"])
-        stages = progress["stages"] if progress else {}
+        stages = self._artifact_stages(job["source_key"], job["status"])
 
         overall = 0.0
+        active_stage = None
         for stage in _STAGE_ORDER:
             info = stages.get(stage, {})
             stage_status = info.get("status")
@@ -234,14 +267,15 @@ class AudioIngestManager:
             weight = _STAGE_WEIGHTS[stage]
             if stage_status == "complete":
                 overall += weight
-            elif stage_status == "running" and stage_progress is not None:
-                overall += weight * (float(stage_progress) / 100.0)
+            elif stage_status == "running":
+                active_stage = stage
+                if stage_progress is not None:
+                    overall += weight * (float(stage_progress) / 100.0)
 
         job["overall_progress"] = round(overall, 1)
-        job["active_stage"] = progress.get("active_stage") if progress else None
+        job["active_stage"] = active_stage
         job["stages"] = stages
-        job["progress_status"] = progress.get("status") if progress else job["status"]
-        job["error"] = job.get("error") or (progress.get("error") if progress else None)
+        job["progress_status"] = job["status"]
         job["dagster_home"] = str(self.dagster_home)
         job["max_workers"] = self.max_workers
         return job
