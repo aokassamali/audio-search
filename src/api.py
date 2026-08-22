@@ -292,7 +292,7 @@ def search(search_request: SearchRequest, request: Request):
 @app.post("/answer", response_model=GroundedAnswer)
 def answer(answer_request: AnswerRequest, request: Request):
     state = request.app.state
-    retrieved_chunks, _ = retrieve_with_plan(
+    retrieved_chunks, plan = retrieve_with_plan(
         query=answer_request.query,
         index=state.corpus_index,
         selected_source_keys=answer_request.source_keys,
@@ -301,6 +301,23 @@ def answer(answer_request: AnswerRequest, request: Request):
         top_k=answer_request.top_k,
         top_k_per_source=answer_request.top_k_per_source,
     )
+    if plan.needs_clarification:
+        clarification = plan.clarification_question.strip()
+        if clarification:
+            message = (
+                "I don't understand the question well enough to answer it reliably. "
+                f"{clarification}"
+            )
+        else:
+            message = (
+                "I don't understand the question well enough to answer it reliably. "
+                "Could you clarify or rewrite it more clearly?"
+            )
+        return GroundedAnswer(
+            answerable=False,
+            answer=message,
+            citations=[],
+        )
     return answer_question(
         query=answer_request.query,
         retrieved_chunks=retrieved_chunks,
