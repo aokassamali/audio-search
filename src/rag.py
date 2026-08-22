@@ -5,22 +5,23 @@ from pydantic import ValidationError
 
 
 SYSTEM_PROMPT = """
-You answer questions about selected audio recordings and transcripts using only the supplied evidence.
+You are the grounded answer-synthesis stage of a question-answering system over audio transcripts.
 
-Interpret the user's intended question naturally from their wording, the selected-source context, and the retrieval planner's working interpretation. The planner interpretation is an intent aid, not evidence. Do not require the user's phrasing, terminology, or source-title reference to appear verbatim in the transcript.
+The retrieval planner has already interpreted the user's wording and resolved ordinary typos, shorthand, source references, and conversational phrasing. You receive that planner-resolved question below. Do not reinterpret the user's spelling or invent alternate meanings for it. If the question was genuinely too ambiguous to interpret reliably, the system handles clarification before this stage.
 
 Grounding rules:
-1. State only factual claims supported by the supplied evidence.
-2. Do not use outside knowledge, even when you know the answer.
+1. Answer the planner-resolved question using only the supplied evidence.
+2. State only factual claims supported by the supplied evidence. Do not use outside knowledge.
 3. Every factual claim in the answer must be supported by at least one citation_id.
 4. Only cite citation_ids that appear in the supplied evidence.
-5. You may synthesize across multiple evidence chunks and make ordinary inferences when the cited evidence jointly supports them.
-6. Distinguish a speaker's own position from questions, hypotheticals, and descriptions of another person's position. If attribution is uncertain, describe the point neutrally.
-7. Refuse only when the supplied evidence is genuinely insufficient to answer the user's intended question.
-8. When refusing, briefly explain what evidence is missing or unsupported and use an empty citation_ids list.
-9. Return JSON only, with no Markdown or additional commentary.
+5. Synthesize across multiple evidence chunks and make ordinary inferences when the cited evidence jointly supports them.
+6. For comparison, relationship, summary, argument, or "what is going on" questions, answer at the level supported by the evidence. The transcript does not need to contain a verbatim sentence naming the requested relationship if the relationship can be directly summarized from supported comparisons or descriptions in the evidence.
+7. Distinguish a speaker's own position from questions, hypotheticals, and descriptions of another person's position. If attribution is uncertain, describe the point neutrally.
+8. Refuse only when the supplied evidence is genuinely insufficient to give a meaningful answer to the planner-resolved question.
+9. When refusing, briefly explain what evidence is missing or unsupported and use an empty citation_ids list.
+10. Return JSON only, with no Markdown or additional commentary.
 
-Grounding constrains what facts you may state; it does not constrain how flexibly you interpret the user's request.
+Grounding constrains what facts you may state; it should not force you to demand exact wording that the evidence already supports semantically.
 
 Return exactly this structure:
 {
@@ -169,13 +170,11 @@ def build_prompt(
     )
 
     return (
-        f"Original user wording:\n{query}\n\n"
-        f"Retrieval planner's working interpretation:\n{interpreted}\n\n"
-        "Use the working interpretation only to understand the user's intent; "
-        "all factual content must come from the evidence below. If the working "
-        "interpretation conflicts with the original wording, preserve the original intent.\n\n"
+        f"Planner-resolved question:\n{interpreted}\n\n"
+        "The question above represents the user's intended information need. "
+        "Do not require any misspelled or shorthand form from the original wording to appear in the transcript.\n\n"
         f"Audio evidence:\n{context}\n\n"
-        "Answer the user's intended question using only this evidence and return the required JSON."
+        "Answer the planner-resolved question using only this evidence and return the required JSON."
     )
 
 
