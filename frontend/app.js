@@ -7,6 +7,7 @@
     importBusy: false,
     audioJobs: [],
     audioTimer: null,
+    focusedJobId: null,
   };
 
   const $ = (id) => document.getElementById(id);
@@ -17,7 +18,7 @@
   const stageKeys = ['normalize', 'transcribe', 'speakers', 'chunk', 'embed'];
   const esc = (value = '') => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
-  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-confirm-batch';
+  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-library-groups';
 
   const formatTime = (value) => {
     if (value == null || Number(value) < 0) return 'Untimed';
@@ -75,10 +76,21 @@
     return labels[job.active_stage] || 'Starting Dagster run';
   }
 
+  function openProcessingJob(jobId) {
+    const job = state.audioJobs.find(item => item.job_id === jobId);
+    if (!job || job.status === 'complete' || !state.batch?.started) return;
+    state.focusedJobId = jobId;
+    $('importModal').hidden = false;
+    setProcessingModal();
+  }
+
   function renderSources() {
-    const jobHtml = state.audioJobs.map(job => `
-      <div class="source-row" title="${esc(job.display_name || job.plan?.name || 'Audio source')}">
-        <div style="width:8px;height:8px;border-radius:50%;background:${job.status === 'failed' ? '#a43b37' : job.status === 'complete' ? '#14804a' : '#171719'};flex:0 0 auto"></div>
+    const visibleJobs = state.audioJobs.filter(job => job.status !== 'complete');
+    const showProcessingGroups = visibleJobs.length > 0 || state.importBusy;
+
+    const jobHtml = visibleJobs.map(job => `
+      <div class="source-row" data-job-id="${esc(job.job_id || '')}" title="Open processing details for ${esc(job.display_name || job.plan?.name || 'Audio source')}">
+        <div style="width:8px;height:8px;border-radius:50%;background:${job.status === 'failed' ? '#a43b37' : '#171719'};flex:0 0 auto"></div>
         <div class="source-copy">
           <div class="source-name">${esc(job.display_name || job.plan?.name || 'Audio source')}</div>
           <div class="source-meta">${esc(jobStageText(job))}${job.status === 'running' ? ` · ${Math.round(job.overall_progress || 0)}%` : ''}</div>
@@ -95,7 +107,13 @@
         </div>
       </label>`).join('');
 
-    $('sourceList').innerHTML = jobHtml + sourceHtml;
+    $('sourceList').innerHTML = showProcessingGroups
+      ? `<div class="section-label">Processing</div>${jobHtml}<div class="section-label">Ready</div>${sourceHtml}`
+      : sourceHtml;
+
+    document.querySelectorAll('[data-job-id]').forEach(row => row.addEventListener('click', () => {
+      if (row.dataset.jobId) openProcessingJob(row.dataset.jobId);
+    }));
 
     document.querySelectorAll('.source-check').forEach(input => input.addEventListener('change', () => {
       input.checked ? state.selected.add(input.dataset.key) : state.selected.delete(input.dataset.key);
@@ -117,12 +135,15 @@
     if (state.transcriptSource) $('transcriptSource').value = state.transcriptSource;
   }
 
-  async function loadSources(reset = false) {
-    const old = new Set(state.selected);
+  async function loadSources() {
+    const previousKeys = new Set(state.sources.map(source => source.source_key));
+    const oldSelected = new Set(state.selected);
+    const initialLoad = state.sources.length === 0;
     state.sources = (await api('/sources')).sources || [];
     state.selected = new Set();
     state.sources.forEach(source => {
-      if (reset || !old.size || old.has(source.source_key)) state.selected.add(source.source_key);
+      const isNew = !previousKeys.has(source.source_key);
+      if (initialLoad || isNew || oldSelected.has(source.source_key)) state.selected.add(source.source_key);
     });
     renderSources();
     renderTranscriptOptions();
@@ -189,7 +210,12 @@
   async function askQuestion(question) {
     const query = question.trim();
     if (!query) return;
-    const sourceKeys = state.selected.size === state.sources.length || state.selected.size === 0 ? null : Array.from(state.selected);
+    if (!state.selected.size) {
+      $('answerState').className = 'answer-state';
+      $('answerState').innerHTML = '<div class="answer-card refusal"><div class="answer-kicker">No sources selected</div><div class="answer-text">Select at least one recording before asking a question.</div></div>';
+      return;
+    }
+    const sourceKeys = state.selected.size === state.sources.length ? null : Array.from(state.selected);
     const payload = {query, top_k: 6, source_keys: sourceKeys, retrieval_mode: 'global', top_k_per_source: 3};
     $('askButton').disabled = true;
     $('answerState').className = 'answer-state';
@@ -364,10 +390,8 @@
     $('overallProgress').textContent = '0%';
     $('dagStatus').textContent = 'Waiting for confirmation';
     renderDag(first);
-    $('importMessage').className = 'import-message';
-    $('importMessage').textContent = batch.plans.length === 1
-      ? 'Nothing has started yet. Review the source, add any other files you want, then click Process.'
-      : `Nothing has started yet. Review all ${batch.plans.length} sources, add more files if needed, then click Process.`;
+    $('importMessage').hidden = true;
+    $('importMessage').textContent = '';
     $('cancelImport').hidden = false;
     $('addImportFiles').hidden = false;
     $('cancelImport').textContent = 'Cancel';
@@ -377,7 +401,14 @@
   }
 
   function currentAudioJob() {
-    return state.audioJobs.find(job => job.status !== 'complete' && job.status !== 'failed') || state.audioJobs[0] || null;
+    if (state.focusedJobId) {
+      const focused = state.audioJobs.find(job => job.job_id === state.focusedJobId && job.status !== 'complete');
+      if (focused) return focused;
+      state.focusedJobId = null;
+    }
+    return state.audioJobs.find(job => job.status === 'running' || job.status === 'queued')
+      || state.audioJobs.find(job => job.status === 'failed')
+      || null;
   }
 
   function batchOverall() {
@@ -402,6 +433,7 @@
     $('importAction').textContent = 'Minimize';
     $('etaValue').textContent = 'Not calibrated';
     $('overallProgress').textContent = `${batchOverall()}%`;
+    $('importMessage').hidden = false;
 
     if (job) {
       $('ingestionPathBadge').textContent = totalItems === 1 ? job.plan.label : `${totalItems} sources`;
@@ -437,7 +469,7 @@
 
     let changedSources = false;
     await Promise.all(state.audioJobs.map(async job => {
-      if (!job.job_id || job.status === 'failed') return;
+      if (!job.job_id || job.status === 'failed' || job.status === 'complete') return;
       try {
         const updated = await api(`/ingest/jobs/${encodeURIComponent(job.job_id)}`);
         const wasComplete = job.status === 'complete';
@@ -449,15 +481,17 @@
       }
     }));
 
-    if (changedSources) await loadSources(true);
+    if (changedSources) await loadSources();
     else renderSources();
 
     if (!$('importModal').hidden && state.batch?.started) setProcessingModal();
 
     const allDone = state.audioJobs.every(job => job.status === 'complete' || job.status === 'failed');
+    if (allDone) state.focusedJobId = null;
     if (allDone && !state.importBusy && state.audioTimer) {
       clearInterval(state.audioTimer);
       state.audioTimer = null;
+      renderSources();
     }
   }
 
@@ -480,7 +514,7 @@
 
     renderSources();
     await pollAudioJobs();
-    if (state.audioJobs.some(job => job.job_id) && !state.audioTimer) {
+    if (state.audioJobs.some(job => job.job_id && job.status !== 'complete' && job.status !== 'failed') && !state.audioTimer) {
       state.audioTimer = setInterval(pollAudioJobs, 1000);
     }
   }
@@ -503,7 +537,7 @@
         try {
           await importTranscriptPlan(plan);
           state.batch.importedCount = (state.batch.importedCount || 0) + 1;
-          await loadSources(true);
+          await loadSources();
         } catch (error) {
           state.batch.errors = state.batch.errors || [];
           state.batch.errors.push(`${plan.name}: ${error.message}`);
@@ -512,6 +546,7 @@
     } finally {
       state.importBusy = false;
       if (!$('importModal').hidden && state.batch?.started) setProcessingModal();
+      renderSources();
     }
   }
 
@@ -522,6 +557,7 @@
     batch.importedCount = 0;
     batch.errors = [];
     state.audioJobs = [];
+    state.focusedJobId = null;
 
     const rawAudioPlans = batch.plans.filter(plan => plan.mode === 'audio');
     const transcriptPlans = batch.plans.filter(plan => plan.mode !== 'audio');
@@ -562,6 +598,7 @@
     };
 
     state.audioJobs = [];
+    state.focusedJobId = null;
     $('importModal').hidden = false;
     previewBatch();
 
