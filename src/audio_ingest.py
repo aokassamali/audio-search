@@ -61,8 +61,6 @@ class AudioIngestManager:
         self.instance = dg.DagsterInstance.get()
         self.max_workers = max_workers
 
-        self.runtime_config_dir = PROJECT_ROOT / ".demo_runtime"
-        self.runtime_config_dir.mkdir(parents=True, exist_ok=True)
         self.log_dir = PROJECT_ROOT / "data" / "ingest_logs"
         self.log_dir.mkdir(parents=True, exist_ok=True)
 
@@ -146,7 +144,7 @@ class AudioIngestManager:
             f"source_id = \"{source_id}\"\n"
         )
 
-        path = self.runtime_config_dir / f"{job['job_id']}.toml"
+        path = PROJECT_ROOT / f".audio_search_runtime_{job['job_id']}.toml"
         path.write_text(text, encoding="utf-8")
         return path
 
