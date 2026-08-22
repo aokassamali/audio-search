@@ -15,12 +15,13 @@ Your job is NOT to answer the user's question. Your job is to decide which selec
 
 Rules:
 1. You may choose only source_keys listed in the selected source catalog.
-2. Resolve obvious misspellings, abbreviations, punctuation differences, and approximate references to source titles. For example, a user may type a source title imperfectly.
+2. Resolve obvious misspellings, abbreviations, punctuation differences, and approximate references to source titles. A user may type a source title imperfectly.
 3. If the user clearly refers to one or more source titles, choose those sources. Otherwise keep all selected sources in scope.
-4. Remove source-title wording from the semantic retrieval queries when it is merely identifying the recording.
-5. For synthesis, comparison, "positions of each side", arguments, disagreements, causes, timelines, or other multi-part questions, decompose the request into 2-4 complementary retrieval queries so the evidence covers the distinct parts of the answer.
-6. Write concise retrieval queries using language likely to appear in a transcript. Do not invent facts that are not in the user's question.
-7. Return JSON only.
+4. Remove source-title wording from semantic retrieval queries when it is merely identifying the recording.
+5. Use the short transcript previews only to understand what each recording is about and to choose useful retrieval language. Do not answer from the previews.
+6. For synthesis, comparison, "positions of each side", arguments, disagreements, causes, timelines, or other multi-part questions, decompose the request into 2-4 complementary retrieval queries so the evidence covers the distinct parts of the answer.
+7. Write concise retrieval queries using language likely to appear in the transcript. It is fine to use concepts revealed by the source preview, but do not invent facts.
+8. Return JSON only.
 """.strip()
 
 
@@ -71,6 +72,7 @@ def plan_retrieval(
         {
             "source_key": item["source_key"],
             "display_name": item["display_name"],
+            "preview": item.get("preview", ""),
         }
         for item in source_catalog
         if item["source_key"] in allowed
@@ -79,7 +81,7 @@ def plan_retrieval(
     cache_key = (
         query.strip().lower(),
         tuple(allowed),
-        tuple((item["source_key"], item["display_name"]) for item in catalog),
+        tuple((item["source_key"], item["display_name"], item["preview"]) for item in catalog),
     )
     now = time.time()
 
@@ -90,8 +92,12 @@ def plan_retrieval(
         if cached and now - cached[0] <= _PLAN_CACHE_SECONDS:
             return cached[1]
 
-        catalog_text = "\n".join(
-            f'- {item["source_key"]}: {item["display_name"]}'
+        catalog_text = "\n\n".join(
+            (
+                f'- source_key: {item["source_key"]}\n'
+                f'  title: {item["display_name"]}\n'
+                f'  preview: {item["preview"]}'
+            )
             for item in catalog
         )
         prompt = (
@@ -108,7 +114,7 @@ def plan_retrieval(
                 max_tokens=256,
             )
             plan = RetrievalPlan.model_validate_json(raw)
-        except (ValidationError, ValueError, TypeError, OSError, RuntimeError, Exception):
+        except Exception:
             # Retrieval must remain usable even if the planner model is unavailable.
             plan = _fallback_plan(query, allowed)
 
@@ -137,6 +143,26 @@ def plan_retrieval(
         return normalized_plan
 
 
+def _catalog_with_previews(
+    index: CorpusIndex,
+    source_catalog: list[dict],
+) -> list[dict]:
+    enriched = []
+    for item in source_catalog:
+        source_index = index.sources.get(item["source_key"])
+        preview_parts = []
+        if source_index is not None:
+            for chunk in source_index.chunks[:3]:
+                text = chunk.get("speaker_text") or chunk.get("text") or ""
+                if text:
+                    preview_parts.append(str(text).strip())
+        preview = " ".join(preview_parts)
+        if len(preview) > 1800:
+            preview = preview[:1800] + "…"
+        enriched.append({**item, "preview": preview})
+    return enriched
+
+
 def retrieve_with_plan(
     query: str,
     index: CorpusIndex,
@@ -146,6 +172,7 @@ def retrieve_with_plan(
     top_k: int,
     top_k_per_source: int = 3,
 ) -> tuple[list[dict], RetrievalPlan]:
+    source_catalog = _catalog_with_previews(index, source_catalog)
     available = [item["source_key"] for item in source_catalog]
     selected = (
         [key for key in selected_source_keys if key in available]
