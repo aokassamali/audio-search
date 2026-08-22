@@ -2,7 +2,7 @@
   const $ = (id) => document.getElementById(id);
   const esc = (value = '') => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
-  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-demo-ux';
+  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-evidence-context-player';
 
   const homeMarkup = '<div class="empty-orb">⌁</div><h2>Ask across hours of audio in seconds.</h2><p>Answers stay traceable to transcript chunks, speakers, timestamps, and the original recording when audio is available.</p>';
 
@@ -10,6 +10,13 @@
     sources: [],
     selected: new Set(),
     initialized: false,
+  };
+
+  const clip = {
+    start: 0,
+    end: 0,
+    sourceKey: null,
+    chunkId: null,
   };
 
   async function api(path, options = {}) {
@@ -41,6 +48,15 @@
       : `${m}:${String(s).padStart(2, '0')}`;
   }
 
+  function parseTime(value) {
+    if (!value) return 0;
+    const parts = String(value).trim().split(':').map(Number);
+    if (parts.some(part => !Number.isFinite(part))) return 0;
+    if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+    if (parts.length === 2) return parts[0] * 60 + parts[1];
+    return parts[0] || 0;
+  }
+
   function showHome() {
     const answer = $('answerState');
     if (!answer) return;
@@ -65,22 +81,86 @@
     });
   }
 
+  function configureClip(source, chunk) {
+    if (!source || !chunk) return;
+    clip.start = Math.max(0, Number(chunk.start) || 0);
+    clip.end = Math.max(clip.start, Number(chunk.end) || clip.start);
+    clip.sourceKey = source.source_key;
+    clip.chunkId = chunk.chunk_id;
+
+    const duration = Math.max(0, clip.end - clip.start);
+    const seek = $('clipSeek');
+    if (seek) {
+      seek.min = '0';
+      seek.max = String(Math.max(duration, 0.05));
+      seek.value = '0';
+    }
+    if ($('clipElapsed')) $('clipElapsed').textContent = '0:00';
+    if ($('clipDuration')) $('clipDuration').textContent = formatTime(duration);
+    if ($('audioDockTitle')) $('audioDockTitle').textContent = source.display_name;
+    if ($('audioDockSubtitle')) $('audioDockSubtitle').textContent = `Chunk ${chunk.chunk_id} · ${formatTime(clip.start)}–${formatTime(clip.end)}`;
+  }
+
+  function drawerEvidenceTarget() {
+    const chips = Array.from(document.querySelectorAll('#drawerBody .meta-chip'));
+    if (chips.length < 2) return null;
+    const chunkMatch = chips[0].textContent.match(/Chunk\s+(\d+)/i);
+    const times = chips[1].textContent.split(/[–—-]/).map(value => value.trim()).filter(Boolean);
+    const source = audit.sources.find(item => item.display_name === $('drawerTitle')?.textContent) || null;
+    if (!chunkMatch || !source || !times.length) return null;
+    return {
+      source,
+      chunk: {
+        chunk_id: Number(chunkMatch[1]),
+        start: parseTime(times[0]),
+        end: parseTime(times[1] || times[0]),
+      },
+    };
+  }
+
+  function configureClipFromDrawer() {
+    const target = drawerEvidenceTarget();
+    if (target) configureClip(target.source, target.chunk);
+  }
+
   function playSourceAudio(source, chunk) {
     if (!source?.has_audio) return;
     const dock = $('audioDock');
     const player = $('audioPlayer');
     if (!dock || !player) return;
+    configureClip(source, chunk);
     dock.hidden = false;
-    $('audioDockTitle').textContent = source.display_name;
-    $('audioDockSubtitle').textContent = `Chunk ${chunk.chunk_id} · ${formatTime(chunk.start)}`;
     player.src = `/sources/${encodeURIComponent(source.source_key)}/audio`;
     const seek = () => {
-      player.currentTime = Math.max(0, Number(chunk.start) || 0);
+      player.currentTime = clip.start;
       player.play().catch(() => {});
       player.removeEventListener('loadedmetadata', seek);
     };
     player.addEventListener('loadedmetadata', seek);
     player.load();
+  }
+
+  function syncClipPlayer() {
+    const player = $('audioPlayer');
+    if (!player || !clip.sourceKey) return;
+    const duration = Math.max(0, clip.end - clip.start);
+    let relative = Math.max(0, player.currentTime - clip.start);
+    if (duration && player.currentTime >= clip.end) {
+      player.pause();
+      player.currentTime = clip.end;
+      relative = duration;
+    }
+    if ($('clipSeek')) $('clipSeek').value = String(Math.min(relative, duration || relative));
+    if ($('clipElapsed')) $('clipElapsed').textContent = formatTime(Math.min(relative, duration || relative));
+    if ($('clipToggle')) $('clipToggle').textContent = player.paused ? '▶' : '❚❚';
+  }
+
+  function jumpClip(delta) {
+    const player = $('audioPlayer');
+    if (!player || !clip.sourceKey) return;
+    const next = Math.max(clip.start, Math.min(clip.end, player.currentTime + delta));
+    player.currentTime = next;
+    syncClipPlayer();
   }
 
   function openAuditEvidence(chunk) {
@@ -101,11 +181,8 @@
     $('evidenceDrawer').classList.add('open');
     $('auditPlayEvidence')?.addEventListener('click', () => playSourceAudio(source, chunk));
     $('auditLocateEvidence')?.addEventListener('click', () => {
-      audit.selected = new Set([source.source_key]);
-      renderAuditSourcePicker();
-      $('transcriptSearch').value = `chunk ${chunk.chunk_id}`;
       $('evidenceDrawer').classList.remove('open');
-      loadAuditTranscript(chunk.chunk_id);
+      showAuditContext(source.source_key, chunk.chunk_id);
     });
   }
 
@@ -151,12 +228,13 @@
     });
   }
 
-  function renderAuditChunks(chunks) {
+  function renderAuditChunks(chunks, focusKey = null) {
     const list = $('transcriptList');
     if (!list) return;
     list.innerHTML = chunks.map((chunk, index) => {
       const source = sourceForChunk(chunk);
-      return `<article class="chunk-row" data-audit-chunk="${index}">
+      const key = `${chunk.source_key || source?.source_key || chunk.source_id}:${chunk.chunk_id}`;
+      return `<article class="chunk-row ${focusKey === key ? 'context-focus' : ''}" data-audit-chunk="${index}">
         <div class="chunk-time">${formatTime(chunk.start)}</div>
         <div class="chunk-text">${esc(chunk.speaker_text || chunk.text || '')}</div>
         <div class="chunk-id"><div>chunk ${esc(chunk.chunk_id)}</div><div class="chunk-source">${esc(source?.display_name || chunk.source_id || '')}</div></div>
@@ -166,6 +244,40 @@
     list.querySelectorAll('[data-audit-chunk]').forEach(row => {
       row.addEventListener('click', () => openAuditEvidence(chunks[Number(row.dataset.auditChunk)]));
     });
+
+    if (focusKey) {
+      setTimeout(() => list.querySelector('.context-focus')?.scrollIntoView({behavior:'smooth', block:'center'}), 0);
+    }
+  }
+
+  async function showAuditContext(sourceKey, chunkId, radius = 3) {
+    try {
+      await refreshAuditSources();
+      const source = sourceByKey(sourceKey);
+      if (!source) return;
+      audit.selected = new Set([source.source_key]);
+      renderAuditSourcePicker();
+      $('transcriptSearch').value = '';
+      document.querySelector('[data-view="transcript"]')?.click();
+      $('transcriptList').innerHTML = '<div class="loading-card"><div class="loading-line"></div><div class="loading-line"></div></div>';
+
+      const data = await api(`/sources/${encodeURIComponent(source.source_key)}/chunks?limit=2000`);
+      const all = data.chunks || [];
+      const index = all.findIndex(chunk => Number(chunk.chunk_id) === Number(chunkId));
+      if (index < 0) {
+        $('transcriptMeta').textContent = `Chunk ${chunkId} was not found in ${source.display_name}.`;
+        $('transcriptList').innerHTML = '';
+        return;
+      }
+      const start = Math.max(0, index - radius);
+      const end = Math.min(all.length, index + radius + 1);
+      const context = all.slice(start, end);
+      const focusKey = `${source.source_key}:${chunkId}`;
+      $('transcriptMeta').textContent = `${context.length} chunks · ${source.display_name} · context around chunk ${chunkId}`;
+      renderAuditChunks(context, focusKey);
+    } catch (error) {
+      $('transcriptList').innerHTML = `<div class="answer-card refusal">${esc(error.message)}</div>`;
+    }
   }
 
   async function loadAuditTranscript(forcedChunkId = null) {
@@ -237,13 +349,6 @@
     }
   }
 
-  function syncAuditToLegacySource() {
-    const legacy = $('transcriptSource')?.value;
-    if (!legacy) return;
-    audit.selected = new Set([legacy]);
-    renderAuditSourcePicker();
-  }
-
   function enhanceEvidenceCards() {
     document.querySelectorAll('.evidence-card:not([data-direct-actions])').forEach(card => {
       card.dataset.directActions = '1';
@@ -259,22 +364,16 @@
           const kind = action.dataset.evidenceAction;
           card.click();
           setTimeout(() => {
+            const target = drawerEvidenceTarget();
+            if (!target) return;
             if (kind === 'play') {
               const play = $('playEvidence');
-              if (play) {
-                play.click();
-                $('evidenceDrawer')?.classList.remove('open');
-              }
+              if (play) play.click();
+              configureClip(target.source, target.chunk);
+              $('evidenceDrawer')?.classList.remove('open');
             } else {
-              const locate = $('viewTranscriptEvidence');
-              if (locate) {
-                locate.click();
-                setTimeout(() => {
-                  syncAuditToLegacySource();
-                  loadAuditTranscript();
-                  $('evidenceDrawer')?.classList.remove('open');
-                }, 0);
-              }
+              $('evidenceDrawer')?.classList.remove('open');
+              showAuditContext(target.source.source_key, target.chunk.chunk_id);
             }
           }, 0);
         };
@@ -347,15 +446,48 @@
   }, true);
 
   document.querySelector('[data-view="transcript"]')?.addEventListener('click', () => {
-    setTimeout(() => loadAuditTranscript(), 0);
+    setTimeout(() => {
+      if (!$('transcriptMeta')?.textContent?.includes('context around chunk')) loadAuditTranscript();
+    }, 0);
   });
 
   document.addEventListener('click', event => {
     if (!event.target.closest('#viewTranscriptEvidence')) return;
-    setTimeout(() => {
-      syncAuditToLegacySource();
-      loadAuditTranscript();
-    }, 0);
+    const target = drawerEvidenceTarget();
+    if (!target) return;
+    event.preventDefault();
+    event.stopPropagation();
+    event.stopImmediatePropagation();
+    $('evidenceDrawer')?.classList.remove('open');
+    showAuditContext(target.source.source_key, target.chunk.chunk_id);
+  }, true);
+
+  document.addEventListener('click', event => {
+    if (!event.target.closest('#playEvidence')) return;
+    setTimeout(configureClipFromDrawer, 0);
+  }, true);
+
+  const player = $('audioPlayer');
+  player?.addEventListener('timeupdate', syncClipPlayer);
+  player?.addEventListener('play', syncClipPlayer);
+  player?.addEventListener('pause', syncClipPlayer);
+  player?.addEventListener('loadedmetadata', syncClipPlayer);
+
+  $('clipToggle')?.addEventListener('click', () => {
+    if (!player || !clip.sourceKey) return;
+    if (!player.paused) {
+      player.pause();
+      return;
+    }
+    if (player.currentTime >= clip.end - 0.05 || player.currentTime < clip.start) player.currentTime = clip.start;
+    player.play().catch(() => {});
+  });
+  $('clipBack15')?.addEventListener('click', () => jumpClip(-15));
+  $('clipForward15')?.addEventListener('click', () => jumpClip(15));
+  $('clipSeek')?.addEventListener('input', event => {
+    if (!player || !clip.sourceKey) return;
+    player.currentTime = Math.max(clip.start, Math.min(clip.end, clip.start + Number(event.target.value || 0)));
+    syncClipPlayer();
   });
 
   const answer = $('answerState');
