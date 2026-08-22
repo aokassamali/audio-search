@@ -19,14 +19,18 @@ Rules:
 3. If the user is clearly referring to one or more selected recordings, scope retrieval to those recordings. Otherwise keep all selected recordings in scope.
 4. Transcript hints are real excerpts retrieved from the selected corpus for this query. Use them to disambiguate shorthand, typos, abbreviations, and ambiguous wording. Do not treat an unsupported expansion from general world knowledge as the intended meaning when the corpus context supports a different reading.
 5. Produce interpreted_question as a concise, neutral restatement of the user's intended information need in clear language. Preserve uncertainty if the request is genuinely ambiguous. Do not answer it and do not add facts.
-6. Generate one or more concise semantic retrieval queries that together cover the user's information need. Decompose the request when doing so would improve evidence coverage.
-7. Prefer language supported by the source catalog and transcript hints and likely to occur in the transcript. Do not invent named entities, acronym expansions, or subject matter that are not supported by the selected corpus context.
-8. Return JSON only.
+6. If the user's intended information need still cannot be resolved from their wording, the selected source catalog, and the transcript hints without materially guessing, set needs_clarification to true and write one short clarification_question. Ask specifically about the ambiguous part. Do not guess an acronym expansion, name, or concept just to avoid asking for clarification.
+7. Set needs_clarification to false when the intent is reasonably clear from context, even if the wording contains typos, slang, abbreviations, shorthand, or poor grammar. Clarification is for genuine unresolved ambiguity, not imperfect writing.
+8. Generate one or more concise semantic retrieval queries that together cover the user's information need. Decompose the request when doing so would improve evidence coverage.
+9. Prefer language supported by the source catalog and transcript hints and likely to occur in the transcript. Do not invent named entities, acronym expansions, or subject matter that are not supported by the selected corpus context.
+10. Return JSON only.
 """.strip()
 
 
 class RetrievalPlan(BaseModel):
     interpreted_question: str = ""
+    needs_clarification: bool = False
+    clarification_question: str = ""
     source_keys: list[str] = Field(default_factory=list)
     queries: list[str] = Field(default_factory=list)
 
@@ -38,7 +42,13 @@ _PLAN_CACHE_SECONDS = 90.0
 
 def _plan_schema(allowed_source_keys: list[str]) -> dict:
     schema = RetrievalPlan.model_json_schema()
-    schema["required"] = ["interpreted_question", "source_keys", "queries"]
+    schema["required"] = [
+        "interpreted_question",
+        "needs_clarification",
+        "clarification_question",
+        "source_keys",
+        "queries",
+    ]
     schema["additionalProperties"] = False
     schema["properties"]["source_keys"]["items"] = {
         "type": "string",
@@ -52,6 +62,8 @@ def _fallback_plan(query: str, selected_source_keys: list[str]) -> RetrievalPlan
     cleaned = query.strip()
     return RetrievalPlan(
         interpreted_question=cleaned,
+        needs_clarification=False,
+        clarification_question="",
         source_keys=list(selected_source_keys),
         queries=[cleaned] if cleaned else [],
     )
@@ -145,7 +157,7 @@ def plan_retrieval(
                 system_prompt=PLANNER_SYSTEM_PROMPT,
                 user_prompt=prompt,
                 response_schema=_plan_schema(allowed),
-                max_tokens=320,
+                max_tokens=384,
             )
             plan = RetrievalPlan.model_validate_json(raw)
         except Exception:
@@ -157,6 +169,15 @@ def plan_retrieval(
             valid_sources = allowed
 
         interpreted_question = plan.interpreted_question.strip() or query.strip()
+        needs_clarification = bool(plan.needs_clarification)
+        clarification_question = plan.clarification_question.strip()
+        if needs_clarification and not clarification_question:
+            clarification_question = (
+                "I don't understand the question well enough to answer it reliably. "
+                "Could you clarify or rewrite it more clearly?"
+            )
+        if not needs_clarification:
+            clarification_question = ""
 
         queries = []
         seen_queries = set()
@@ -173,6 +194,8 @@ def plan_retrieval(
 
         normalized_plan = RetrievalPlan(
             interpreted_question=interpreted_question,
+            needs_clarification=needs_clarification,
+            clarification_question=clarification_question,
             source_keys=valid_sources,
             queries=queries,
         )
@@ -217,7 +240,13 @@ def retrieve_with_plan(
         else available
     )
     if not selected:
-        return [], RetrievalPlan(interpreted_question=query.strip(), source_keys=[], queries=[])
+        return [], RetrievalPlan(
+            interpreted_question=query.strip(),
+            needs_clarification=False,
+            clarification_question="",
+            source_keys=[],
+            queries=[],
+        )
 
     display_names = {
         item["source_key"]: item["display_name"]
