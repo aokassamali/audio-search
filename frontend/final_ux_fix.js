@@ -52,6 +52,7 @@
   const ETA_STORAGE_KEY = 'audio-search-local-rtf-v1';
   let ingestWorkers = 1;
   let latestJobs = [];
+  const capturedEtaJobs = new Set();
 
   function median(values) {
     if (!values.length) return null;
@@ -130,13 +131,13 @@
 
   function captureCompletedSamples(durations) {
     latestJobs.forEach(job => {
-      if (job.status !== 'complete' || job.__etaCaptured) return;
+      if (job.status !== 'complete' || capturedEtaJobs.has(job.job_id)) return;
       const duration = durations.get(job.display_name);
       const started = Number(job.started_at);
       const finished = Number(job.finished_at);
       if (duration && Number.isFinite(started) && Number.isFinite(finished) && finished > started) {
         storeRtfSample((finished - started) / duration);
-        job.__etaCaptured = true;
+        capturedEtaJobs.add(job.job_id);
       }
     });
   }
