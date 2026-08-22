@@ -17,6 +17,8 @@
   const stageKeys = ['normalize', 'transcribe', 'speakers', 'chunk', 'embed'];
   const esc = (value = '') => String(value).replace(/[&<>'"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
 
+  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-confirm-batch';
+
   const formatTime = (value) => {
     if (value == null || Number(value) < 0) return 'Untimed';
     const total = Math.floor(Number(value));
@@ -355,18 +357,19 @@
     if (!batch) return;
     const first = batch.plans[0];
 
-    $('importTitle').textContent = batch.plans.length === 1 ? 'Ingestion preview' : `Review ${batch.plans.length} sources`;
+    $('importTitle').textContent = batch.plans.length === 1 ? 'Review source' : `Review ${batch.plans.length} sources`;
     renderFileSummary();
     $('ingestionPathBadge').textContent = batch.plans.length === 1 ? first.label : `${batch.plans.length} sources`;
     $('etaValue').textContent = 'Not calibrated';
     $('overallProgress').textContent = '0%';
-    $('dagStatus').textContent = 'Ready to process';
+    $('dagStatus').textContent = 'Waiting for confirmation';
     renderDag(first);
     $('importMessage').className = 'import-message';
     $('importMessage').textContent = batch.plans.length === 1
-      ? 'Review the source and processing path, then start ingestion.'
-      : `${batch.plans.length} sources will be submitted as separate ingestion jobs. Matching audio and transcript filenames are paired automatically.`;
+      ? 'Nothing has started yet. Review the source, add any other files you want, then click Process.'
+      : `Nothing has started yet. Review all ${batch.plans.length} sources, add more files if needed, then click Process.`;
     $('cancelImport').hidden = false;
+    $('addImportFiles').hidden = false;
     $('cancelImport').textContent = 'Cancel';
     $('importAction').textContent = 'Process';
     $('importAction').disabled = false;
@@ -395,6 +398,7 @@
     $('importTitle').textContent = totalItems === 1 ? 'Processing source' : `Processing ${totalItems} sources`;
     renderFileSummary();
     $('cancelImport').hidden = true;
+    $('addImportFiles').hidden = true;
     $('importAction').textContent = 'Minimize';
     $('etaValue').textContent = 'Not calibrated';
     $('overallProgress').textContent = `${batchOverall()}%`;
@@ -531,8 +535,22 @@
     if (!$('importModal').hidden) setProcessingModal();
   }
 
-  function prepareImport(files) {
-    const {supported, plans} = plansForFiles(files);
+  function uniqueFiles(files) {
+    const seen = new Set();
+    return files.filter(file => {
+      const key = `${file.name}::${file.size}::${file.lastModified}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }
+
+  function prepareImport(files, append = false) {
+    const existing = append && state.batch && !state.batch.started
+      ? state.batch.supported
+      : [];
+    const mergedFiles = uniqueFiles([...existing, ...files]);
+    const {supported, plans} = plansForFiles(mergedFiles);
     if (!supported.length || !plans.length) return;
 
     state.batch = {
@@ -571,13 +589,13 @@
     else cancelBatch();
   }
 
-  function pickFiles() {
+  function pickFiles(append = false) {
     const input = document.createElement('input');
     input.type = 'file';
     input.multiple = true;
     input.accept = '.mp3,.wav,.m4a,.flac,.ogg,.aac,.json,.srt,.vtt,.txt';
     input.addEventListener('change', () => {
-      if (input.files?.length) prepareImport(Array.from(input.files));
+      if (input.files?.length) prepareImport(Array.from(input.files), append);
     }, {once:true});
     input.click();
   }
@@ -592,8 +610,9 @@
   $('transcriptSearch').addEventListener('keydown', event => { if (event.key === 'Enter') loadTranscript(); });
   $('closeDrawer').addEventListener('click', () => $('evidenceDrawer').classList.remove('open'));
   $('closeAudio').addEventListener('click', () => { $('audioPlayer').pause(); $('audioDock').hidden = true; });
-  $('addSourceButton').addEventListener('click', pickFiles);
-  $('topAddButton').addEventListener('click', pickFiles);
+  $('addSourceButton').addEventListener('click', () => pickFiles(false));
+  $('topAddButton').addEventListener('click', () => pickFiles(false));
+  $('addImportFiles').addEventListener('click', () => pickFiles(true));
   $('closeImport').addEventListener('click', closeImport);
   $('cancelImport').addEventListener('click', cancelBatch);
   $('importAction').addEventListener('click', async () => {
@@ -619,7 +638,10 @@
     dragDepth = 0;
     $('dropOverlay').classList.remove('visible');
     const files = Array.from(event.dataTransfer?.files || []);
-    if (files.length) prepareImport(files);
+    if (files.length) {
+      const append = Boolean(state.batch && !state.batch.started && !$('importModal').hidden);
+      prepareImport(files, append);
+    }
   });
 
   loadSources().catch(error => {
