@@ -50,6 +50,21 @@ def _slugify(value: str) -> str:
     return slug or "imported-source"
 
 
+def _unique_import_source_key(state, display_name: str) -> str:
+    base = _slugify(display_name)
+    key = base
+    suffix = 2
+    while (
+        key in state.corpus_index.sources
+        or key in state.settings.sources
+        or key in state.runtime_sources
+        or (IMPORT_ROOT / key).exists()
+    ):
+        key = f"{base}-{suffix}"
+        suffix += 1
+    return key
+
+
 def _source_audio_path(state, source_key: str) -> Path | None:
     runtime = state.runtime_sources.get(source_key)
     if runtime and runtime.get("audio_path"):
@@ -79,11 +94,7 @@ def _source_display_name(state, source_key: str) -> str:
 def _source_summary(state, source_key: str) -> dict:
     source_index = state.corpus_index.sources[source_key]
     chunks = source_index.chunks
-    timed = [
-        chunk
-        for chunk in chunks
-        if chunk.get("start", -1) >= 0 and chunk.get("end", -1) >= 0
-    ]
+    timed = [chunk for chunk in chunks if chunk.get("start", -1) >= 0 and chunk.get("end", -1) >= 0]
     speakers = []
     for chunk in chunks:
         for label in chunk.get("speaker_labels", {}).values():
@@ -105,10 +116,7 @@ def _source_summary(state, source_key: str) -> dict:
 
 def _source_catalog(state) -> list[dict]:
     return [
-        {
-            "source_key": key,
-            "display_name": _source_display_name(state, key),
-        }
+        {"source_key": key, "display_name": _source_display_name(state, key)}
         for key in state.corpus_index.sources
     ]
 
@@ -172,10 +180,17 @@ def _attach_completed_audio_job(state, job: dict) -> None:
         chunks=chunks,
         cache_dir=source.embedding_cache_dir,
     )
+    playback_path = (
+        source.normalized_audio_path
+        if source.normalized_audio_path.exists()
+        else Path(job["audio_path"])
+    )
     state.runtime_sources[source_key] = {
         "display_name": job["display_name"],
         "source_type": "processed_audio",
-        "audio_path": job["audio_path"],
+        # Chunk timestamps are derived from normalized PCM. Serving that same
+        # file avoids the small seek offsets that can happen with MP3 playback.
+        "audio_path": str(playback_path),
     }
 
 
@@ -202,7 +217,10 @@ async def lifespan(app: FastAPI):
         f"{app.state.audio_ingest.max_workers}; "
         f"Dagster home: {app.state.audio_ingest.dagster_home}"
     )
-    yield
+    try:
+        yield
+    finally:
+        app.state.audio_ingest.shutdown()
 
 
 app = FastAPI(title="Audio Search API", lifespan=lifespan)
@@ -252,10 +270,7 @@ def source_chunks(
             for chunk in chunks
             if needle in chunk.get("text", "").lower()
             or needle in chunk.get("speaker_text", "").lower()
-            or any(
-                needle in str(label).lower()
-                for label in chunk.get("speaker_labels", {}).values()
-            )
+            or any(needle in str(label).lower() for label in chunk.get("speaker_labels", {}).values())
         ]
     return {
         "source": _source_summary(state, source_key),
@@ -310,16 +325,10 @@ def answer(answer_request: AnswerRequest, request: Request):
     )
     if plan.needs_clarification:
         clarification = plan.clarification_question.strip()
-        if clarification:
-            message = (
-                "I don't understand the question well enough to answer it reliably. "
-                f"{clarification}"
-            )
-        else:
-            message = (
-                "I don't understand the question well enough to answer it reliably. "
-                "Could you clarify or rewrite it more clearly?"
-            )
+        message = (
+            "I don't understand the question well enough to answer it reliably. "
+            + (clarification or "Could you clarify or rewrite it more clearly?")
+        )
         return GroundedAnswer(answerable=False, answer=message, citations=[])
     return answer_question(
         query=answer_request.query,
@@ -337,24 +346,16 @@ async def ingest_audio(
     extension = Path(audio.filename or "audio").suffix.lower()
     if extension not in AUDIO_EXTENSIONS:
         raise HTTPException(status_code=400, detail="Unsupported audio format")
-
     display_name = (
         source_name.strip()
         if source_name and source_name.strip()
         else Path(audio.filename or "Audio source").stem
     )
-
     raw_dir = request.app.state.settings.paths.raw_audio_dir
     raw_dir.mkdir(parents=True, exist_ok=True)
-    safe_name = _slugify(display_name)
-    target = raw_dir / f"{safe_name}-{uuid.uuid4().hex[:8]}{extension}"
+    target = raw_dir / f"{_slugify(display_name)}-{uuid.uuid4().hex[:8]}{extension}"
     target.write_bytes(await audio.read())
-
-    job = request.app.state.audio_ingest.submit(
-        audio_path=target,
-        display_name=display_name,
-    )
-    return job
+    return request.app.state.audio_ingest.submit(audio_path=target, display_name=display_name)
 
 
 @app.get("/ingest/jobs")
@@ -387,10 +388,9 @@ def cancel_ingest_job(job_id: str, request: Request):
 
 @app.post("/ingest/cancel-all")
 def cancel_all_ingest(request: Request):
-    jobs = request.app.state.audio_ingest.cancel_all()
     return {
         "status": "cancellation_requested",
-        "jobs": jobs,
+        "jobs": request.app.state.audio_ingest.cancel_all(),
     }
 
 
@@ -404,10 +404,7 @@ async def ingest_transcript(
     state = request.app.state
     payload = await transcript.read()
     try:
-        segments, metadata = parse_transcript_bytes(
-            transcript.filename or "transcript.txt",
-            payload,
-        )
+        segments, metadata = parse_transcript_bytes(transcript.filename or "transcript.txt", payload)
     except (UnicodeDecodeError, ValueError, json.JSONDecodeError) as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -416,12 +413,7 @@ async def ingest_transcript(
         if source_name and source_name.strip()
         else Path(transcript.filename or "Imported transcript").stem
     )
-    base_key = _slugify(display_name)
-    source_key = base_key
-    suffix = 2
-    while source_key in state.corpus_index.sources:
-        source_key = f"{base_key}-{suffix}"
-        suffix += 1
+    source_key = _unique_import_source_key(state, display_name)
     source_id = source_key
 
     speaker_labels = {
@@ -436,17 +428,11 @@ async def ingest_transcript(
     )
 
     source_dir = IMPORT_ROOT / source_key
-    source_dir.mkdir(parents=True, exist_ok=True)
+    source_dir.mkdir(parents=True, exist_ok=False)
     transcript_path = source_dir / "transcript.json"
     chunks_path = source_dir / "chunks.json"
-    transcript_path.write_text(
-        json.dumps(segments, indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
-    chunks_path.write_text(
-        json.dumps(chunks, indent=2, ensure_ascii=False),
-        encoding="utf-8",
-    )
+    transcript_path.write_text(json.dumps(segments, indent=2, ensure_ascii=False), encoding="utf-8")
+    chunks_path.write_text(json.dumps(chunks, indent=2, ensure_ascii=False), encoding="utf-8")
 
     audio_path = None
     if audio is not None and audio.filename:
@@ -456,12 +442,7 @@ async def ingest_transcript(
         audio_path = source_dir / f"audio{extension}"
         audio_path.write_bytes(await audio.read())
 
-    _add_runtime_source(
-        state,
-        source_key=source_key,
-        source_id=source_id,
-        chunks=chunks,
-    )
+    _add_runtime_source(state, source_key=source_key, source_id=source_id, chunks=chunks)
     state.runtime_sources[source_key] = {
         "display_name": display_name,
         "source_type": "imported_transcript",
