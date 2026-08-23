@@ -27,7 +27,7 @@
   const ETA_STORAGE_KEY = 'audio-search-local-rtf-v1';
   const HOME_MARKUP = '<div class="empty-orb">⌁</div><h2>Ask across hours of audio in seconds.</h2><p>Answers stay traceable to transcript chunks, speakers, timestamps, and the original recording when audio is available.</p>';
 
-  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-agentic-rag';
+  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-agentic-rag-v2';
 
   const esc = (value = '') => String(value).replace(/[&<>'"]/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
