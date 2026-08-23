@@ -174,45 +174,54 @@
       updateHomeLayout();
       return;
     }
+
     const sourceKeys = state.selected.size === state.sources.length ? null : [...state.selected];
     const payload = { query, top_k: 6, source_keys: sourceKeys, top_k_per_source: 3 };
     $('askButton').disabled = true;
     $('answerState').className = 'answer-state';
     $('answerState').innerHTML = '<div class="loading-card"><div class="loading-line"></div><div class="loading-line"></div><div class="loading-line"></div></div>';
     updateHomeLayout();
-    const [searchResult, answerResult] = await Promise.allSettled([
-      api('/search', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }),
-      api('/answer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }),
-    ]);
-    $('askButton').disabled = false;
-    if (answerResult.status === 'rejected') {
-      $('answerState').innerHTML = `<div class="answer-card refusal"><div class="answer-kicker">LLM unavailable</div><div class="answer-text">${esc(answerResult.reason.message)}. Retrieval remains available through the API.</div></div>`;
-      return;
-    }
-    const answer = answerResult.value;
-    const search = searchResult.status === 'fulfilled' ? searchResult.value : { results: [] };
-    const cited = await hydrateCitations(answer, search.results || []);
-    const clarify = !answer.answerable && String(answer.answer || '').startsWith("I don't understand the question well enough to answer it reliably.");
-    let html = `<div class="answer-card ${answer.answerable ? '' : 'refusal'}"><div class="answer-kicker">${answer.answerable ? 'Grounded answer' : clarify ? 'Clarify question' : 'Not enough evidence'}</div><div class="answer-text">${esc(answer.answer)}</div></div>`;
-    if (cited.length) {
-      html += `<div class="evidence-section"><div class="evidence-title">Evidence · ${cited.length}</div><div class="evidence-grid">${cited.map((chunk, i) => {
-        const source = sourceForChunk(chunk);
-        return `<article class="evidence-card" data-evidence-index="${i}"><div class="evidence-card-head"><div class="evidence-source">${esc(source?.display_name || chunk.source_id || 'Source')}</div><div class="evidence-time">${formatTime(chunk.start)}${Number(chunk.end) >= 0 ? `–${formatTime(chunk.end)}` : ''}</div></div><div class="evidence-excerpt">${esc(chunk.speaker_text || chunk.text || 'Open to inspect source evidence.')}</div><div class="evidence-direct-actions"><button type="button" data-evidence-action="transcript">View transcript</button>${source?.has_audio ? '<button type="button" data-evidence-action="play">▶ Play</button>' : ''}</div></article>`;
-      }).join('')}</div></div>`;
-    }
-    $('answerState').innerHTML = html;
-    updateHomeLayout();
-    document.querySelectorAll('[data-evidence-index]').forEach(card => {
-      const chunk = cited[Number(card.dataset.evidenceIndex)];
-      card.addEventListener('click', event => { if (!event.target.closest('[data-evidence-action]')) openEvidence(chunk); });
-      card.querySelector('[data-evidence-action="transcript"]')?.addEventListener('click', () => {
-        const source = sourceForChunk(chunk);
-        if (source) showAuditContext(source.source_key, chunk.chunk_id).catch(error => { $('transcriptList').innerHTML = `<div class="answer-card refusal">${esc(error.message)}</div>`; });
+
+    try {
+      // Product Q&A is one orchestration request. /ask lets the model inspect the
+      // selected library, iteratively retrieve more transcript evidence when
+      // needed, and return the cited evidence it actually used.
+      const answer = await api('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
       });
-      card.querySelector('[data-evidence-action="play"]')?.addEventListener('click', () => {
-        const source = sourceForChunk(chunk);
-        if (source) playSourceAudio(source, chunk);
+      const cited = answer.evidence || [];
+      const clarify = answer.outcome === 'clarification';
+      let html = `<div class="answer-card ${answer.answerable ? '' : 'refusal'}"><div class="answer-kicker">${answer.answerable ? 'Grounded answer' : clarify ? 'Clarify question' : 'Not enough evidence'}</div><div class="answer-text">${esc(answer.answer)}</div></div>`;
+
+      if (cited.length) {
+        html += `<div class="evidence-section"><div class="evidence-title">Evidence · ${cited.length}</div><div class="evidence-grid">${cited.map((chunk, i) => {
+          const source = sourceForChunk(chunk);
+          return `<article class="evidence-card" data-evidence-index="${i}"><div class="evidence-card-head"><div class="evidence-source">${esc(source?.display_name || chunk.source_display_name || chunk.source_id || 'Source')}</div><div class="evidence-time">${formatTime(chunk.start)}${Number(chunk.end) >= 0 ? `–${formatTime(chunk.end)}` : ''}</div></div><div class="evidence-excerpt">${esc(chunk.speaker_text || chunk.text || 'Open to inspect source evidence.')}</div><div class="evidence-direct-actions"><button type="button" data-evidence-action="transcript">View transcript</button>${source?.has_audio ? '<button type="button" data-evidence-action="play">▶ Play</button>' : ''}</div></article>`;
+        }).join('')}</div></div>`;
+      }
+
+      $('answerState').innerHTML = html;
+      updateHomeLayout();
+
+      document.querySelectorAll('[data-evidence-index]').forEach(card => {
+        const chunk = cited[Number(card.dataset.evidenceIndex)];
+        card.addEventListener('click', event => { if (!event.target.closest('[data-evidence-action]')) openEvidence(chunk); });
+        card.querySelector('[data-evidence-action="transcript"]')?.addEventListener('click', () => {
+          const source = sourceForChunk(chunk);
+          if (source) showAuditContext(source.source_key, chunk.chunk_id).catch(error => { $('transcriptList').innerHTML = `<div class="answer-card refusal">${esc(error.message)}</div>`; });
+        });
+        card.querySelector('[data-evidence-action="play"]')?.addEventListener('click', () => {
+          const source = sourceForChunk(chunk);
+          if (source) playSourceAudio(source, chunk);
+        });
       });
-    });
+    } catch (error) {
+      $('answerState').innerHTML = `<div class="answer-card refusal"><div class="answer-kicker">LLM unavailable</div><div class="answer-text">${esc(error.message)}. Retrieval remains available through the API.</div></div>`;
+      updateHomeLayout();
+    } finally {
+      $('askButton').disabled = false;
+    }
   }
 
