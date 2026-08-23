@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+from difflib import SequenceMatcher
+import re
 import time
 from typing import Literal
 
@@ -140,6 +142,56 @@ def _decision_schema(
         else {"type": "string"}
     )
     return schema
+
+
+def _normalized_words(value: str) -> list[str]:
+    return re.findall(r"[a-z0-9]+", value.lower())
+
+
+def _title_match_score(query: str, title: str) -> float:
+    """Fuzzy metadata match without interpreting the user's substantive intent."""
+    query_words = _normalized_words(query)
+    title_words = _normalized_words(title)
+    if not query_words or not title_words:
+        return 0.0
+
+    title_text = " ".join(title_words)
+    candidates = [" ".join(query_words)]
+    width = len(title_words)
+    for window in range(max(1, width - 1), min(len(query_words), width + 2) + 1):
+        for start in range(0, len(query_words) - window + 1):
+            candidates.append(" ".join(query_words[start: start + window]))
+
+    return max(
+        SequenceMatcher(None, title_text, candidate).ratio()
+        for candidate in candidates
+    )
+
+
+def _obvious_source_reference(
+    query: str,
+    source_catalog: list[dict],
+    selected_source_keys: list[str],
+) -> str | None:
+    selected = set(selected_source_keys)
+    scored = sorted(
+        (
+            (
+                _title_match_score(query, item["display_name"]),
+                item["source_key"],
+            )
+            for item in source_catalog
+            if item["source_key"] in selected
+        ),
+        reverse=True,
+    )
+    if not scored:
+        return None
+    best_score, best_key = scored[0]
+    second_score = scored[1][0] if len(scored) > 1 else 0.0
+    if best_score >= 0.78 and best_score - second_score >= 0.10:
+        return best_key
+    return None
 
 
 def _catalog_text(
@@ -573,6 +625,44 @@ def agentic_ask(
             elapsed_ms=bootstrap_ms,
         )
     )
+
+    # Source-title resolution is metadata navigation, not intent routing. When
+    # the user clearly names one selected recording (even with a typo), add a
+    # small distributed sample before the first LLM turn. This lets broad
+    # source questions often finish in one controller call while preserving the
+    # model's freedom to gather different evidence when needed.
+    matched_source = _obvious_source_reference(
+        query,
+        source_catalog,
+        selected,
+    )
+    if matched_source:
+        sample_request = RetrievalRequest(
+            tool="sample_source",
+            source_key=matched_source,
+            limit=6,
+        )
+        sample_started = time.perf_counter()
+        sample_chunks, sample_detail = _execute_sample_source(
+            sample_request,
+            index,
+            selected,
+        )
+        sample_ms = round((time.perf_counter() - sample_started) * 1000)
+        sample_added = _add_evidence(
+            state,
+            sample_chunks,
+            display_names,
+        )
+        state.trace.append(
+            AgentTraceStep(
+                iteration=0,
+                action="metadata_sample",
+                detail=f"obvious title match: {sample_detail}",
+                result_count=sample_added,
+                elapsed_ms=sample_ms,
+            )
+        )
 
     retrieval_rounds_used = 0
     decision_number = 0
