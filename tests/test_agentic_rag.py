@@ -70,19 +70,9 @@ class AgenticRagTests(unittest.TestCase):
         return payload
 
     @patch("src.agentic_rag.search_corpus")
-    def test_title_typo_can_use_one_broad_source_sample_then_answer(self, search):
+    def test_title_typo_is_presampled_and_can_answer_in_one_llm_turn(self, search):
         search.return_value = [self.sripetch_chunks[7], self.sripetch_chunks[15]]
         llm = ScriptedLLM([
-            self._decision(
-                "gather",
-                requests=[
-                    self._request(
-                        "sample_source",
-                        source_key="sripetch",
-                        limit=8,
-                    )
-                ],
-            ),
             self._decision(
                 "answer",
                 answer="The recording centers on the dispute described in the cited passages.",
@@ -100,8 +90,8 @@ class AgenticRagTests(unittest.TestCase):
 
         self.assertTrue(result.answerable)
         self.assertEqual(result.outcome, "answer")
-        self.assertEqual(llm.calls, 2)
-        self.assertTrue(any(step.action == "sample_source" for step in result.trace))
+        self.assertEqual(llm.calls, 1)
+        self.assertTrue(any(step.action == "metadata_sample" for step in result.trace))
 
     @patch("src.agentic_rag.search_corpus")
     def test_out_of_corpus_question_refuses_without_chatbot_reinterpretation(self, search):
