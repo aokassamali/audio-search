@@ -18,10 +18,9 @@ from src.agentic_rag import AskResult, agentic_ask
 from src.audio_ingest import AudioIngestManager
 from src.chunk import create_chunks
 from src.config import PROJECT_ROOT, load_settings
-from src.corpus import SourceIndex, build_corpus_index
+from src.corpus import SourceIndex, build_corpus_index, search_corpus
 from src.llm_clients import LlamaCppClient
 from src.rag import GroundedAnswer
-from src.retrieval_planner import retrieve_with_plan
 from src.search import build_bm25, build_dense_index, extract_texts, load_chunks
 from src.transcript_import import parse_transcript_bytes
 
@@ -298,22 +297,29 @@ def source_audio(source_key: str, request: Request):
 
 @app.post("/search")
 def search(search_request: SearchRequest, request: Request):
-    """Debug/direct retrieval endpoint. Product Q&A uses /ask."""
+    """Direct hybrid retrieval primitive. Product Q&A uses /ask."""
     state = request.app.state
-    results, plan = retrieve_with_plan(
+    results = search_corpus(
         query=search_request.query,
         index=state.corpus_index,
-        selected_source_keys=search_request.source_keys,
-        source_catalog=_source_catalog(state),
-        llm_client=state.llm_client,
         top_k=search_request.top_k,
+        source_keys=search_request.source_keys,
+        retrieval_mode=search_request.retrieval_mode,
         top_k_per_source=search_request.top_k_per_source,
     )
+    display_names = {
+        item["source_key"]: item["display_name"]
+        for item in _source_catalog(state)
+    }
+    for chunk in results:
+        chunk["source_display_name"] = display_names.get(
+            chunk.get("source_key"),
+            chunk.get("source_id", "Source"),
+        )
     return {
         "query": search_request.query,
         "source_keys": search_request.source_keys,
-        "retrieval_mode": "llm_planned_hybrid",
-        "retrieval_plan": plan.model_dump(),
+        "retrieval_mode": search_request.retrieval_mode,
         "results": results,
     }
 
