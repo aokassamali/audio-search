@@ -14,12 +14,13 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 
+from src.agentic_rag import AskResult, agentic_ask
 from src.audio_ingest import AudioIngestManager
 from src.chunk import create_chunks
 from src.config import PROJECT_ROOT, load_settings
 from src.corpus import SourceIndex, build_corpus_index
 from src.llm_clients import LlamaCppClient
-from src.rag import GroundedAnswer, answer_question
+from src.rag import GroundedAnswer
 from src.retrieval_planner import retrieve_with_plan
 from src.search import build_bm25, build_dense_index, extract_texts, load_chunks
 from src.transcript_import import parse_transcript_bytes
@@ -116,7 +117,11 @@ def _source_summary(state, source_key: str) -> dict:
 
 def _source_catalog(state) -> list[dict]:
     return [
-        {"source_key": key, "display_name": _source_display_name(state, key)}
+        {
+            "source_key": key,
+            "display_name": _source_display_name(state, key),
+            "chunk_count": len(state.corpus_index.sources[key].chunks),
+        }
         for key in state.corpus_index.sources
     ]
 
@@ -237,6 +242,7 @@ def health(request: Request):
         "chunks_loaded": len(index.chunks),
         "chunks_by_source": dict(source_counts),
         "embedding_model": state.settings.models.embedding_model,
+        "embedding_device": state.settings.models.embedding_device,
         "ingest_workers": state.audio_ingest.max_workers,
         "dagster_home": str(state.audio_ingest.dagster_home),
     }
@@ -292,6 +298,7 @@ def source_audio(source_key: str, request: Request):
 
 @app.post("/search")
 def search(search_request: SearchRequest, request: Request):
+    """Debug/direct retrieval endpoint. Product Q&A uses /ask."""
     state = request.app.state
     results, plan = retrieve_with_plan(
         query=search_request.query,
@@ -311,29 +318,36 @@ def search(search_request: SearchRequest, request: Request):
     }
 
 
-@app.post("/answer", response_model=GroundedAnswer)
-def answer(answer_request: AnswerRequest, request: Request):
+def _run_agentic_answer(
+    answer_request: AnswerRequest,
+    request: Request,
+) -> AskResult:
     state = request.app.state
-    retrieved_chunks, plan = retrieve_with_plan(
+    return agentic_ask(
         query=answer_request.query,
         index=state.corpus_index,
         selected_source_keys=answer_request.source_keys,
         source_catalog=_source_catalog(state),
         llm_client=state.llm_client,
-        top_k=answer_request.top_k,
-        top_k_per_source=answer_request.top_k_per_source,
+        initial_top_k=min(8, max(4, answer_request.top_k)),
+        max_tool_calls=3,
     )
-    if plan.needs_clarification:
-        clarification = plan.clarification_question.strip()
-        message = (
-            "I don't understand the question well enough to answer it reliably. "
-            + (clarification or "Could you clarify or rewrite it more clearly?")
-        )
-        return GroundedAnswer(answerable=False, answer=message, citations=[])
-    return answer_question(
-        query=answer_request.query,
-        retrieved_chunks=retrieved_chunks,
-        llm_client=state.llm_client,
+
+
+@app.post("/ask", response_model=AskResult)
+def ask(answer_request: AnswerRequest, request: Request):
+    """Agentic grounded Q&A with iterative transcript retrieval."""
+    return _run_agentic_answer(answer_request, request)
+
+
+@app.post("/answer", response_model=GroundedAnswer)
+def answer(answer_request: AnswerRequest, request: Request):
+    """Compatibility endpoint backed by the same agentic retrieval loop as /ask."""
+    result = _run_agentic_answer(answer_request, request)
+    return GroundedAnswer(
+        answerable=result.answerable,
+        answer=result.answer,
+        citations=result.citations,
     )
 
 
