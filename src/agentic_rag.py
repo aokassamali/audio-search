@@ -143,7 +143,7 @@ def _catalog_text(
     return "\n\n".join(lines) if lines else "(none)"
 
 
-def _chunk_excerpt(chunk: dict, max_chars: int = 650) -> str:
+def _chunk_excerpt(chunk: dict, max_chars: int = 340) -> str:
     text = str(
         chunk.get("speaker_text")
         or chunk.get("text")
@@ -464,7 +464,7 @@ def agentic_ask(
                     selected,
                     list(state.evidence),
                 ),
-                max_tokens=700,
+                max_tokens=512,
             )
             decision = AgentDecision.model_validate_json(raw)
         except (ValidationError, ValueError, TypeError):
