@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import time
 from typing import Literal
 
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel, Field
 
 from src.corpus import CorpusIndex, search_corpus
 from src.rag import (
@@ -19,54 +20,59 @@ from src.rag import (
 AGENT_SYSTEM_PROMPT = """
 You are the retrieval controller and grounded answerer for an audio-transcript search system.
 
-You do not know the recordings from model memory. The only facts you may use in an answer are facts present in transcript evidence returned by the retrieval tools in this session. Source titles and metadata may be used to decide where to search, but they are not factual evidence for the answer.
+You do not know the recordings from model memory. The only factual evidence you may use in an answer is transcript evidence returned by the retrieval tools in this session. Source titles and metadata may be used to decide where to search, but they are not factual evidence for the answer.
 
 You receive:
 - the user's natural-language question,
 - the selected recording catalog,
 - transcript evidence gathered so far,
-- the number of retrieval tool calls remaining.
+- the number of retrieval rounds remaining.
 
-Available actions:
+Available retrieval tools:
 1. search_transcripts
-   Search transcript chunks semantically and lexically. Use this for targeted questions, names, topics, comparisons, paraphrases, and reformulations.
+   Semantic + lexical search over transcript chunks. Use for names, topics, paraphrases, comparisons, and targeted questions.
 2. read_source
-   Read an ordered slice of one recording's transcript by chunk offset. Use this when current search results are too narrow, when chronology matters, or when the user asks for an explanation/synthesis that needs broader coverage.
-3. read_context
-   Read chunks immediately around one known chunk. Use this when a retrieved passage needs neighboring context.
-4. answer
-   Answer using only gathered transcript evidence. Every factual claim must be supported by at least one citation_id from the evidence.
-5. refuse
-   Choose this when reasonable retrieval has not found evidence that supports the user's question.
-6. clarify
-   Choose this only when the user's meaning remains materially ambiguous after using the selected source catalog and retrieval tools.
+   Read one ordered slice of a recording by chunk offset. Use when nearby chronology or a particular section matters.
+3. sample_source
+   Read chunks distributed across an entire recording. Use when broad coverage of a recording is useful and the current evidence is too narrow.
+4. read_context
+   Read chunks immediately around a known chunk. Use when a retrieved passage needs neighboring context.
+
+Available final actions:
+- answer: answer only from gathered transcript evidence and cite evidence IDs.
+- refuse: use when reasonable retrieval has not found enough evidence.
+- clarify: use only when the user's meaning remains materially ambiguous after consulting the selected catalog and available transcript evidence.
 
 Behavior rules:
-- Do not classify the request into a fixed intent taxonomy. Decide directly what information you need and which retrieval action will obtain it.
-- Resolve obvious typos, shorthand, and approximate recording-title references from the selected source catalog. Do not ask for clarification when one interpretation is clearly the best match.
-- If a question is understandable but unsupported by the selected recordings, retrieve reasonably and then refuse. Do not invent a different interpretation just to fit the corpus.
-- Clarification is a last resort. Use it only when multiple materially different interpretations remain plausible and choosing among them would change the answer.
-- Never use world knowledge as evidence. Never propose world-knowledge meanings for an unclear term.
-- Stay inside the selected source boundary. Never request or cite an unselected source.
-- Do not answer broad questions from a narrow handful of passages if more source coverage is needed; retrieve more first.
-- Prefer a small number of purposeful retrieval actions. If the evidence is already sufficient, answer without another tool call.
-- When no retrieval tool calls remain, choose answer, refuse, or clarify.
+- Do not classify the request into a fixed intent taxonomy. Decide directly what information would help and which retrieval tools can obtain it.
+- Resolve obvious typos, shorthand, and approximate recording-title references from the selected source catalog. Do not clarify when one catalog match is clearly best.
+- If the question is understandable but unsupported by the selected recordings, retrieve reasonably and then refuse. Do not reinterpret it toward unrelated corpus content.
+- Clarification is a last resort. Never propose world-knowledge meanings for an unclear term.
+- Stay inside the selected-source boundary. Never request or cite an unselected source.
+- Prefer one purposeful gather step containing multiple retrieval requests over serially requesting one small slice at a time.
+- For a broad question about one recording, sample the source or request a few strategically different sections in the same gather step instead of walking offsets 0, 8, 16, ... across multiple model turns.
+- If the bootstrap evidence is already sufficient, answer immediately.
+- When no retrieval rounds remain, choose answer, refuse, or clarify. Do not request more retrieval.
 - Return JSON only.
 """.strip()
 
 
-ActionName = Literal[
+ToolName = Literal[
     "search_transcripts",
     "read_source",
+    "sample_source",
     "read_context",
+]
+ActionName = Literal[
+    "gather",
     "answer",
     "refuse",
     "clarify",
 ]
 
 
-class AgentDecision(BaseModel):
-    action: ActionName
+class RetrievalRequest(BaseModel):
+    tool: ToolName
     query: str = ""
     source_keys: list[str] = Field(default_factory=list)
     source_key: str = ""
@@ -74,6 +80,11 @@ class AgentDecision(BaseModel):
     limit: int = 5
     chunk_id: int = -1
     radius: int = 2
+
+
+class AgentDecision(BaseModel):
+    action: ActionName
+    requests: list[RetrievalRequest] = Field(default_factory=list)
     answer: str = ""
     citation_ids: list[str] = Field(default_factory=list)
     clarification_question: str = ""
@@ -84,10 +95,11 @@ class AgentTraceStep(BaseModel):
     action: str
     detail: str
     result_count: int = 0
+    elapsed_ms: int = 0
 
 
 class AskResult(BaseModel):
-    outcome: Literal["answer", "refusal", "clarification"]
+    outcome: Literal["answer", "refusal", "clarification", "error"]
     answerable: bool
     answer: str
     citations: list[Citation] = Field(default_factory=list)
@@ -106,20 +118,27 @@ def _decision_schema(
     evidence_ids: list[str],
 ) -> dict:
     schema = AgentDecision.model_json_schema()
-    schema["required"] = list(schema["properties"])
+    schema["required"] = ["action"]
     schema["additionalProperties"] = False
-    schema["properties"]["source_keys"]["items"] = {
-        "type": "string",
-        "enum": allowed_source_keys,
-    }
-    schema["properties"]["source_key"] = {
-        "type": "string",
-        "enum": ["", *allowed_source_keys],
-    }
-    schema["properties"]["citation_ids"]["items"] = {
-        "type": "string",
-        "enum": evidence_ids,
-    }
+
+    request_schema = schema.get("$defs", {}).get("RetrievalRequest", {})
+    if request_schema:
+        request_schema["required"] = ["tool"]
+        request_schema["additionalProperties"] = False
+        request_schema["properties"]["source_keys"]["items"] = {
+            "type": "string",
+            "enum": allowed_source_keys,
+        }
+        request_schema["properties"]["source_key"] = {
+            "type": "string",
+            "enum": ["", *allowed_source_keys],
+        }
+
+    schema["properties"]["citation_ids"]["items"] = (
+        {"type": "string", "enum": evidence_ids}
+        if evidence_ids
+        else {"type": "string"}
+    )
     return schema
 
 
@@ -129,21 +148,21 @@ def _catalog_text(
     index: CorpusIndex,
 ) -> str:
     selected = set(selected_source_keys)
-    lines = []
+    blocks = []
     for item in source_catalog:
         key = item["source_key"]
         if key not in selected or key not in index.sources:
             continue
         chunk_count = len(index.sources[key].chunks)
-        lines.append(
-            f'- source_key: {key}\n'
-            f'  title: {item["display_name"]}\n'
-            f'  chunk_count: {chunk_count}'
+        blocks.append(
+            f"- source_key: {key}\n"
+            f"  title: {item['display_name']}\n"
+            f"  chunk_count: {chunk_count}"
         )
-    return "\n\n".join(lines) if lines else "(none)"
+    return "\n\n".join(blocks) if blocks else "(none)"
 
 
-def _chunk_excerpt(chunk: dict, max_chars: int = 340) -> str:
+def _chunk_excerpt(chunk: dict, max_chars: int = 260) -> str:
     text = str(
         chunk.get("speaker_text")
         or chunk.get("text")
@@ -174,12 +193,13 @@ def _prompt(
     selected_source_keys: list[str],
     index: CorpusIndex,
     evidence: dict[str, dict],
-    remaining_tool_calls: int,
+    remaining_rounds: int,
+    max_requests_per_round: int,
     previous_steps: list[AgentTraceStep],
 ) -> str:
     step_text = "\n".join(
         f"- {step.action}: {step.detail}"
-        for step in previous_steps[-6:]
+        for step in previous_steps[-8:]
     ) or "(none)"
     return (
         f"User question:\n{query}\n\n"
@@ -188,9 +208,14 @@ def _prompt(
         f"Transcript evidence gathered so far:\n"
         f"{_evidence_text(evidence)}\n\n"
         f"Retrieval steps already taken:\n{step_text}\n\n"
-        f"Retrieval tool calls remaining: {remaining_tool_calls}\n\n"
-        "Choose the next action. If you answer, cite only evidence IDs shown above. "
-        "If evidence is insufficient but another retrieval action could reasonably help, use the tool rather than refusing."
+        f"Evidence chunks gathered: {len(evidence)} / 16\n"
+        f"Retrieval rounds remaining: {remaining_rounds}\n"
+        f"Maximum retrieval requests in one gather step: {max_requests_per_round}\n\n"
+        "Choose the next action. "
+        "If you choose gather, put all useful retrieval requests for this round in requests. "
+        "If you answer, cite only evidence IDs shown above. "
+        "If the question is broad and current evidence is narrow, prefer sample_source or multiple strategic requests in one gather step. "
+        "If evidence is sufficient, answer now."
     )
 
 
@@ -217,10 +242,12 @@ def _add_evidence(
     state: _AgentState,
     chunks: list[dict],
     display_names: dict[str, str],
-    max_evidence: int = 18,
+    max_evidence: int = 16,
 ) -> int:
     added = 0
     for raw_chunk in chunks:
+        if len(state.evidence) >= max_evidence:
+            break
         chunk = dict(raw_chunk)
         source_key = str(chunk.get("source_key", ""))
         chunk["source_display_name"] = display_names.get(
@@ -230,8 +257,6 @@ def _add_evidence(
         citation_id = create_citation_id(chunk)
         if citation_id in state.evidence:
             continue
-        if len(state.evidence) >= max_evidence:
-            break
         state.evidence[citation_id] = chunk
         added += 1
     return added
@@ -252,20 +277,20 @@ def _authorized_sources(
 
 
 def _execute_search(
-    decision: AgentDecision,
+    request: RetrievalRequest,
     index: CorpusIndex,
     selected: list[str],
 ) -> tuple[list[dict], str]:
     source_keys = _authorized_sources(
-        decision.source_keys,
+        request.source_keys,
         selected,
     )
-    if decision.source_keys and not source_keys:
-        return [], "Search was blocked because it requested only unselected sources."
-    query = decision.query.strip()
+    if request.source_keys and not source_keys:
+        return [], "blocked: search requested only unselected sources"
+    query = request.query.strip()
     if not query:
-        return [], "Search was skipped because no retrieval query was supplied."
-    limit = max(1, min(int(decision.limit), 8))
+        return [], "skipped: search request had no query"
+    limit = max(1, min(int(request.limit), 6))
     chunks = search_corpus(
         query=query,
         index=index,
@@ -275,24 +300,23 @@ def _execute_search(
         top_k_per_source=min(4, limit),
     )
     return chunks, (
-        f'searched "{query}" in '
-        f'{", ".join(source_keys)}'
+        f'search "{query}" in {", ".join(source_keys)}'
     )
 
 
 def _execute_read_source(
-    decision: AgentDecision,
+    request: RetrievalRequest,
     index: CorpusIndex,
     selected: list[str],
 ) -> tuple[list[dict], str]:
-    key = decision.source_key
+    key = request.source_key
     if key not in selected:
-        return [], "Source read was blocked because the source is not selected."
+        return [], "blocked: source read requested an unselected source"
     source = index.sources.get(key)
     if source is None:
-        return [], "Source read failed because the source does not exist."
-    offset = max(0, int(decision.offset))
-    limit = max(1, min(int(decision.limit), 8))
+        return [], "failed: source does not exist"
+    offset = max(0, int(request.offset))
+    limit = max(1, min(int(request.limit), 6))
     chunks = source.chunks[offset: offset + limit]
     return chunks, (
         f"read {len(chunks)} ordered chunks from {key} "
@@ -300,35 +324,81 @@ def _execute_read_source(
     )
 
 
-def _execute_read_context(
-    decision: AgentDecision,
+def _execute_sample_source(
+    request: RetrievalRequest,
     index: CorpusIndex,
     selected: list[str],
 ) -> tuple[list[dict], str]:
-    key = decision.source_key
+    key = request.source_key
     if key not in selected:
-        return [], "Context read was blocked because the source is not selected."
+        return [], "blocked: source sample requested an unselected source"
     source = index.sources.get(key)
     if source is None:
-        return [], "Context read failed because the source does not exist."
-    radius = max(1, min(int(decision.radius), 4))
+        return [], "failed: source does not exist"
+
+    chunks = source.chunks
+    if not chunks:
+        return [], f"sampled 0 chunks from {key}"
+
+    limit = max(2, min(int(request.limit), 8))
+    if len(chunks) <= limit:
+        sampled = list(chunks)
+    else:
+        last = len(chunks) - 1
+        positions = []
+        for i in range(limit):
+            position = round(i * last / (limit - 1))
+            if position not in positions:
+                positions.append(position)
+        sampled = [chunks[position] for position in positions]
+
+    return sampled, (
+        f"sampled {len(sampled)} chunks across all {len(chunks)} chunks in {key}"
+    )
+
+
+def _execute_read_context(
+    request: RetrievalRequest,
+    index: CorpusIndex,
+    selected: list[str],
+) -> tuple[list[dict], str]:
+    key = request.source_key
+    if key not in selected:
+        return [], "blocked: context read requested an unselected source"
+    source = index.sources.get(key)
+    if source is None:
+        return [], "failed: source does not exist"
+    radius = max(1, min(int(request.radius), 3))
     target_index = next(
         (
             index_value
             for index_value, chunk in enumerate(source.chunks)
-            if int(chunk.get("chunk_id", -999999)) == int(decision.chunk_id)
+            if int(chunk.get("chunk_id", -999999)) == int(request.chunk_id)
         ),
         None,
     )
     if target_index is None:
-        return [], f"Chunk {decision.chunk_id} was not found in {key}."
+        return [], f"failed: chunk {request.chunk_id} was not found in {key}"
     start = max(0, target_index - radius)
     end = min(len(source.chunks), target_index + radius + 1)
     chunks = source.chunks[start:end]
     return chunks, (
-        f"read context around chunk {decision.chunk_id} "
-        f"from {key}"
+        f"read context around chunk {request.chunk_id} from {key}"
     )
+
+
+def _execute_request(
+    request: RetrievalRequest,
+    index: CorpusIndex,
+    selected: list[str],
+) -> tuple[list[dict], str]:
+    if request.tool == "search_transcripts":
+        return _execute_search(request, index, selected)
+    if request.tool == "read_source":
+        return _execute_read_source(request, index, selected)
+    if request.tool == "sample_source":
+        return _execute_sample_source(request, index, selected)
+    return _execute_read_context(request, index, selected)
 
 
 def _clarification_result(
@@ -336,14 +406,13 @@ def _clarification_result(
     trace: list[AgentTraceStep],
 ) -> AskResult:
     cleaned = question.strip() or "Could you clarify what you mean?"
-    message = (
-        "I don't understand the question well enough to answer it reliably. "
-        + cleaned
-    )
     return AskResult(
         outcome="clarification",
         answerable=False,
-        answer=message,
+        answer=(
+            "I don't understand the question well enough to answer it reliably. "
+            + cleaned
+        ),
         trace=trace,
     )
 
@@ -356,6 +425,29 @@ def _refusal_result(
         answerable=False,
         answer=REFUSAL_TEXT,
         trace=trace,
+    )
+
+
+def _error_result(
+    trace: list[AgentTraceStep],
+    detail: str,
+) -> AskResult:
+    safe_trace = list(trace)
+    safe_trace.append(
+        AgentTraceStep(
+            iteration=len(safe_trace),
+            action="error",
+            detail=detail,
+        )
+    )
+    return AskResult(
+        outcome="error",
+        answerable=False,
+        answer=(
+            "I couldn't complete the grounded retrieval process reliably. "
+            "Please try the question again."
+        ),
+        trace=safe_trace,
     )
 
 
@@ -394,14 +486,50 @@ def _answer_result(
     )
 
 
+def _get_decision(
+    *,
+    query: str,
+    state: _AgentState,
+    selected: list[str],
+    source_catalog: list[dict],
+    index: CorpusIndex,
+    llm_client,
+    remaining_rounds: int,
+    max_requests_per_round: int,
+) -> tuple[AgentDecision, int]:
+    prompt = _prompt(
+        query=query,
+        source_catalog=source_catalog,
+        selected_source_keys=selected,
+        index=index,
+        evidence=state.evidence,
+        remaining_rounds=remaining_rounds,
+        max_requests_per_round=max_requests_per_round,
+        previous_steps=state.trace,
+    )
+    started = time.perf_counter()
+    raw = llm_client.generate(
+        system_prompt=AGENT_SYSTEM_PROMPT,
+        user_prompt=prompt,
+        response_schema=_decision_schema(
+            selected,
+            list(state.evidence),
+        ),
+        max_tokens=420,
+    )
+    elapsed_ms = round((time.perf_counter() - started) * 1000)
+    return AgentDecision.model_validate_json(raw), elapsed_ms
+
+
 def agentic_ask(
     query: str,
     index: CorpusIndex,
     selected_source_keys: list[str] | None,
     source_catalog: list[dict],
     llm_client,
-    initial_top_k: int = 6,
+    initial_top_k: int = 4,
     max_tool_calls: int = 3,
+    max_retrieval_rounds: int = 2,
 ) -> AskResult:
     selected = _normalize_selected_sources(
         selected_source_keys,
@@ -421,14 +549,16 @@ def agentic_ask(
         trace=[],
     )
 
+    bootstrap_started = time.perf_counter()
     bootstrap = search_corpus(
         query=query,
         index=index,
-        top_k=max(1, min(initial_top_k, 8)),
+        top_k=max(1, min(initial_top_k, 6)),
         source_keys=selected,
         retrieval_mode="global",
         top_k_per_source=3,
     )
+    bootstrap_ms = round((time.perf_counter() - bootstrap_started) * 1000)
     added = _add_evidence(
         state,
         bootstrap,
@@ -440,40 +570,52 @@ def agentic_ask(
             action="bootstrap_search",
             detail=f'initial search for "{query}"',
             result_count=added,
+            elapsed_ms=bootstrap_ms,
         )
     )
 
-    tool_calls_used = 0
-    # One final decision is allowed after the retrieval budget has been spent.
-    for iteration in range(1, max_tool_calls + 2):
-        remaining = max(0, max_tool_calls - tool_calls_used)
-        prompt = _prompt(
-            query=query,
-            source_catalog=source_catalog,
-            selected_source_keys=selected,
-            index=index,
-            evidence=state.evidence,
-            remaining_tool_calls=remaining,
-            previous_steps=state.trace,
+    retrieval_rounds_used = 0
+    decision_number = 0
+
+    while True:
+        remaining_rounds = max(
+            0,
+            max_retrieval_rounds - retrieval_rounds_used,
         )
+        if len(state.evidence) >= 16:
+            remaining_rounds = 0
+        decision_number += 1
+
         try:
-            raw = llm_client.generate(
-                system_prompt=AGENT_SYSTEM_PROMPT,
-                user_prompt=prompt,
-                response_schema=_decision_schema(
-                    selected,
-                    list(state.evidence),
-                ),
-                max_tokens=512,
+            decision, controller_ms = _get_decision(
+                query=query,
+                state=state,
+                selected=selected,
+                source_catalog=source_catalog,
+                index=index,
+                llm_client=llm_client,
+                remaining_rounds=remaining_rounds,
+                max_requests_per_round=max_tool_calls,
             )
-            decision = AgentDecision.model_validate_json(raw)
-        except (ValidationError, ValueError, TypeError):
-            return _refusal_result(state.trace)
+        except Exception as exc:
+            return _error_result(
+                state.trace,
+                f"controller failure: {type(exc).__name__}",
+            )
+
+        state.trace.append(
+            AgentTraceStep(
+                iteration=decision_number,
+                action="controller",
+                detail=f"controller chose {decision.action}",
+                elapsed_ms=controller_ms,
+            )
+        )
 
         if decision.action == "answer":
             state.trace.append(
                 AgentTraceStep(
-                    iteration=iteration,
+                    iteration=decision_number,
                     action="answer",
                     detail="answered from gathered transcript evidence",
                     result_count=len(decision.citation_ids),
@@ -484,9 +626,9 @@ def agentic_ask(
         if decision.action == "refuse":
             state.trace.append(
                 AgentTraceStep(
-                    iteration=iteration,
+                    iteration=decision_number,
                     action="refuse",
-                    detail="model determined the selected evidence does not support the question",
+                    detail="selected transcript evidence did not support the question",
                 )
             )
             return _refusal_result(state.trace)
@@ -494,7 +636,7 @@ def agentic_ask(
         if decision.action == "clarify":
             state.trace.append(
                 AgentTraceStep(
-                    iteration=iteration,
+                    iteration=decision_number,
                     action="clarify",
                     detail="material ambiguity remained after retrieval",
                 )
@@ -504,48 +646,52 @@ def agentic_ask(
                 state.trace,
             )
 
-        if remaining <= 0:
+        if remaining_rounds <= 0:
+            return _error_result(
+                state.trace,
+                "controller requested more retrieval after the retrieval budget was exhausted",
+            )
+
+        requests = decision.requests[:max_tool_calls]
+        if not requests:
+            return _error_result(
+                state.trace,
+                "controller chose gather without any retrieval requests",
+            )
+
+        retrieval_rounds_used += 1
+        total_added = 0
+
+        for request_number, retrieval_request in enumerate(requests, start=1):
+            request_started = time.perf_counter()
+            chunks, detail = _execute_request(
+                retrieval_request,
+                index,
+                selected,
+            )
+            request_ms = round((time.perf_counter() - request_started) * 1000)
+            added = _add_evidence(
+                state,
+                chunks,
+                display_names,
+            )
+            total_added += added
             state.trace.append(
                 AgentTraceStep(
-                    iteration=iteration,
-                    action="refuse",
-                    detail="retrieval budget exhausted without a grounded final answer",
+                    iteration=decision_number,
+                    action=retrieval_request.tool,
+                    detail=f"batch {retrieval_rounds_used}.{request_number}: {detail}",
+                    result_count=added,
+                    elapsed_ms=request_ms,
                 )
             )
-            return _refusal_result(state.trace)
 
-        if decision.action == "search_transcripts":
-            chunks, detail = _execute_search(
-                decision,
-                index,
-                selected,
+        if total_added == 0 and len(state.evidence) >= 16:
+            state.trace.append(
+                AgentTraceStep(
+                    iteration=decision_number,
+                    action="evidence_budget",
+                    detail="evidence budget full; further duplicate/source-walk reads are suppressed",
+                    result_count=0,
+                )
             )
-        elif decision.action == "read_source":
-            chunks, detail = _execute_read_source(
-                decision,
-                index,
-                selected,
-            )
-        else:
-            chunks, detail = _execute_read_context(
-                decision,
-                index,
-                selected,
-            )
-
-        added = _add_evidence(
-            state,
-            chunks,
-            display_names,
-        )
-        tool_calls_used += 1
-        state.trace.append(
-            AgentTraceStep(
-                iteration=iteration,
-                action=decision.action,
-                detail=detail,
-                result_count=added,
-            )
-        )
-
-    return _refusal_result(state.trace)
