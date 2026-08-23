@@ -213,6 +213,38 @@ class AgenticRagTests(unittest.TestCase):
         self.assertEqual(result.outcome, "clarification")
         self.assertIn("Which speaker", result.answer)
 
+    @patch("src.agentic_rag.search_corpus")
+    def test_reformulated_search_can_add_evidence_before_answering(self, search):
+        search.side_effect = [
+            [self.sripetch_chunks[0]],
+            [self.sripetch_chunks[1], self.sripetch_chunks[2]],
+        ]
+        llm = ScriptedLLM([
+            self._decision(
+                "search_transcripts",
+                query="petitioner government disgorgement disagreement",
+                source_keys=["sripetch"],
+                limit=4,
+            ),
+            self._decision(
+                "answer",
+                answer="The two sides disagree in the ways described by the cited passages.",
+                citation_ids=["Sripetch_vs_SEC:1", "Sripetch_vs_SEC:2"],
+            ),
+        ])
+
+        result = agentic_ask(
+            query="how do the two sides disagree",
+            index=self.index,
+            selected_source_keys=["sripetch"],
+            source_catalog=self.catalog,
+            llm_client=llm,
+        )
+
+        self.assertTrue(result.answerable)
+        self.assertEqual(search.call_count, 2)
+        self.assertTrue(any(step.action == "search_transcripts" for step in result.trace))
+
 
 if __name__ == "__main__":
     unittest.main()
