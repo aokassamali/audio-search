@@ -22,11 +22,12 @@ Rules:
 4. Transcript hints are subordinate context for resolving ambiguous wording, typos, abbreviations, and shorthand. Preserve explicit subject matter in the user's question even when the selected corpus does not discuss it. A lack of matching evidence is a retrieval outcome, not permission to reinterpret the question so it fits unrelated corpus material.
 5. Use transcript hints to normalize an unclear token only when the user's wording and corpus context reasonably support that normalization. Never replace a clear topic, entity, relationship, or requested concept with a different topic merely because that different topic appears in the hints.
 6. Produce interpreted_question as a concise, neutral restatement of the user's intended information need in clear language. Preserve uncertainty if the request is genuinely ambiguous. Do not answer it and do not add facts.
-7. If the user's intended information need still cannot be resolved from their wording, the selected source catalog, and the transcript hints without materially guessing, set needs_clarification to true and write one short clarification_question. Ask specifically about the ambiguous part. Do not guess an acronym expansion, name, or concept just to avoid asking for clarification.
-8. Set needs_clarification to false when the intent is reasonably clear from context, even if the wording contains typos, slang, abbreviations, shorthand, or poor grammar. Clarification is for genuine unresolved ambiguity, not imperfect writing.
-9. Generate one or more concise semantic retrieval queries that together cover the user's information need. Decompose the request when doing so would improve evidence coverage.
-10. Prefer language supported by the user's wording first, then use source metadata and transcript hints to normalize or expand it. Do not invent named entities, acronym expansions, or subject matter that are unsupported by the user and selected corpus context.
-11. Return JSON only.
+7. Clarification is only for a genuinely ambiguous token or reference whose meaning is required before retrieval. If the user's topic or information need is understandable but the selected recordings may not contain relevant evidence, set needs_clarification to false and preserve the request; the grounded answer stage will handle insufficient evidence.
+8. A clarification_question may ask what an ambiguous term or reference means, but it must not suggest candidate meanings, entities, topics, or facts from world knowledge. Never ask whether a clear user topic is a typo merely because the selected corpus discusses something else.
+9. Set needs_clarification to false when the intent is reasonably clear from context, even if the wording contains typos, slang, abbreviations, shorthand, or poor grammar. Clarification is for genuine unresolved ambiguity, not imperfect writing.
+10. Generate one or more concise semantic retrieval queries that together cover the user's information need. Decompose the request when doing so would improve evidence coverage.
+11. Prefer language supported by the user's wording first, then use source metadata and transcript hints to normalize or expand it. Do not invent named entities, acronym expansions, or subject matter that are unsupported by the user and selected corpus context.
+12. Return JSON only.
 """.strip()
 
 
@@ -50,6 +51,7 @@ _COMMON_SHORT_WORDS = {
     "so", "that", "the", "their", "them", "then", "they", "this", "to", "was", "we",
     "were", "what", "when", "where", "which", "who", "why", "will", "with", "wit",
     "you", "your", "all", "about", "tell", "give", "know", "say", "says", "said",
+    "wdyk", "wdyt",
 }
 
 _CONTENT_STOPWORDS = _COMMON_SHORT_WORDS | {
@@ -154,14 +156,7 @@ def _tokens_match(left: str, right: str) -> bool:
 
 
 def _interpretation_drifted(query: str, interpreted_question: str) -> bool:
-    """Detect large topic drift while still allowing typo correction/paraphrase.
-
-    Corpus hints are useful for normalizing noisy wording, but an out-of-corpus
-    question must stay out-of-corpus rather than being rewritten toward the
-    nearest unrelated transcript. We conservatively apply this only when the raw
-    question has at least three content-bearing tokens and fewer than roughly a
-    third survive, even fuzzily, in the proposed interpretation.
-    """
+    """Detect large topic drift while still allowing typo correction/paraphrase."""
     query_tokens = _content_tokens(query)
     if len(query_tokens) < 3:
         return False
@@ -183,13 +178,7 @@ def _unsupported_interpretation(
     source_catalog: list[dict],
     evidence_hints: list[dict] | None,
 ) -> str | None:
-    """Return the ambiguous raw token when the planner invents unsupported entities.
-
-    The LLM is allowed to paraphrase freely, but it is not allowed to turn an
-    unexplained shorthand token into a specific named entity or acronym expansion
-    that appears nowhere in the selected corpus context. This deterministic check
-    catches that class of overconfident interpretation before answer generation.
-    """
+    """Return the ambiguous raw token when the planner invents unsupported entities."""
     support = _support_text(source_catalog, evidence_hints)
     unknown_tokens = _unknown_short_tokens(query, support)
     if not unknown_tokens:
@@ -256,8 +245,6 @@ def plan_retrieval(
     )
     now = time.time()
 
-    # Hold the lock while planning so the frontend's concurrent /search and
-    # /answer calls share one planner request instead of hitting the local LLM twice.
     with _PLAN_CACHE_LOCK:
         cached = _PLAN_CACHE.get(cache_key)
         if cached and now - cached[0] <= _PLAN_CACHE_SECONDS:
@@ -276,7 +263,9 @@ def plan_retrieval(
             f"Selected source catalog:\n{catalog_text}\n\n"
             f"Query-specific transcript hints:\n{_hint_text(evidence_hints)}\n\n"
             "Important: the transcript hints may be irrelevant nearest-neighbor results. "
-            "Preserve clear subject matter from the user even when those hints discuss something else.\n\n"
+            "Preserve clear subject matter from the user even when those hints discuss something else. "
+            "If the request itself is understandable but unsupported by the selected recordings, do not clarify; retrieve it faithfully and let the answer stage refuse. "
+            "Never offer world-knowledge candidate meanings in a clarification.\n\n"
             "Return the retrieval plan."
         )
 
@@ -305,21 +294,29 @@ def plan_retrieval(
             source_catalog=catalog,
             evidence_hints=evidence_hints,
         )
+        force_raw_query = False
         if unsupported_token:
             needs_clarification = True
             clarification_question = (
                 f'What do you mean by "{unsupported_token}"? '
                 "I can’t reliably infer that term from the selected recordings."
             )
+        elif needs_clarification and len(_content_tokens(query)) >= 2:
+            # For a search product, a readable out-of-corpus question should be
+            # searched faithfully and refused if unsupported. Do not turn corpus
+            # mismatch into speculative chatbot-style clarification.
+            needs_clarification = False
+            clarification_question = ""
+            interpreted_question = query.strip()
+            force_raw_query = True
 
-        force_raw_query = False
         if not needs_clarification and _interpretation_drifted(query, interpreted_question):
             interpreted_question = query.strip()
             force_raw_query = True
 
         if needs_clarification and not clarification_question:
             clarification_question = (
-                "Could you clarify or rewrite the ambiguous part of the question?"
+                "Could you clarify the ambiguous term or reference in your question?"
             )
         if not needs_clarification:
             clarification_question = ""
