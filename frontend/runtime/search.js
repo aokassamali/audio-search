@@ -168,9 +168,9 @@
     updateHomeLayout();
 
     try {
-      // Product Q&A is one orchestration request. /ask lets the model inspect the
-      // selected library, iteratively retrieve more transcript evidence when
-      // needed, and return the cited evidence it actually used.
+      // /ask performs one bounded agentic orchestration request. The controller
+      // can batch several retrieval operations in one round instead of forcing
+      // one slow LLM turn per transcript slice.
       const answer = await api('/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -178,7 +178,15 @@
       });
       const cited = answer.evidence || [];
       const clarify = answer.outcome === 'clarification';
-      let html = `<div class="answer-card ${answer.answerable ? '' : 'refusal'}"><div class="answer-kicker">${answer.answerable ? 'Grounded answer' : clarify ? 'Clarify question' : 'Not enough evidence'}</div><div class="answer-text">${esc(answer.answer)}</div></div>`;
+      const failed = answer.outcome === 'error';
+      const kicker = answer.answerable
+        ? 'Grounded answer'
+        : failed
+          ? 'Couldn’t complete search'
+          : clarify
+            ? 'Clarify question'
+            : 'Not enough evidence';
+      let html = `<div class="answer-card ${answer.answerable ? '' : 'refusal'}"><div class="answer-kicker">${kicker}</div><div class="answer-text">${esc(answer.answer)}</div></div>`;
 
       if (cited.length) {
         html += `<div class="evidence-section"><div class="evidence-title">Evidence · ${cited.length}</div><div class="evidence-grid">${cited.map((chunk, i) => {
