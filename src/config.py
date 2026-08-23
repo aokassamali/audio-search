@@ -42,6 +42,9 @@ class ModelSettings:
     embedding_model: str
     whisper_model: str
     diarization_model: str
+    embedding_device: str
+    whisper_device: str
+    diarization_device: str
 
 
 @dataclass(frozen=True)
@@ -283,6 +286,18 @@ def load_settings(
         diarization_model=model_data[
             "diarization_model"
         ],
+        embedding_device=os.getenv(
+            "AUDIO_SEARCH_EMBEDDING_DEVICE",
+            model_data.get("embedding_device", "cpu"),
+        ),
+        whisper_device=os.getenv(
+            "AUDIO_SEARCH_WHISPER_DEVICE",
+            model_data.get("whisper_device", "cuda"),
+        ),
+        diarization_device=os.getenv(
+            "AUDIO_SEARCH_DIARIZATION_DEVICE",
+            model_data.get("diarization_device", "cuda"),
+        ),
     )
 
     llm = LLMSettings(
