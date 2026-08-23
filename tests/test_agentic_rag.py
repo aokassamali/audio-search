@@ -27,17 +27,23 @@ class ScriptedLLM:
         self.calls += 1
         if not self.decisions:
             raise AssertionError("LLM was called more times than expected")
-        return json.dumps(self.decisions.pop(0))
+        decision = self.decisions.pop(0)
+        if isinstance(decision, str):
+            return decision
+        return json.dumps(decision)
 
 
 class AgenticRagTests(unittest.TestCase):
     def setUp(self):
         self.sripetch_chunks = [
-            chunk("sripetch", "Sripetch_vs_SEC", 0, "Opening issue in the case."),
-            chunk("sripetch", "Sripetch_vs_SEC", 1, "Petitioner's central argument."),
-            chunk("sripetch", "Sripetch_vs_SEC", 2, "Government response."),
-            chunk("sripetch", "Sripetch_vs_SEC", 3, "Questions from the Court."),
+            chunk("sripetch", "Sripetch_vs_SEC", i, f"Sripetch case passage {i}.")
+            for i in range(24)
         ]
+        self.sripetch_chunks[0]["speaker_text"] = "Opening issue in the case."
+        self.sripetch_chunks[7]["speaker_text"] = "Petitioner's central argument."
+        self.sripetch_chunks[15]["speaker_text"] = "Government response."
+        self.sripetch_chunks[23]["speaker_text"] = "Questions from the Court."
+
         self.nasa_chunks = [
             chunk("nasa", "NASA_Clip", 0, "The crew discusses autonomy during loss of signal."),
             chunk("nasa", "NASA_Clip", 1, "Mission Control is unavailable for two weeks."),
@@ -53,37 +59,34 @@ class AgenticRagTests(unittest.TestCase):
             {"source_key": "nasa", "display_name": "NASA CHAPEA 2 - Clip 3"},
         ]
 
+    def _request(self, tool, **overrides):
+        payload = {"tool": tool}
+        payload.update(overrides)
+        return payload
+
     def _decision(self, action, **overrides):
-        payload = {
-            "action": action,
-            "query": "",
-            "source_keys": [],
-            "source_key": "",
-            "offset": 0,
-            "limit": 5,
-            "chunk_id": -1,
-            "radius": 2,
-            "answer": "",
-            "citation_ids": [],
-            "clarification_question": "",
-        }
+        payload = {"action": action}
         payload.update(overrides)
         return payload
 
     @patch("src.agentic_rag.search_corpus")
-    def test_obvious_title_typo_can_trigger_broader_source_read(self, search):
-        search.return_value = [self.sripetch_chunks[1], self.sripetch_chunks[2]]
+    def test_title_typo_can_use_one_broad_source_sample_then_answer(self, search):
+        search.return_value = [self.sripetch_chunks[7], self.sripetch_chunks[15]]
         llm = ScriptedLLM([
             self._decision(
-                "read_source",
-                source_key="sripetch",
-                offset=0,
-                limit=4,
+                "gather",
+                requests=[
+                    self._request(
+                        "sample_source",
+                        source_key="sripetch",
+                        limit=8,
+                    )
+                ],
             ),
             self._decision(
                 "answer",
                 answer="The recording centers on the dispute described in the cited passages.",
-                citation_ids=["Sripetch_vs_SEC:0", "Sripetch_vs_SEC:2"],
+                citation_ids=["Sripetch_vs_SEC:0", "Sripetch_vs_SEC:23"],
             ),
         ])
 
@@ -97,8 +100,8 @@ class AgenticRagTests(unittest.TestCase):
 
         self.assertTrue(result.answerable)
         self.assertEqual(result.outcome, "answer")
-        self.assertEqual({item["source_key"] for item in result.evidence}, {"sripetch"})
-        self.assertTrue(any(step.action == "read_source" for step in result.trace))
+        self.assertEqual(llm.calls, 2)
+        self.assertTrue(any(step.action == "sample_source" for step in result.trace))
 
     @patch("src.agentic_rag.search_corpus")
     def test_out_of_corpus_question_refuses_without_chatbot_reinterpretation(self, search):
@@ -119,6 +122,7 @@ class AgenticRagTests(unittest.TestCase):
         self.assertEqual(result.outcome, "refusal")
         self.assertEqual(result.answer, REFUSAL_TEXT)
         self.assertEqual(result.citations, [])
+        self.assertEqual(llm.calls, 1)
 
     @patch("src.agentic_rag.search_corpus")
     def test_clear_natural_language_can_answer_from_selected_nasa_evidence(self, search):
@@ -142,16 +146,22 @@ class AgenticRagTests(unittest.TestCase):
         self.assertTrue(result.answerable)
         self.assertEqual(len(result.citations), 2)
         self.assertEqual({item["source_key"] for item in result.evidence}, {"nasa"})
+        self.assertEqual(llm.calls, 1)
 
     @patch("src.agentic_rag.search_corpus")
-    def test_unselected_source_tool_request_is_blocked(self, search):
+    def test_unselected_source_batch_request_is_blocked(self, search):
         search.return_value = [self.sripetch_chunks[0]]
         llm = ScriptedLLM([
             self._decision(
-                "search_transcripts",
-                query="mars autonomy",
-                source_keys=["nasa"],
-                limit=5,
+                "gather",
+                requests=[
+                    self._request(
+                        "search_transcripts",
+                        query="mars autonomy",
+                        source_keys=["nasa"],
+                        limit=5,
+                    )
+                ],
             ),
             self._decision("refuse"),
         ])
@@ -165,10 +175,8 @@ class AgenticRagTests(unittest.TestCase):
         )
 
         self.assertEqual(result.outcome, "refusal")
-        # Only the bootstrap search should have executed. The attempted NASA
-        # search is outside the selected boundary and must not hit retrieval.
         self.assertEqual(search.call_count, 1)
-        self.assertIn("blocked", result.trace[1].detail.lower())
+        self.assertTrue(any("blocked" in step.detail.lower() for step in result.trace))
 
     @patch("src.agentic_rag.search_corpus")
     def test_invalid_citation_downgrades_to_refusal(self, search):
@@ -214,22 +222,34 @@ class AgenticRagTests(unittest.TestCase):
         self.assertIn("Which speaker", result.answer)
 
     @patch("src.agentic_rag.search_corpus")
-    def test_reformulated_search_can_add_evidence_before_answering(self, search):
+    def test_multiple_retrieval_requests_share_one_controller_round(self, search):
         search.side_effect = [
             [self.sripetch_chunks[0]],
-            [self.sripetch_chunks[1], self.sripetch_chunks[2]],
+            [self.sripetch_chunks[7]],
+            [self.sripetch_chunks[15]],
         ]
         llm = ScriptedLLM([
             self._decision(
-                "search_transcripts",
-                query="petitioner government disgorgement disagreement",
-                source_keys=["sripetch"],
-                limit=4,
+                "gather",
+                requests=[
+                    self._request(
+                        "search_transcripts",
+                        query="petitioner position",
+                        source_keys=["sripetch"],
+                        limit=3,
+                    ),
+                    self._request(
+                        "search_transcripts",
+                        query="government position",
+                        source_keys=["sripetch"],
+                        limit=3,
+                    ),
+                ],
             ),
             self._decision(
                 "answer",
-                answer="The two sides disagree in the ways described by the cited passages.",
-                citation_ids=["Sripetch_vs_SEC:1", "Sripetch_vs_SEC:2"],
+                answer="The sides take different positions in the cited passages.",
+                citation_ids=["Sripetch_vs_SEC:7", "Sripetch_vs_SEC:15"],
             ),
         ])
 
@@ -242,8 +262,29 @@ class AgenticRagTests(unittest.TestCase):
         )
 
         self.assertTrue(result.answerable)
-        self.assertEqual(search.call_count, 2)
-        self.assertTrue(any(step.action == "search_transcripts" for step in result.trace))
+        self.assertEqual(search.call_count, 3)
+        self.assertEqual(llm.calls, 2)
+        self.assertEqual(
+            len([step for step in result.trace if step.action == "search_transcripts"]),
+            2,
+        )
+
+    @patch("src.agentic_rag.search_corpus")
+    def test_controller_failure_is_not_mislabeled_as_missing_evidence(self, search):
+        search.return_value = [self.sripetch_chunks[0]]
+        llm = ScriptedLLM(["not-json"])
+
+        result = agentic_ask(
+            query="explain the case",
+            index=self.index,
+            selected_source_keys=["sripetch"],
+            source_catalog=self.catalog,
+            llm_client=llm,
+        )
+
+        self.assertEqual(result.outcome, "error")
+        self.assertNotEqual(result.answer, REFUSAL_TEXT)
+        self.assertTrue(any(step.action == "error" for step in result.trace))
 
 
 if __name__ == "__main__":
