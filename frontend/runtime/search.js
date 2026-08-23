@@ -150,21 +150,6 @@
     });
   }
 
-  async function hydrateCitations(answer, searchResults) {
-    const lookup = new Map((searchResults || []).map(chunk => [`${chunk.source_id}:${chunk.chunk_id}`, chunk]));
-    return Promise.all((answer.citations || []).map(async citation => {
-      const existing = lookup.get(citation.citation_id);
-      if (existing) return existing;
-      const source = state.sources.find(item => item.source_id === citation.source_id || item.source_key === citation.source_id);
-      if (!source) return citation;
-      try {
-        const params = new URLSearchParams({ limit: '10', chunk_id: String(citation.chunk_id) });
-        const data = await api(`/sources/${encodeURIComponent(source.source_key)}/chunks?${params}`);
-        return data.chunks?.[0] || citation;
-      } catch (_) { return citation; }
-    }));
-  }
-
   async function askQuestion(question) {
     const query = question.trim();
     if (!query) { showHome(); return; }
