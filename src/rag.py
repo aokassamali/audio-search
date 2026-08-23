@@ -18,7 +18,7 @@ Grounding rules:
 6. For comparison, relationship, summary, argument, or "what is going on" questions, answer at the level supported by the evidence. The transcript does not need to contain a verbatim sentence naming the requested relationship if the relationship can be directly summarized from supported comparisons or descriptions in the evidence.
 7. Distinguish a speaker's own position from questions, hypotheticals, and descriptions of another person's position. If attribution is uncertain, describe the point neutrally.
 8. Refuse only when the supplied evidence is genuinely insufficient to give a meaningful answer to the planner-resolved question.
-9. When refusing, briefly explain what evidence is missing or unsupported and use an empty citation_ids list.
+9. When the evidence is insufficient, set answerable=false, answer="", and citation_ids=[]. Do not summarize unrelated retrieved evidence or explain which irrelevant topics happened to be retrieved. The application supplies the user-facing refusal text deterministically.
 10. Return JSON only, with no Markdown or additional commentary.
 
 Grounding constrains what facts you may state; it should not force you to demand exact wording that the evidence already supports semantically.
@@ -26,7 +26,7 @@ Grounding constrains what facts you may state; it should not force you to demand
 Return exactly this structure:
 {
   "answerable": true or false,
-  "answer": "your answer or a brief refusal",
+  "answer": "your grounded answer, or an empty string when answerable is false",
   "citation_ids": ["source_id:chunk_id"]
 }
 """.strip()
@@ -61,6 +61,12 @@ class GroundedAnswer(BaseModel):
     answerable: bool
     answer: str
     citations: list[Citation] = Field(default_factory=list)
+
+
+REFUSAL_TEXT = (
+    "I couldn't find enough relevant evidence in the selected recordings "
+    "to answer that question."
+)
 
 
 def create_citation_id(chunk: dict) -> str:
@@ -108,14 +114,9 @@ def finalize_answer(
     }
 
     if not draft.answerable:
-        refusal = draft.answer.strip()
-
-        if not refusal:
-            refusal = "I don't find this discussed in the audio."
-
         return GroundedAnswer(
             answerable=False,
-            answer=refusal,
+            answer=REFUSAL_TEXT,
         )
 
     invalid_citation_ids = [
@@ -127,10 +128,7 @@ def finalize_answer(
     if not draft.citation_ids or invalid_citation_ids:
         return GroundedAnswer(
             answerable=False,
-            answer=(
-                "I couldn't verify an answer from the "
-                "retrieved audio evidence."
-            ),
+            answer=REFUSAL_TEXT,
         )
 
     citations = []
@@ -188,10 +186,7 @@ def parse_llm_answer(
     except ValidationError:
         return LLMAnswerDraft(
             answerable=False,
-            answer=(
-                "The language model returned an "
-                "invalid response."
-            ),
+            answer="",
             citation_ids=[],
         )
 
