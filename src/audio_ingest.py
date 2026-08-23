@@ -15,7 +15,6 @@ from threading import Lock
 import dagster as dg
 
 from src.config import PROJECT_ROOT, Settings, SourceSettings
-from src.ingest_progress import initialize, mark_complete, mark_failed, mark_running, snapshot
 
 _STAGE_ORDER = ["normalize", "transcribe", "speakers", "chunk", "embed"]
 _STAGE_WEIGHTS = {
@@ -98,7 +97,6 @@ class AudioIngestManager:
         with self._lock:
             self.jobs[job_id] = job
 
-        initialize(source_key)
         future = self.executor.submit(self._run, job_id)
         with self._lock:
             self._futures[job_id] = future
@@ -226,7 +224,6 @@ class AudioIngestManager:
             job["started_at"] = time.time()
 
         source_key = job["source_key"]
-        mark_running(source_key)
         runtime_config = None
 
         try:
@@ -282,13 +279,11 @@ class AudioIngestManager:
             if cancelled:
                 self._set_cancelled(job_id)
             elif returncode == 0:
-                mark_complete(source_key)
                 with self._lock:
                     job["status"] = "complete"
                     job["finished_at"] = time.time()
             else:
                 error = f"Dagster materialization failed. See {log_path}."
-                mark_failed(source_key, error)
                 with self._lock:
                     job["status"] = "failed"
                     job["error"] = error
@@ -300,7 +295,6 @@ class AudioIngestManager:
                 self._set_cancelled(job_id)
             else:
                 error = f"{type(exc).__name__}: {exc}"
-                mark_failed(source_key, error)
                 with self._lock:
                     job["status"] = "failed"
                     job["error"] = error
@@ -347,12 +341,6 @@ class AudioIngestManager:
                 stages[stage] = {"status": "pending", "progress": None}
         if job["status"] == "running" and first_incomplete is not None:
             stages[first_incomplete] = {"status": "running", "progress": None}
-
-        live = snapshot(job["source_key"])
-        if live and job["status"] == "running":
-            for stage, info in live.get("stages", {}).items():
-                if info.get("status") == "running" and info.get("progress") is not None:
-                    stages[stage] = dict(info)
         return stages
 
     def status(self, job_id: str) -> dict:
