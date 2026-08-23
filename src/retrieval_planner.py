@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import time
+from difflib import SequenceMatcher
 from threading import Lock
 
 from pydantic import BaseModel, Field
@@ -18,13 +19,14 @@ Rules:
 1. You may choose only source_keys listed in the selected source catalog.
 2. Treat source titles as metadata. Resolve approximate references to them from the catalog rather than requiring exact wording.
 3. If the user is clearly referring to one or more selected recordings, scope retrieval to those recordings. Otherwise keep all selected recordings in scope.
-4. Transcript hints are real excerpts retrieved from the selected corpus for this query. Use them to disambiguate shorthand, typos, abbreviations, and ambiguous wording. Do not treat an unsupported expansion from general world knowledge as the intended meaning when the corpus context supports a different reading.
-5. Produce interpreted_question as a concise, neutral restatement of the user's intended information need in clear language. Preserve uncertainty if the request is genuinely ambiguous. Do not answer it and do not add facts.
-6. If the user's intended information need still cannot be resolved from their wording, the selected source catalog, and the transcript hints without materially guessing, set needs_clarification to true and write one short clarification_question. Ask specifically about the ambiguous part. Do not guess an acronym expansion, name, or concept just to avoid asking for clarification.
-7. Set needs_clarification to false when the intent is reasonably clear from context, even if the wording contains typos, slang, abbreviations, shorthand, or poor grammar. Clarification is for genuine unresolved ambiguity, not imperfect writing.
-8. Generate one or more concise semantic retrieval queries that together cover the user's information need. Decompose the request when doing so would improve evidence coverage.
-9. Prefer language supported by the source catalog and transcript hints and likely to occur in the transcript. Do not invent named entities, acronym expansions, or subject matter that are not supported by the selected corpus context.
-10. Return JSON only.
+4. Transcript hints are subordinate context for resolving ambiguous wording, typos, abbreviations, and shorthand. Preserve explicit subject matter in the user's question even when the selected corpus does not discuss it. A lack of matching evidence is a retrieval outcome, not permission to reinterpret the question so it fits unrelated corpus material.
+5. Use transcript hints to normalize an unclear token only when the user's wording and corpus context reasonably support that normalization. Never replace a clear topic, entity, relationship, or requested concept with a different topic merely because that different topic appears in the hints.
+6. Produce interpreted_question as a concise, neutral restatement of the user's intended information need in clear language. Preserve uncertainty if the request is genuinely ambiguous. Do not answer it and do not add facts.
+7. If the user's intended information need still cannot be resolved from their wording, the selected source catalog, and the transcript hints without materially guessing, set needs_clarification to true and write one short clarification_question. Ask specifically about the ambiguous part. Do not guess an acronym expansion, name, or concept just to avoid asking for clarification.
+8. Set needs_clarification to false when the intent is reasonably clear from context, even if the wording contains typos, slang, abbreviations, shorthand, or poor grammar. Clarification is for genuine unresolved ambiguity, not imperfect writing.
+9. Generate one or more concise semantic retrieval queries that together cover the user's information need. Decompose the request when doing so would improve evidence coverage.
+10. Prefer language supported by the user's wording first, then use source metadata and transcript hints to normalize or expand it. Do not invent named entities, acronym expansions, or subject matter that are unsupported by the user and selected corpus context.
+11. Return JSON only.
 """.strip()
 
 
@@ -48,6 +50,11 @@ _COMMON_SHORT_WORDS = {
     "so", "that", "the", "their", "them", "then", "they", "this", "to", "was", "we",
     "were", "what", "when", "where", "which", "who", "why", "will", "with", "wit",
     "you", "your", "all", "about", "tell", "give", "know", "say", "says", "said",
+}
+
+_CONTENT_STOPWORDS = _COMMON_SHORT_WORDS | {
+    "being", "these", "those", "more", "less", "than", "very", "really", "just",
+    "kind", "sort", "thing", "things", "something", "someone", "people", "guys",
 }
 
 
@@ -128,6 +135,48 @@ def _unknown_short_tokens(query: str, support: str) -> list[str]:
     return unknown
 
 
+def _content_tokens(text: str) -> list[str]:
+    tokens = []
+    for token in re.findall(r"\b[a-zA-Z]{4,}\b", text.lower()):
+        if token in _CONTENT_STOPWORDS:
+            continue
+        if token not in tokens:
+            tokens.append(token)
+    return tokens
+
+
+def _tokens_match(left: str, right: str) -> bool:
+    if left == right:
+        return True
+    if min(len(left), len(right)) < 4:
+        return False
+    return SequenceMatcher(None, left, right).ratio() >= 0.72
+
+
+def _interpretation_drifted(query: str, interpreted_question: str) -> bool:
+    """Detect large topic drift while still allowing typo correction/paraphrase.
+
+    Corpus hints are useful for normalizing noisy wording, but an out-of-corpus
+    question must stay out-of-corpus rather than being rewritten toward the
+    nearest unrelated transcript. We conservatively apply this only when the raw
+    question has at least three content-bearing tokens and fewer than roughly a
+    third survive, even fuzzily, in the proposed interpretation.
+    """
+    query_tokens = _content_tokens(query)
+    if len(query_tokens) < 3:
+        return False
+
+    interpreted_tokens = _content_tokens(interpreted_question)
+    if not interpreted_tokens:
+        return True
+
+    matched = sum(
+        any(_tokens_match(token, candidate) for candidate in interpreted_tokens)
+        for token in query_tokens
+    )
+    return (matched / len(query_tokens)) < 0.34
+
+
 def _unsupported_interpretation(
     query: str,
     interpreted_question: str,
@@ -146,7 +195,6 @@ def _unsupported_interpretation(
     if not unknown_tokens:
         return None
 
-    # Explicit acronym expansions such as "Independent Police Panel (INDP)".
     expansion_pattern = re.compile(
         r"\b([A-Z][A-Za-z]+(?:\s+(?:[A-Z][A-Za-z]+|of|the|and|for)){1,6})\s*\(([A-Z]{2,10})\)"
     )
@@ -156,9 +204,6 @@ def _unsupported_interpretation(
         if phrase.lower() not in support:
             return acronym.lower()
 
-    # More generally, a newly introduced multi-word proper name is suspicious
-    # when the user supplied unresolved shorthand and that name has no support
-    # anywhere in the selected source context.
     proper_name_pattern = re.compile(
         r"\b(?:[A-Z][a-z]{2,})(?:\s+(?:[A-Z][a-z]{2,})){1,4}\b"
     )
@@ -230,6 +275,8 @@ def plan_retrieval(
             f"User question:\n{query}\n\n"
             f"Selected source catalog:\n{catalog_text}\n\n"
             f"Query-specific transcript hints:\n{_hint_text(evidence_hints)}\n\n"
+            "Important: the transcript hints may be irrelevant nearest-neighbor results. "
+            "Preserve clear subject matter from the user even when those hints discuss something else.\n\n"
             "Return the retrieval plan."
         )
 
@@ -242,7 +289,6 @@ def plan_retrieval(
             )
             plan = RetrievalPlan.model_validate_json(raw)
         except Exception:
-            # Retrieval must remain usable even if the planner model is unavailable.
             plan = _fallback_plan(query, allowed)
 
         valid_sources = [key for key in plan.source_keys if key in allowed]
@@ -266,6 +312,11 @@ def plan_retrieval(
                 "I can’t reliably infer that term from the selected recordings."
             )
 
+        force_raw_query = False
+        if not needs_clarification and _interpretation_drifted(query, interpreted_question):
+            interpreted_question = query.strip()
+            force_raw_query = True
+
         if needs_clarification and not clarification_question:
             clarification_question = (
                 "Could you clarify or rewrite the ambiguous part of the question?"
@@ -275,14 +326,19 @@ def plan_retrieval(
 
         queries = []
         seen_queries = set()
-        for item in plan.queries:
-            cleaned = item.strip()
-            normalized = cleaned.lower()
-            if cleaned and normalized not in seen_queries:
-                queries.append(cleaned)
-                seen_queries.add(normalized)
-            if len(queries) == 4:
-                break
+        if force_raw_query:
+            cleaned = query.strip()
+            if cleaned:
+                queries = [cleaned]
+        else:
+            for item in plan.queries:
+                cleaned = item.strip()
+                normalized = cleaned.lower()
+                if cleaned and normalized not in seen_queries:
+                    queries.append(cleaned)
+                    seen_queries.add(normalized)
+                if len(queries) == 4:
+                    break
         if not queries:
             queries = [interpreted_question or query.strip()]
 
@@ -347,10 +403,6 @@ def retrieve_with_plan(
         for item in source_catalog
     }
 
-    # Bootstrap with ordinary hybrid retrieval on the user's raw wording. These
-    # snippets are not used as the final answer packet; they give the planner
-    # corpus-grounded context for resolving shorthand and typos before it writes
-    # better semantic searches.
     bootstrap = search_corpus(
         query=query,
         index=index,
@@ -373,8 +425,6 @@ def retrieve_with_plan(
         evidence_hints=bootstrap,
     )
 
-    # Retrieve several candidates for each planned evidence search, then
-    # interleave them so one search cannot consume the entire evidence budget.
     per_query_k = max(3, min(6, top_k))
     ranked_lists = []
     for retrieval_query in plan.queries:
