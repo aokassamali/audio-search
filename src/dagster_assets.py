@@ -69,7 +69,7 @@ class WhisperResource(dg.ConfigurableResource):
     ) -> None:
         context.log.info(
             f"Loading Whisper model: "
-            f"{self.model_size}"
+            f"{self.model_size} on {self.device}"
         )
 
         self._model = WhisperModel(
@@ -87,6 +87,7 @@ class DiarizationResource(
     dg.ConfigurableResource
 ):
     model_name: str
+    device: str = "cuda"
 
     _pipeline: Pipeline = PrivateAttr()
 
@@ -96,12 +97,13 @@ class DiarizationResource(
     ) -> None:
         context.log.info(
             f"Loading diarization model: "
-            f"{self.model_name}"
+            f"{self.model_name} on {self.device}"
         )
 
         self._pipeline = (
             load_diarization_pipeline(
                 model_name=self.model_name,
+                device=self.device,
             )
         )
 
@@ -114,6 +116,7 @@ class EmbeddingResource(
     dg.ConfigurableResource
 ):
     model_name: str
+    device: str = "cpu"
 
     _model: SentenceTransformer = (
         PrivateAttr()
@@ -125,11 +128,12 @@ class EmbeddingResource(
     ) -> None:
         context.log.info(
             f"Loading embedding model: "
-            f"{self.model_name}"
+            f"{self.model_name} on {self.device}"
         )
 
         self._model = SentenceTransformer(
-            self.model_name
+            self.model_name,
+            device=self.device,
         )
 
     @property
@@ -595,6 +599,15 @@ def embeddings(
     return str(embeddings_path)
 
 
+# Each asset step runs in its own subprocess so CUDA memory is guaranteed to be
+# returned when the step exits. Limiting concurrency to one prevents Whisper and
+# pyannote from occupying the single shared GPU at the same time while retaining
+# process isolation between GPU-heavy stages.
+SERIAL_MULTIPROCESS_EXECUTOR = dg.multiprocess_executor.configured(
+    {"max_concurrent": 1}
+)
+
+
 defs = dg.Definitions(
     assets=[
         raw_audio,
@@ -612,7 +625,9 @@ defs = dg.Definitions(
             model_size=(
                 SETTINGS.models.whisper_model
             ),
-            device="cuda",
+            device=(
+                SETTINGS.models.whisper_device
+            ),
             compute_type="int8",
         ),
         "diarizer": DiarizationResource(
@@ -620,11 +635,19 @@ defs = dg.Definitions(
                 SETTINGS.models
                 .diarization_model
             ),
+            device=(
+                SETTINGS.models
+                .diarization_device
+            ),
         ),
         "embedding": EmbeddingResource(
             model_name=(
                 SETTINGS.models
                 .embedding_model
+            ),
+            device=(
+                SETTINGS.models
+                .embedding_device
             ),
         ),
         "llm": LLMResource(
@@ -635,4 +658,5 @@ defs = dg.Definitions(
             ),
         ),
     },
+    executor=SERIAL_MULTIPROCESS_EXECUTOR,
 )
