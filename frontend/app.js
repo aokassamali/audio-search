@@ -23,7 +23,7 @@
   const ETA_STORAGE_KEY = 'audio-search-local-rtf-v1';
   const HOME_MARKUP = '<div class="empty-orb">⌁</div><h2>Ask across hours of audio in seconds.</h2><p>Answers stay traceable to transcript chunks, speakers, timestamps, and the original recording when audio is available.</p>';
 
-  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-consolidated-runtime';
+  window.__AUDIO_SEARCH_FRONTEND_BUILD__ = '20260822-duplicate-guard';
 
   const esc = (value = '') => String(value).replace(/[&<>'"]/g, c => ({
     '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
@@ -548,6 +548,32 @@
     return { supported, plans };
   }
 
+  function normalizeSourceName(value) {
+    return String(value || '')
+      .trim()
+      .toLowerCase()
+      .replace(/_/g, ' ')
+      .replace(/\s+/g, ' ');
+  }
+
+  function findDuplicateSources(plans) {
+    const readyAudioSources = state.sources.filter(source => source.has_audio);
+    const matches = [];
+    for (const plan of plans) {
+      if (!plan.audio) continue;
+      const incoming = normalizeSourceName(stem(plan.audio.name));
+      const source = readyAudioSources.find(item => normalizeSourceName(item.display_name) === incoming);
+      if (!source) continue;
+      matches.push({
+        planId: plan.id,
+        planName: plan.name,
+        sourceKey: source.source_key,
+        sourceName: source.display_name,
+      });
+    }
+    return matches;
+  }
+
   function renderDag(plan, stages = null) {
     $('dagGraph').innerHTML = plan.nodes.map((node, index) => {
       const skipped = node[2] === 'skip';
@@ -584,7 +610,11 @@
       const kind = plan.mode === 'both' ? 'Audio + transcript' : plan.mode === 'audio' ? 'Audio' : 'Transcript';
       const durationText = plan.duration ? ` · ${formatDuration(plan.duration)}` : '';
       const size = files.reduce((sum, file) => sum + (file.size || 0), 0);
-      return `<div class="file-row"><div><div class="file-kind">${kind}</div><div class="file-name">${esc(plan.name)}</div></div><div class="file-size">${bytes(size)}${durationText}</div></div>`;
+      const duplicate = (state.batch.duplicateMatches || []).find(item => item.planId === plan.id);
+      const duplicateLabel = duplicate
+        ? `<div class="file-kind" style="margin-top:4px;color:#9a5b00">Already in library · ${esc(duplicate.sourceName)}</div>`
+        : '';
+      return `<div class="file-row"><div><div class="file-kind">${kind}</div><div class="file-name">${esc(plan.name)}</div>${duplicateLabel}</div><div class="file-size">${bytes(size)}${durationText}</div></div>`;
     }).join('');
   }
 
@@ -677,19 +707,28 @@
     const batch = state.batch;
     if (!batch) return;
     const first = batch.plans[0];
-    $('importTitle').textContent = batch.plans.length === 1 ? 'Review source' : `Review ${batch.plans.length} sources`;
+    const duplicates = batch.duplicateMatches || [];
+    const duplicateWarning = duplicates.length > 0;
+    $('importTitle').textContent = duplicateWarning
+      ? (duplicates.length === 1 ? 'Already in library' : `${duplicates.length} sources already in library`)
+      : (batch.plans.length === 1 ? 'Review source' : `Review ${batch.plans.length} sources`);
     renderFileSummary();
     $('ingestionPathBadge').textContent = batch.plans.length === 1 ? first.label : `${batch.plans.length} sources`;
     $('overallProgress').textContent = '0%';
-    $('dagStatus').textContent = 'Waiting for confirmation';
+    $('dagStatus').textContent = duplicateWarning ? 'Reprocessing requires confirmation' : 'Waiting for confirmation';
     renderDag(first);
-    $('importMessage').hidden = true;
-    $('importMessage').textContent = '';
+    $('importMessage').hidden = !duplicateWarning;
+    $('importMessage').className = 'import-message';
+    $('importMessage').textContent = duplicateWarning
+      ? (duplicates.length === 1
+          ? `It looks like ${duplicates[0].sourceName} is already in your library. Reprocessing will run the ingestion pipeline again and create a new source. Continue?`
+          : `${duplicates.length} of these audio sources already appear in your library. Reprocessing will run the ingestion pipeline again and create new sources. Continue?`)
+      : '';
     $('cancelImport').hidden = false;
     $('cancelImport').textContent = 'Cancel';
     $('cancelImport').disabled = false;
-    $('addImportFiles').hidden = false;
-    $('importAction').textContent = 'Process';
+    $('addImportFiles').hidden = duplicateWarning;
+    $('importAction').textContent = duplicateWarning ? 'Reprocess anyway' : 'Process';
     $('importAction').disabled = false;
     renderEta();
   }
@@ -905,7 +944,8 @@
     const mergedFiles = uniqueFiles([...existing, ...files]);
     const { supported, plans } = plansForFiles(mergedFiles);
     if (!supported.length || !plans.length) return;
-    state.batch = { supported, plans, started: false, cancelling: false, importedCount: 0, errors: [] };
+    const duplicateMatches = findDuplicateSources(plans);
+    state.batch = { supported, plans, duplicateMatches, started: false, cancelling: false, importedCount: 0, errors: [] };
     state.audioJobs = [];
     state.focusedJobId = null;
     $('importModal').hidden = false;
