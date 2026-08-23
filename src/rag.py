@@ -5,33 +5,28 @@ from pydantic import ValidationError
 
 
 SYSTEM_PROMPT = """
-You answer questions about an audio recording using only the supplied evidence.
+You are the grounded answer-synthesis stage of a question-answering system over audio transcripts.
 
-Rules:
-1. Use only facts explicitly supported by the evidence.
-2. Do not use outside knowledge, even when you know the answer.
+The retrieval planner has already interpreted the user's wording and resolved ordinary typos, shorthand, source references, and conversational phrasing. You receive that planner-resolved question below. Do not reinterpret the user's spelling or invent alternate meanings for it. If the question was genuinely too ambiguous to interpret reliably, the system handles clarification before this stage.
+
+Grounding rules:
+1. Answer the planner-resolved question using only the supplied evidence.
+2. State only factual claims supported by the supplied evidence. Do not use outside knowledge.
 3. Every factual claim in the answer must be supported by at least one citation_id.
 4. Only cite citation_ids that appear in the supplied evidence.
-5. If the evidence does not answer the question, set answerable to false.
-6. When answerable is false, use an empty citation_ids list.
-7. Return JSON only, with no Markdown or additional commentary.
-8. Do not attribute a claim to a person or party merely because another
-speaker describes that person's position. If attribution is uncertain,
-describe the disagreement neutrally.
-9.When answerable is false, briefly explain whether:
-- the topic is absent from the evidence, or
-- the question contains a premise that the evidence does not support.
-10. Distinguish between a speaker's own position, a question, a hypothetical,
-and their description of another speaker's position. Do not describe a
-question or hypothetical as that speaker's argument unless the evidence
-clearly supports that interpretation.
+5. Synthesize across multiple evidence chunks and make ordinary inferences when the cited evidence jointly supports them.
+6. For comparison, relationship, summary, argument, or "what is going on" questions, answer at the level supported by the evidence. The transcript does not need to contain a verbatim sentence naming the requested relationship if the relationship can be directly summarized from supported comparisons or descriptions in the evidence.
+7. Distinguish a speaker's own position from questions, hypotheticals, and descriptions of another person's position. If attribution is uncertain, describe the point neutrally.
+8. Refuse only when the supplied evidence is genuinely insufficient to give a meaningful answer to the planner-resolved question.
+9. When the evidence is insufficient, set answerable=false, answer="", and citation_ids=[]. Do not summarize unrelated retrieved evidence or explain which irrelevant topics happened to be retrieved. The application supplies the user-facing refusal text deterministically.
+10. Return JSON only, with no Markdown or additional commentary.
 
-Do not answer using outside knowledge.
+Grounding constrains what facts you may state; it should not force you to demand exact wording that the evidence already supports semantically.
 
 Return exactly this structure:
 {
   "answerable": true or false,
-  "answer": "your answer or a brief refusal",
+  "answer": "your grounded answer, or an empty string when answerable is false",
   "citation_ids": ["source_id:chunk_id"]
 }
 """.strip()
@@ -46,6 +41,7 @@ class LLMClient(Protocol):
         max_tokens: int = 512,
     ) -> str:
         ...
+
 
 class LLMAnswerDraft(BaseModel):
     answerable: bool
@@ -67,6 +63,12 @@ class GroundedAnswer(BaseModel):
     citations: list[Citation] = Field(default_factory=list)
 
 
+REFUSAL_TEXT = (
+    "I couldn't find enough relevant evidence in the selected recordings "
+    "to answer that question."
+)
+
+
 def create_citation_id(chunk: dict) -> str:
     return f"{chunk['source_id']}:{chunk['chunk_id']}"
 
@@ -78,6 +80,10 @@ def build_context(
 
     for chunk in chunks:
         citation_id = create_citation_id(chunk)
+        source_name = chunk.get(
+            "source_display_name",
+            chunk.get("source_key", chunk.get("source_id", "Source")),
+        )
 
         context_text = chunk.get(
             "speaker_text",
@@ -86,6 +92,7 @@ def build_context(
 
         context_block = (
             f"[{citation_id}]\n"
+            f"Source: {source_name}\n"
             f"Timestamp: "
             f"{chunk['start']:.1f}s–"
             f"{chunk['end']:.1f}s\n"
@@ -95,6 +102,7 @@ def build_context(
         context_blocks.append(context_block)
 
     return "\n\n".join(context_blocks)
+
 
 def finalize_answer(
     draft: LLMAnswerDraft,
@@ -106,16 +114,11 @@ def finalize_answer(
     }
 
     if not draft.answerable:
-        refusal = draft.answer.strip()
-
-        if not refusal:
-            refusal = "I don't find this discussed in the audio."
-
         return GroundedAnswer(
             answerable=False,
-            answer=refusal,
+            answer=REFUSAL_TEXT,
         )
-    
+
     invalid_citation_ids = [
         citation_id
         for citation_id in draft.citation_ids
@@ -125,10 +128,7 @@ def finalize_answer(
     if not draft.citation_ids or invalid_citation_ids:
         return GroundedAnswer(
             answerable=False,
-            answer=(
-                "I couldn't verify an answer from the "
-                "retrieved audio evidence."
-            ),
+            answer=REFUSAL_TEXT,
         )
 
     citations = []
@@ -158,11 +158,21 @@ def build_prompt(
     retrieved_chunks: list[dict],
 ) -> str:
     context = build_context(retrieved_chunks)
+    interpreted = next(
+        (
+            str(chunk.get("retrieval_interpretation", "")).strip()
+            for chunk in retrieved_chunks
+            if str(chunk.get("retrieval_interpretation", "")).strip()
+        ),
+        query.strip(),
+    )
 
     return (
-        f"Question:\n{query}\n\n"
+        f"Planner-resolved question:\n{interpreted}\n\n"
+        "The question above represents the user's intended information need. "
+        "Do not require any misspelled or shorthand form from the original wording to appear in the transcript.\n\n"
         f"Audio evidence:\n{context}\n\n"
-        "Produce the required JSON response."
+        "Answer the planner-resolved question using only this evidence and return the required JSON."
     )
 
 
@@ -176,13 +186,10 @@ def parse_llm_answer(
     except ValidationError:
         return LLMAnswerDraft(
             answerable=False,
-            answer=(
-                "The language model returned an "
-                "invalid response."
-            ),
+            answer="",
             citation_ids=[],
         )
-    
+
 
 def answer_question(
     query: str,
@@ -236,8 +243,3 @@ def build_answer_schema(
     }
 
     return schema
-
-
-
-
-

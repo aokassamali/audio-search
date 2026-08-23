@@ -196,6 +196,14 @@ The fusion placebo keeps text fixed and shuffles WavLM turns within canonical sp
 
 The schema constraint depends on the inference server enforcing the supplied grammar.
 
+### Agentic retrieval
+
+The interactive `/ask` path does not classify questions into a fixed intent taxonomy. It gives the local LLM the selected source catalog plus a small initial retrieval result, then lets the model choose among a bounded set of transcript tools: semantic/lexical search, ordered source reads, and neighboring-chunk context reads. The model can repeat retrieval when the first result is too narrow, then either answer from cited transcript evidence, refuse, or ask a clarification as a last resort.
+
+Source selection remains a hard boundary enforced outside the model. Factual answers may cite only transcript chunks gathered inside that boundary. Source titles are metadata for navigation, not answer evidence. Invalid or missing citations still downgrade to the deterministic refusal.
+
+`/search` remains a direct hybrid retrieval primitive for debugging and transcript audit. `/answer` is a compatibility endpoint backed by the same agentic loop as `/ask`, so the product has one Q&A orchestration path rather than separate planner and answer pipelines.
+
 ### Speaker attribution
 
 Role and identity use separate fields, confidence values, and evidence.
@@ -247,6 +255,7 @@ Eighty-two of about 1,650 segments have an overlap ratio below 0.8. These segmen
 - Audio is normalized to 16 kHz mono PCM before diarization. MP3 seeking produced inconsistent sample lengths.
 - Chunk boundaries use terminal punctuation rather than domain keywords.
 - Corpus setup runs once during FastAPI lifespan. Each request embeds the query and ranks stored chunks.
+- Interactive Q&A uses bounded iterative retrieval rather than a fixed intent router; the LLM chooses how to navigate the selected transcript library while deterministic code enforces source and citation boundaries.
 - Four-fold grouped cross-validation was used because a stable fixed test set would contain very few hypothetical examples.
 - Permissive labels were primary because the strict taxonomy reduced the hypothetical class to four examples.
 - Cross-case speaker identities were reviewed before final model comparison.
@@ -278,7 +287,7 @@ PowerShell uses the following form.
 $env:HF_TOKEN = "your_token"
 ```
 
-Speaker-role inference and `/answer` require an OpenAI-compatible chat server. Configure it in `audio_search.toml`.
+Speaker-role inference and `/ask` require an OpenAI-compatible chat server. Configure it in `audio_search.toml`.
 
 ```toml
 [llm]
@@ -369,38 +378,15 @@ Check the loaded corpus.
 curl http://127.0.0.1:8000/health
 ```
 
-Ask a grounded question.
+Ask a grounded question through the product orchestration endpoint.
 
 ```bash
-curl -X POST http://127.0.0.1:8000/answer \
+curl -X POST http://127.0.0.1:8000/ask \
   -H "Content-Type: application/json" \
-  -d '{"query":"How do the petitioner and government disagree about the purpose and limits of disgorgement?","source_keys":["sripetch"],"retrieval_mode":"global","top_k":10}'
+  -d '{"query":"How do the petitioner and government disagree about the purpose and limits of disgorgement?","source_keys":["sripetch"],"top_k":6}'
 ```
 
-Abridged response.
-
-```json
-{
-  "answerable": true,
-  "answer": "Geiser argues that disgorgement must be a remedial remedy that restores funds to the proper owner or injured parties and cannot serve as punishment or deterrence, while the government argues that disgorgement can focus on depriving wrongdoers and deterring misconduct without requiring restoration to investors.",
-  "citations": [
-    {
-      "citation_id": "Sripetch_vs_SEC:1",
-      "source_id": "Sripetch_vs_SEC",
-      "chunk_id": 1,
-      "start": 45,
-      "end": 92
-    },
-    {
-      "citation_id": "Sripetch_vs_SEC:80",
-      "source_id": "Sripetch_vs_SEC",
-      "chunk_id": 80,
-      "start": 3420,
-      "end": 3463
-    }
-  ]
-}
-```
+The response includes the grounded answer, validated citations, the cited evidence chunks used by the UI, and an agent trace showing which bounded retrieval actions were taken.
 
 ---
 

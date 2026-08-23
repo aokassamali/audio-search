@@ -13,6 +13,7 @@ MODEL_NAME = "pyannote/speaker-diarization-community-1"
 def load_diarization_pipeline(
     token: str | None = None,
     model_name: str = MODEL_NAME,
+    device: str = "cuda",
 ) -> Pipeline:
     token = token or os.getenv("HF_TOKEN")
 
@@ -20,10 +21,15 @@ def load_diarization_pipeline(
         model_name,
         token=token,
     )
-    
-    if torch.cuda.is_available():
-        pipeline.to(torch.device("cuda"))
 
+    target_device = torch.device(device)
+    if target_device.type == "cuda" and not torch.cuda.is_available():
+        raise RuntimeError(
+            "Diarization is configured for CUDA, but CUDA is unavailable. "
+            "Set AUDIO_SEARCH_DIARIZATION_DEVICE=cpu to run on CPU."
+        )
+
+    pipeline.to(target_device)
     return pipeline
 
 
@@ -31,12 +37,15 @@ def diarize_audio(
     audio_path: str | Path,
     output_path: str | Path,
     pipeline: Pipeline | None = None,
+    device: str = "cuda",
 ) -> Path:
     audio_path = Path(audio_path)
     output_path = Path(output_path)
 
     if pipeline is None:
-        pipeline = load_diarization_pipeline()
+        pipeline = load_diarization_pipeline(
+            device=device,
+        )
 
     with ProgressHook() as hook:
         output = pipeline(

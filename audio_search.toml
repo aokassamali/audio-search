@@ -16,8 +16,11 @@ speaker_roles_dir = "data/processed/speaker_roles"
 
 [models]
 embedding_model = "sentence-transformers/all-MiniLM-L6-v2"
+embedding_device = "cpu"
 whisper_model = "medium"
+whisper_device = "cuda"
 diarization_model = "pyannote/speaker-diarization-community-1"
+diarization_device = "cuda"
 
 [llm]
 base_url = "http://127.0.0.1:8080"

@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Audio Intelligence</title>
+  <link rel="stylesheet" href="/static/styles.css?v=20260822-ui-cleanup">
+  <link rel="stylesheet" href="/static/ui.css?v=20260822-consolidated-runtime">
+  <style>[hidden]{display:none!important}</style>
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <aside id="sidebar" class="sidebar">
+      <div class="sidebar-head">
+        <button id="sidebarToggle" class="icon-button" type="button">☰</button>
+        <div class="brand sidebar-label">Audio Intelligence</div>
+      </div>
+      <button id="addSourceButton" class="new-source-button" type="button"><span>＋</span><span class="sidebar-label">Add source</span></button>
+      <nav class="sidebar-nav">
+        <button class="nav-item active" data-view="ask" type="button"><span>⌕</span><span class="sidebar-label">Ask</span></button>
+        <button class="nav-item" data-view="transcript" type="button"><span>≣</span><span class="sidebar-label">Transcripts</span></button>
+      </nav>
+      <div class="library-section">
+        <div class="library-head">
+          <div class="section-label sidebar-label">Library</div>
+          <div class="library-actions sidebar-label">
+            <button id="selectAllSources" class="library-select-all" type="button">Select all</button>
+            <button id="clearAllSources" class="library-select-all" type="button">Clear</button>
+          </div>
+        </div>
+        <div id="sourceList" class="source-list"></div>
+      </div>
+      <div class="sidebar-tools">
+        <a class="nav-item" href="/docs" target="_blank" rel="noreferrer"><span>{ }</span><span class="sidebar-label">API docs</span></a>
+        <a class="nav-item" href="http://127.0.0.1:3000" target="_blank" rel="noreferrer"><span>◇</span><span class="sidebar-label">Dagster</span></a>
+      </div>
+    </aside>
+
+    <main class="main-canvas">
+      <header class="topbar">
+        <div><div id="viewEyebrow" class="eyebrow">Search across your library</div><h1 id="viewTitle">Ask your recordings</h1></div>
+        <div class="topbar-actions"><div id="connectionBadge" class="status-pill"><span></span>Connecting</div><button id="topAddButton" class="secondary-button" type="button">Add source</button></div>
+      </header>
+
+      <section id="askView" class="view view-active">
+        <div class="ask-stage">
+          <div class="query-card">
+            <div class="selected-summary"><span id="selectedSourceText">All recordings</span><button id="clearSources" class="text-button" type="button">Reset</button></div>
+            <form id="queryForm">
+              <textarea id="queryInput" rows="2" placeholder="Ask a question about the selected recordings…"></textarea>
+              <div class="query-actions"><span class="hint">Selected sources only · grounded answers with timestamped evidence</span><button id="askButton" class="primary-button" type="submit">Ask</button></div>
+            </form>
+          </div>
+          <div id="answerState" class="answer-state empty-state"><div class="empty-orb">⌁</div><h2>Ask across hours of audio in seconds.</h2><p>Answers stay traceable to transcript chunks, speakers, timestamps, and the original recording when audio is available.</p></div>
+        </div>
+      </section>
+
+      <section id="transcriptView" class="view">
+        <div class="transcript-toolbar">
+          <div class="transcript-source-field" id="transcriptSourcePicker">
+            <span>Sources</span>
+            <div class="multi-select">
+              <button id="transcriptSourceButton" class="multi-select-trigger" type="button"><span class="picker-value">Select sources</span><span>⌄</span></button>
+              <div id="transcriptSourceMenu" class="multi-select-menu" hidden>
+                <div class="multi-select-actions"><button id="transcriptSelectAll" type="button">Select all</button><button id="transcriptClearAll" type="button">Clear</button></div>
+                <div id="transcriptSourceOptions" class="multi-select-options"></div>
+              </div>
+            </div>
+          </div>
+          <label><span>Audit transcript</span><input id="transcriptSearch" type="search" placeholder="Search text, speaker, or chunk ID…"></label>
+          <button id="transcriptSearchButton" class="primary-button" type="button">Search</button>
+        </div>
+        <div id="transcriptMeta" class="transcript-meta"></div>
+        <div id="transcriptList" class="transcript-list"></div>
+      </section>
+    </main>
+
+    <aside id="evidenceDrawer" class="evidence-drawer" aria-hidden="true">
+      <div class="drawer-head"><div><div class="eyebrow">Evidence</div><h2 id="drawerTitle">Source chunk</h2></div><button id="closeDrawer" class="icon-button" type="button">×</button></div>
+      <div id="drawerBody" class="drawer-body"></div>
+    </aside>
+  </div>
+
+  <div id="audioDock" class="audio-dock clip-audio-dock" hidden>
+    <div class="clip-audio-meta"><div id="audioDockTitle" class="audio-title"></div><div id="audioDockSubtitle" class="audio-subtitle"></div></div>
+    <div class="clip-player" aria-label="Evidence clip player">
+      <button id="clipBack15" class="clip-skip" type="button" title="Back 15 seconds" aria-label="Back 15 seconds">−15s</button>
+      <button id="clipToggle" class="clip-toggle" type="button" title="Play or pause" aria-label="Play or pause">▶</button>
+      <button id="clipForward15" class="clip-skip" type="button" title="Forward 15 seconds" aria-label="Forward 15 seconds">+15s</button>
+      <span id="clipElapsed" class="clip-time">0:00</span>
+      <input id="clipSeek" class="clip-seek" type="range" min="0" max="1" step="0.05" value="0" aria-label="Evidence clip position">
+      <span id="clipDuration" class="clip-time">0:00</span>
+      <audio id="audioPlayer" preload="metadata"></audio>
+    </div>
+    <button id="closeAudio" class="icon-button" type="button">×</button>
+  </div>
+
+  <div id="dropOverlay" class="drop-overlay"><div class="drop-card"><div class="drop-icon">↓</div><div class="drop-title">Drop to add to your library</div><div class="drop-subtitle">Audio, JSON, SRT, VTT, or TXT</div></div></div>
+
+  <div id="importModal" class="modal-backdrop" hidden>
+    <section class="import-modal" role="dialog" aria-modal="true">
+      <div class="modal-head"><div><div class="eyebrow">New source</div><h2 id="importTitle">Ingestion preview</h2></div><button id="closeImport" class="icon-button" type="button">×</button></div>
+      <div id="fileSummary" class="file-summary"></div>
+      <div class="eta-row"><div><div class="meta-label">Estimated completion</div><div id="etaValue" class="eta-value">Calculating…</div></div><div id="ingestionPathBadge" class="path-badge">Detecting inputs</div></div>
+      <div class="dag-panel"><div class="dag-header"><div><div class="meta-label">Processing graph</div><div id="dagStatus" class="dag-status">Ready to process</div></div><div id="overallProgress" class="overall-progress">0%</div></div><div id="dagGraph" class="dag-graph"></div></div>
+      <div id="importMessage" class="import-message"></div>
+      <div class="modal-actions"><button id="cancelImport" class="secondary-button" type="button">Cancel</button><button id="addImportFiles" class="secondary-button" type="button">Add files</button><button id="importAction" class="primary-button" type="button">Process</button></div>
+    </section>
+  </div>
+
+  <script src="/static/runtime/core.js?v=20260822-agentic-rag-v2"></script>
+  <script src="/static/runtime/search.js?v=20260822-agentic-rag-v2"></script>
+  <script src="/static/runtime/ingest_ui.js?v=20260822-agentic-rag"></script>
+  <script src="/static/runtime/ingest_jobs.js?v=20260822-agentic-rag"></script>
+  <script src="/static/runtime/boot.js?v=20260822-agentic-rag"></script>
+</body>
+</html>

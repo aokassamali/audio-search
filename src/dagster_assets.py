@@ -2,6 +2,7 @@ import json
 from pathlib import Path
 
 import dagster as dg
+import httpx
 from faster_whisper import WhisperModel
 from pyannote.audio import Pipeline
 from pydantic import PrivateAttr
@@ -30,6 +31,8 @@ from src.speaker_alignment import (
     align_transcript_speakers,
 )
 from src.speaker_roles import (
+    SpeakerRolesDraft,
+    finalize_speaker_roles,
     infer_speaker_roles,
     load_speaker_samples,
     save_speaker_roles,
@@ -66,7 +69,7 @@ class WhisperResource(dg.ConfigurableResource):
     ) -> None:
         context.log.info(
             f"Loading Whisper model: "
-            f"{self.model_size}"
+            f"{self.model_size} on {self.device}"
         )
 
         self._model = WhisperModel(
@@ -84,6 +87,7 @@ class DiarizationResource(
     dg.ConfigurableResource
 ):
     model_name: str
+    device: str = "cuda"
 
     _pipeline: Pipeline = PrivateAttr()
 
@@ -93,12 +97,13 @@ class DiarizationResource(
     ) -> None:
         context.log.info(
             f"Loading diarization model: "
-            f"{self.model_name}"
+            f"{self.model_name} on {self.device}"
         )
 
         self._pipeline = (
             load_diarization_pipeline(
                 model_name=self.model_name,
+                device=self.device,
             )
         )
 
@@ -111,6 +116,7 @@ class EmbeddingResource(
     dg.ConfigurableResource
 ):
     model_name: str
+    device: str = "cpu"
 
     _model: SentenceTransformer = (
         PrivateAttr()
@@ -122,11 +128,12 @@ class EmbeddingResource(
     ) -> None:
         context.log.info(
             f"Loading embedding model: "
-            f"{self.model_name}"
+            f"{self.model_name} on {self.device}"
         )
 
         self._model = SentenceTransformer(
-            self.model_name
+            self.model_name,
+            device=self.device,
         )
 
     @property
@@ -401,14 +408,36 @@ def speaker_roles(
         speaker_transcript
     )
 
-    artifact = infer_speaker_roles(
-        samples_by_speaker=samples,
-        source_id=source.source_id,
-        llm_client=llm.client,
-        manual_labels=(
-            source.speaker_labels
-        ),
-    )
+    enrichment_status = "llm"
+    enrichment_error = ""
+
+    try:
+        artifact = infer_speaker_roles(
+            samples_by_speaker=samples,
+            source_id=source.source_id,
+            llm_client=llm.client,
+            manual_labels=(
+                source.speaker_labels
+            ),
+        )
+    except httpx.HTTPError as exc:
+        enrichment_status = "fallback_raw_speaker_ids"
+        enrichment_error = (
+            f"{type(exc).__name__}: {exc}"
+        )
+        context.log.warning(
+            "Speaker-role inference is unavailable; "
+            "continuing with raw diarization speaker IDs. "
+            f"{enrichment_error}"
+        )
+        artifact = finalize_speaker_roles(
+            draft=SpeakerRolesDraft(speakers=[]),
+            samples_by_speaker=samples,
+            source_id=source.source_id,
+            manual_labels=(
+                source.speaker_labels
+            ),
+        )
 
     output_path = save_speaker_roles(
         artifact=artifact,
@@ -451,6 +480,12 @@ def speaker_roles(
             ),
             "manual_override_count": (
                 manual_override_count
+            ),
+            "role_enrichment_status": (
+                enrichment_status
+            ),
+            "role_enrichment_error": (
+                enrichment_error
             ),
             "size_bytes": (
                 output_path.stat().st_size
@@ -564,6 +599,15 @@ def embeddings(
     return str(embeddings_path)
 
 
+# Each asset step runs in its own subprocess so CUDA memory is guaranteed to be
+# returned when the step exits. Limiting concurrency to one prevents Whisper and
+# pyannote from occupying the single shared GPU at the same time while retaining
+# process isolation between GPU-heavy stages.
+SERIAL_MULTIPROCESS_EXECUTOR = dg.multiprocess_executor.configured(
+    {"max_concurrent": 1}
+)
+
+
 defs = dg.Definitions(
     assets=[
         raw_audio,
@@ -581,7 +625,9 @@ defs = dg.Definitions(
             model_size=(
                 SETTINGS.models.whisper_model
             ),
-            device="cuda",
+            device=(
+                SETTINGS.models.whisper_device
+            ),
             compute_type="int8",
         ),
         "diarizer": DiarizationResource(
@@ -589,11 +635,19 @@ defs = dg.Definitions(
                 SETTINGS.models
                 .diarization_model
             ),
+            device=(
+                SETTINGS.models
+                .diarization_device
+            ),
         ),
         "embedding": EmbeddingResource(
             model_name=(
                 SETTINGS.models
                 .embedding_model
+            ),
+            device=(
+                SETTINGS.models
+                .embedding_device
             ),
         ),
         "llm": LLMResource(
@@ -604,4 +658,5 @@ defs = dg.Definitions(
             ),
         ),
     },
+    executor=SERIAL_MULTIPROCESS_EXECUTOR,
 )

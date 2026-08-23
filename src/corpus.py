@@ -18,6 +18,7 @@ from src.search import (
 
 from typing import Literal
 
+
 @dataclass(frozen=True)
 class CorpusSource:
     source: SourceSettings
@@ -126,7 +127,8 @@ def build_corpus_index(
         return None
 
     embedding_model = SentenceTransformer(
-        settings.models.embedding_model
+        settings.models.embedding_model,
+        device=settings.models.embedding_device,
     )
 
     all_chunks = []
@@ -210,6 +212,7 @@ def build_corpus_index(
         sources=source_indexes,
     )
 
+
 RetrievalMode = Literal[
     "global",
     "per_source",
@@ -234,6 +237,7 @@ def search_source(
         ),
         top_k=top_k,
     )
+
 
 def search_filtered_global(
     query: str,
@@ -295,6 +299,7 @@ def search_filtered_global(
         results.append(result)
 
     return results
+
 
 def search_corpus(
     query: str,
